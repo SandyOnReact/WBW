@@ -1,38 +1,63 @@
-import React, { useState } from 'react'
-import { View, Text, Image, TextInput, Dimensions } from 'react-native'
+import React, { useState, useCallback } from 'react'
+import { View, Text, Image, Keyboard } from 'react-native'
 import { images } from '../utils/images'
 import { Button, Input, Icon } from "react-native-elements";
 import { api } from '../utils/api'
-import { RootStore } from '../store/root-store';
-import { getSnapshot } from 'mobx-state-tree'
+import { useFormik } from "formik"
+import { string, object } from 'yup'
+import { useFocusEffect } from "@react-navigation/native"
+import Toast from 'react-native-simple-toast'
 
-export const LoginScreen = (props) => {
+//TODO: reset form on login button click.
+//TODO: formik should only validate the given field and not others. 
+export const LoginScreen = ( ) => {
 
-    const { navigation } = props;
+    const [isSecured, setIsSecured] = useState( true )
+    const {
+        touched,
+        handleBlur,
+        handleChange,
+        handleSubmit,
+        errors,
+        isValid,
+        isValidating,
+        isSubmitting,
+        resetForm,
+    } = useFormik( {
+        initialValues: {
+            username: "",
+            password: "",
+        },
+        validationSchema: object( {
+            username: string()
+                .required(),
+            password: string()
+                .required()
+                .min( 6 )
+        } ),
+        async onSubmit( { username, password } ) {
+            Keyboard.dismiss()
+            const result = await api.post(  {
+                "url": 'api/User/UserLogin',
+                body: {
+                    UserName:username, 
+                    Password:password
+                }  
+            } )
+            if( result.Message ){
+                Toast.showWithGravity(result.Message, Toast.LONG, Toast.TOP);
+            }
+        },
+    } )
 
-    const [username, setUserName] = useState( '' )
-    const [password, setPassword] = useState( '' )
-    const [isSecured, setIsSecured] = useState( false )
-
-    // api/User/UserLogin
-    const onLoginPress = async ( ) => {
-        const result = api.post(  {
-            "url": 'api/User/UserLogin',
-            body: {
-                UserName:username, 
-                Password:password
-            }  
-        } )
-        navigation.navigate( 'Home' );
-
-        // await storage.saveString( 'Token', response.AccessToken )
-
-    }
-
-    const rightIcon = isSecured ? "eye" : "eye-off"
-    const onRightIconPress = ( e ) => {
-        setIsSecured( !isSecured )
-    }
+    
+    useFocusEffect(
+        useCallback( () => {
+            return () => {
+                resetForm()
+            }
+        }, [] ),
+    )
 
     return (
         <View style={{ flex: 1, backgroundColor: 'white', }}>
@@ -41,23 +66,34 @@ export const LoginScreen = (props) => {
             </View>
             <View style={{ flex: 6.5, marginHorizontal: '8%', marginTop: '2%' }}>
                 <Input
-                    placeholder='Enter UserId'
+                    touched={touched.username}
+                    errorMessage={errors.username}
+                    placeholder='Enter Username'
                     inputContainerStyle={{ borderBottomWidth: 1, borderColor: '#1e5873'}}
                     inputStyle={{ height: 4 }}
-                    value={username}
-                    onChangeText={value => setUserName( value) }
+                    onChangeText={handleChange( "username" )}
+                    onBlur={handleBlur( "username" )}
+                    onSubmitEditing={() => passwordRef.current.focus()}
                 />
                 <Input
                     placeholder='Enter Password'
-                    inputContainerStyle={{ borderBottomWidth: 1, borderColor: '#1e5873' }}
+                    inputContainerStyle={{ borderBottomWidth: 1, borderColor: '#1e5873', marginTop: 10 }}
                     inputStyle={{ height: 4 }}
-                    value={password}
+                    touched={touched.password}
+                    errorMessage={errors.password}
                     secureTextEntry={isSecured}
-                    // rightIcon={rightIcon}
-                    onRightIconPress={onRightIconPress}
-                    onChangeText={value => setPassword( value) }
+                    onChangeText={handleChange( "password" )}
+                    onBlur={handleBlur( "password" )}
+                    onSubmitEditing={handleSubmit}
                 />
-                <Button title='Login' onPress={()=>onLoginPress()} buttonStyle={{ backgroundColor: '#1e5873', padding: '3%' }} containerStyle={{ marginTop: '5%', borderRadius: 7 }} />
+                <Button 
+                    title='Login' 
+                    onPress={handleSubmit} 
+                    buttonStyle={{ backgroundColor: '#1e5873', padding: '3%' }} 
+                    containerStyle={{ marginTop: '5%', borderRadius: 7 }}
+                    disabled={!isValid || isSubmitting || isValidating}
+                    loading={isSubmitting || isValidating} 
+                />
             </View>
         </View>
     )
