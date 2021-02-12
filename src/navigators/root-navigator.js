@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, Text, Dimensions } from "react-native";
+import { View, Text, Dimensions, Platform } from "react-native";
 import { AuthenticationNavigator } from './auth-navigator'
 import { NavigationContainer } from '@react-navigation/native'
 import { ApplicationNavigator } from "./application-navigator";
@@ -20,7 +20,7 @@ export const RootNavigator = (props) => {
             <View style={{ flex: 0.1, marginVertical: '2%', justifyContent: 'center', alignItems: 'center' }}>
                 <Text>Copyright © Wise Businessware. All rights reserved.</Text>
             </View>
-            {keyboard.keyboardShown 
+            {Platform.os === 'ios' && keyboard.keyboardShown 
             ? <View style={{ width: Dimensions.get('window').width,  height: keyboard.keyboardHeight }} />
             : null
             }
