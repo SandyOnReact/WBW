@@ -1,4 +1,5 @@
 import { config } from './config'
+import Toast from 'react-native-simple-toast';
 
 const post = async (props) => {
 
@@ -8,7 +9,6 @@ const post = async (props) => {
     } = props;
 
     const apiUrl = `${config.API_URL}/${url}`
-
     const result = await fetch(apiUrl, {
         method: 'POST',
         headers: {
@@ -26,7 +26,6 @@ const post = async (props) => {
         Toast.showWithGravity('Something Went Wrong', Toast.LONG, Toast.CENTER);
         return null;
     })
-    console.log( 'finall--> ', result );
     return result;
 }
 
