@@ -9,7 +9,7 @@ import { createStackNavigator } from '@react-navigation/stack'
 import { HomeScreen } from '../screens/Home'
 import { LoginScreen } from '../screens/Login'
 
-
+//TODO: implement Authorization flow and move auth screens to Auth Navigator and Application Navigator.
 export const RootNavigator = (props) => {
 
     const [token, setToken] = useState(undefined)

@@ -11,6 +11,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 
 //TODO: reset form on login button click.
 //TODO: formik should only validate the given field and not others. 
+//TODO: once authentication flow is setup, remove navigataion.navigate function()
 export const LoginScreen = ( { navigation} ) => {
 
     const [isSecured, setIsSecured] = useState( true )
