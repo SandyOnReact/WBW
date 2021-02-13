@@ -12,9 +12,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 //TODO: reset form on login button click.
 //TODO: formik should only validate the given field and not others. 
 //TODO: once authentication flow is setup, remove navigataion.navigate function()
-export const LoginScreen = ( { navigation} ) => {
+export const LoginScreen = ({ navigation }) => {
 
-    const [isSecured, setIsSecured] = useState( true )
+    const [isSecured, setIsSecured] = useState(true)
     const {
         touched,
         handleBlur,
@@ -25,54 +25,76 @@ export const LoginScreen = ( { navigation} ) => {
         isValidating,
         isSubmitting,
         resetForm,
-    } = useFormik( {
+    } = useFormik({
         initialValues: {
             username: "",
             password: "",
         },
-        validationSchema: object( {
+        validationSchema: object({
             username: string()
                 .required(),
             password: string()
                 .required()
-                .min( 6 )
-        } ),
-        async onSubmit( { username, password } ) {
+                .min(6)
+        }),
+        async onSubmit({ username, password }) {
             Keyboard.dismiss()
-            const result = await api.post(  {
+            const result = await api.post({
                 "url": 'api/User/UserLogin',
                 body: {
-                    UserName:username, 
-                    Password:password
-                }  
-            } )
-            if( result.Message ){
+                    UserName: username,
+                    Password: password
+                }
+            })
+            if (result.Message) {
                 Toast.showWithGravity(result.Message, Toast.LONG, Toast.TOP);
                 return null
             }
 
             // save Accesstoken in localstorage
-            await saveToken( result.AccessToken )
+            await saveToken(result.AccessToken)
+
+            // save Entire response object in Asynstorage
+            const { ['AccessToken']: remove, ...rest } = result
+            
+            /**
+             *  Storing an entiree object as a string in asyncstorage.
+             */
+            const userInfoWithoutToken = JSON.stringify( rest )
+            await saveUserInfo( userInfoWithoutToken )
 
             // navigating to Home screen once logged in
-            navigation.navigate( 'Home' )
+            navigation.navigate('Home')
         },
-    } )
+    })
 
-    const saveToken = async ( value ) => {
+
+    const saveUserInfo = async (value) => {
+        try {
+            await AsyncStorage.setItem('USER_INFO', value )
+        } catch (e) {
+            // save error
+            Toast.showWithGravity(result.Message, Toast.LONG, Toast.TOP);
+            return null
+        }
+    }
+
+    const saveToken = async (value) => {
         try {
             await AsyncStorage.setItem('Token', value)
-          } catch(e) {
+        } catch (e) {
             // save error
-          }
+            Toast.showWithGravity(result.Message, Toast.LONG, Toast.TOP);
+            return null
+        }
     }
-    
+
     useFocusEffect(
-        useCallback( () => {
+        useCallback(() => {
             return () => {
                 resetForm()
             }
-        }, [] ),
+        }, []),
     )
 
     return (
@@ -85,10 +107,10 @@ export const LoginScreen = ( { navigation} ) => {
                     touched={touched.username}
                     errorMessage={errors.username}
                     placeholder='Enter Username'
-                    inputContainerStyle={{ borderBottomWidth: 1, borderColor: '#1e5873'}}
+                    inputContainerStyle={{ borderBottomWidth: 1, borderColor: '#1e5873' }}
                     inputStyle={{ height: 4 }}
-                    onChangeText={handleChange( "username" )}
-                    onBlur={handleBlur( "username" )}
+                    onChangeText={handleChange("username")}
+                    onBlur={handleBlur("username")}
                     onSubmitEditing={() => passwordRef.current.focus()}
                 />
                 <Input
@@ -98,21 +120,21 @@ export const LoginScreen = ( { navigation} ) => {
                     touched={touched.password}
                     errorMessage={errors.password}
                     secureTextEntry={isSecured}
-                    onChangeText={handleChange( "password" )}
-                    onBlur={handleBlur( "password" )}
+                    onChangeText={handleChange("password")}
+                    onBlur={handleBlur("password")}
                     onSubmitEditing={handleSubmit}
                 />
-                <Button 
-                    title='Login' 
-                    onPress={handleSubmit} 
-                    buttonStyle={{ backgroundColor: '#1e5873', padding: '3%' }} 
+                <Button
+                    title='Login'
+                    onPress={handleSubmit}
+                    buttonStyle={{ backgroundColor: '#1e5873', padding: '3%' }}
                     containerStyle={{ marginTop: '5%', borderRadius: 7 }}
                     disabled={!isValid || isSubmitting || isValidating}
-                    loading={isSubmitting || isValidating} 
+                    loading={isSubmitting || isValidating}
                 />
             </View>
         </View>
     )
-    
+
 }
 
