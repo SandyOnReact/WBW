@@ -7,10 +7,12 @@ import { useFormik } from "formik"
 import { string, object } from 'yup'
 import { useFocusEffect } from "@react-navigation/native"
 import Toast from 'react-native-simple-toast'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 //TODO: reset form on login button click.
 //TODO: formik should only validate the given field and not others. 
-export const LoginScreen = ( ) => {
+//TODO: once authentication flow is setup, remove navigataion.navigate function()
+export const LoginScreen = ( { navigation} ) => {
 
     const [isSecured, setIsSecured] = useState( true )
     const {
@@ -46,10 +48,24 @@ export const LoginScreen = ( ) => {
             } )
             if( result.Message ){
                 Toast.showWithGravity(result.Message, Toast.LONG, Toast.TOP);
+                return null
             }
+
+            // save Accesstoken in localstorage
+            await saveToken( result.AccessToken )
+
+            // navigating to Home screen once logged in
+            navigation.navigate( 'Home' )
         },
     } )
 
+    const saveToken = async ( value ) => {
+        try {
+            await AsyncStorage.setItem('Token', value)
+          } catch(e) {
+            // save error
+          }
+    }
     
     useFocusEffect(
         useCallback( () => {
