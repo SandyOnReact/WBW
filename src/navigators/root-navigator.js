@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import { View, Text, Dimensions, Platform, ActivityIndicator } from "react-native";
+import { View, Text, Dimensions, Platform, ActivityIndicator, BackHandler } from "react-native";
 import { AuthenticationNavigator } from './auth-navigator'
-import { NavigationContainer } from '@react-navigation/native'
+import { NavigationContainer, useNavigation } from '@react-navigation/native'
 import { ApplicationNavigator } from "./application-navigator";
 import { useKeyboard } from "@react-native-community/hooks";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -11,7 +11,7 @@ import { LoginScreen } from '../screens/Login'
 import { HistoryScreen } from '../screens/History'
 
 //TODO: implement Authorization flow and move auth screens to Auth Navigator and Application Navigator.
-export const RootNavigator = (props) => {
+export const RootNavigator = ( ) => {
 
     const [token, setToken] = useState(undefined)
     const [isLoading, setIsLoading] = useState(true)
@@ -52,11 +52,11 @@ export const RootNavigator = (props) => {
 
     return (
         <View style={{ flex: 1 }}>
-            <View style={{ flex: 0.9 }}>
+            <View style={{ flex: 0.95 }}>
                 {/* {token ? <ApplicationNavigator /> : <AuthenticationNavigator />} */}
                 { fetchAllScreens() }
             </View>
-            <View style={{ flex: 0.1, marginVertical: '2%', justifyContent: 'center', alignItems: 'center' }}>
+            <View style={{ flex: 0.05, justifyContent: 'center', alignItems: 'center' }}>
                 <Text>Copyright © Wise Businessware. All rights reserved.</Text>
             </View>
             {Platform.os === 'ios' && keyboard.keyboardShown
