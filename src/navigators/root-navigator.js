@@ -8,6 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createStackNavigator } from '@react-navigation/stack'
 import { HomeScreen } from '../screens/Home'
 import { LoginScreen } from '../screens/Login'
+import { HistoryScreen } from '../screens/History'
 
 //TODO: implement Authorization flow and move auth screens to Auth Navigator and Application Navigator.
 export const RootNavigator = (props) => {
@@ -44,6 +45,7 @@ export const RootNavigator = (props) => {
             <Stack.Navigator initialRouteName={token ? 'Home' : 'Login'} headerMode='none'>
                 <Stack.Screen name="Login" component={LoginScreen} />
                 <Stack.Screen name="Home" component={HomeScreen} />
+                <Stack.Screen name="History" component={HistoryScreen} />
             </Stack.Navigator>
         )
     }
