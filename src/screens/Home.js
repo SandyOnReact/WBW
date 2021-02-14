@@ -6,6 +6,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from '../utils/api'
 import { DashboardCard } from '../components/dashboard-card'
 import { Divider, Header } from 'react-native-elements'
+import { CommonActions } from '@react-navigation/native';
+
 
 export const HomeScreen = ({ navigation }) => {
     const [userInfo, setUserInfo] = useState({})
@@ -57,6 +59,16 @@ export const HomeScreen = ({ navigation }) => {
                 AccessToken: token
             }
         })
+        if (result === "Invalid User Token") {
+            navigation.dispatch(
+                CommonActions.reset({
+                  index: 0,
+                  routes: [
+                    { name: 'Login' }
+                  ],
+                })
+              );
+        }
         return result;
     }, [])
 
