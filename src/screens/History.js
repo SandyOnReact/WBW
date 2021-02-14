@@ -65,7 +65,7 @@ export const HistoryScreen = ({ route, navigation }) => {
                                 containerStyle={{ height: 56 + STATUS_BAR_HEIGHT }}
                                 statusBarProps={{ barStyle: "dark-content", translucent: true, backgroundColor: "transparent" }}
                                 containerStyle={{ backgroundColor: '#1e5873' }}
-                                leftComponent={{ name: 'arrow-back', type: 'ionicons', color: 'white', onPress: navigatetoBackScreen }}
+                                leftComponent={{ icon: 'arrow-back', type: 'ionicons', color: 'white', onPress: navigatetoBackScreen }}
                                 centerComponent={{ text: category, style: { color: '#fff' } }}
                             />
                             <View>
