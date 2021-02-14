@@ -1,14 +1,39 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { View, Text, ActivityIndicator } from 'react-native'
+import { View, Text, ActivityIndicator, BackHandler, Alert } from 'react-native'
 import Async from 'react-async';
 import { FlatList } from 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from '../utils/api'
 import { DashboardCard } from '../components/dashboard-card'
-import { Divider, ListItem, Header } from 'react-native-elements'
+import { Divider, Header } from 'react-native-elements'
 
 export const HomeScreen = ({ navigation }) => {
     const [userInfo, setUserInfo] = useState({})
+
+    /**
+     *  handling back handler 
+     *  Whenever user does hardware back press, exit App instead if navigating to back screen.
+     */
+    useEffect(() => {
+        const backAction = () => {
+            Alert.alert("Hold on!", "Are you sure you want to Exit App?", [
+                {
+                    text: "Cancel",
+                    onPress: () => null,
+                    style: "cancel"
+                },
+                { text: "YES", onPress: () => BackHandler.exitApp() }
+            ]);
+            return true;
+        };
+
+        const backHandler = BackHandler.addEventListener(
+            "hardwareBackPress",
+            backAction
+        );
+
+        return () => backHandler.remove();
+    }, []);
 
     /**
     *  Fetch object as a string
@@ -36,7 +61,7 @@ export const HomeScreen = ({ navigation }) => {
     }, [])
 
     const onDashboardPress = (dashboard) => {
-        navigation.navigate( 'History', {
+        navigation.navigate('History', {
             historyData: dashboard
         })
     }
