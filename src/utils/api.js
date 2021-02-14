@@ -19,7 +19,6 @@ const post = async (props) => {
     })
     .then( ( response )  => response.json() )
     .then( ( res ) => {
-        console.log( 'responn is ',JSON.stringify( res ) );
         return res;
     } )
     .catch( error => {
@@ -41,6 +40,7 @@ const get = ( props ) => {
             'Content-Type': 'application/json',
         }
     })
+    .then( res => res.json() )
     .then( ( response ) => {
         return response;
     } )
