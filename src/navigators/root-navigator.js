@@ -56,8 +56,8 @@ export const RootNavigator = ( ) => {
                 {/* {token ? <ApplicationNavigator /> : <AuthenticationNavigator />} */}
                 { fetchAllScreens() }
             </View>
-            <View style={{ flex: 0.05, justifyContent: 'center', alignItems: 'center' }}>
-                <Text>Copyright © Wise Businessware. All rights reserved.</Text>
+            <View style={{ flex: 0.05, backgroundColor: '#1e5873', justifyContent: 'center', opacity: 0.8 , alignItems: 'center' }}>
+                <Text style={{ color: 'white'}}>Copyright © Wise Businessware. All rights reserved.</Text>
             </View>
             {Platform.os === 'ios' && keyboard.keyboardShown
                 ? <View style={{ width: Dimensions.get('window').width, height: keyboard.keyboardHeight }} />
