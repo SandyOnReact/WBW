@@ -33,6 +33,10 @@ export const HistoryScreen = ({ route, navigation }) => {
 
     }, [])
 
+    const onRightIconPress = ( ) => {
+        navigation.navigate( 'AddObservation' )
+    }
+
     const renderItem = ( { item } ) => {
         return(
             <HistoryCard history={item} />
@@ -67,6 +71,7 @@ export const HistoryScreen = ({ route, navigation }) => {
                                 containerStyle={{ backgroundColor: '#1e5873' }}
                                 leftComponent={{ icon: 'arrow-back', type: 'ionicons', color: 'white', onPress: navigatetoBackScreen }}
                                 centerComponent={{ text: category, style: { color: '#fff' } }}
+                                rightComponent={{ icon: 'add-circle', type: 'ionicons', size: 30, style: { marginRight: 10 }, onPress: onRightIconPress}}
                             />
                             <View>
                                 <FlatList 
