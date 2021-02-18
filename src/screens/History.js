@@ -71,7 +71,7 @@ export const HistoryScreen = ({ route, navigation }) => {
                                 containerStyle={{ backgroundColor: '#1e5873' }}
                                 leftComponent={{ icon: 'arrow-back', type: 'ionicons', color: 'white', onPress: navigatetoBackScreen }}
                                 centerComponent={{ text: category, style: { color: '#fff' } }}
-                                rightComponent={{ icon: 'add-circle', type: 'ionicons', size: 30, style: { marginRight: 10 }, onPress: onRightIconPress}}
+                                rightComponent={{ icon: 'add-circle', color: 'rgba(255,255,255,0.5)', type: 'ionicons', size: 30, style: { marginRight: 10 }, onPress: onRightIconPress}}
                             />
                             <View>
                                 <FlatList 
