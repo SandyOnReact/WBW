@@ -114,12 +114,12 @@ export const HomeScreen = ({ navigation }) => {
                     return (
                         <View style={{ flex: 1 }}>
                             <Header
-                                statusBarProps={{ barStyle: "dark-content", translucent: true, backgroundColor: "transparent" }}
+                                statusBarProps={{ barStyle: "light-content", translucent: true, backgroundColor: "transparent" }}
                                 leftComponent={{ icon: 'menu', color: '#fff' }}
                                 containerStyle={{ backgroundColor: '#1e5873' }}
                                 centerComponent={{ text: userInfo.CompanyName, style: { color: '#fff' } }}
                             />
-                            <View>
+                            <View style={{margin:20}}>
                                 <FlatList
                                     data={list}
                                     ItemSeparatorComponent={ItemSeparatorComponent}

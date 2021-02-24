@@ -9,11 +9,11 @@ export const HistoryCard = (props) => {
         <View style={{ width: '90%', height: Dimensions.get('screen').height * 0.60, margin: '5%' }}>
             <View style={{ width: '100%', height: Dimensions.get('screen').height * 0.6, borderRadius: 20, borderWidth: 0.5, backgroundColor: 'lightgray' }}>
 
-                <View style={{ width: '100%', height: '12%', borderTopLeftRadius: 20, borderTopRightRadius: 20, flexDirection: 'row', backgroundColor: '#1e5873' }}>
+                <View style={{ width: '100%', justifyContent: 'center', alignItems: 'center', borderTopLeftRadius: 20, borderTopRightRadius: 20, flexDirection: 'row', backgroundColor: '#1e5873' }}>
                     <View style={{ width: '70%', height: '100%', padding: '5%' }}>
-                        <Text style={{ fontSize: 16, fontWeight: 'bold' }}>{history.Topic}</Text>
+                        <Text style={{ fontSize: 16, fontWeight: 'bold' }}>{history.ObservationNumber}</Text>
                     </View>
-                    <View style={{ width: '30%', alignSelf: 'center', marginTop: '5%', height: '100%', padding: '5%', alignItems: 'flex-end' }}>
+                    <View style={{ width: '32%', alignSelf: 'center', height: '100%', padding: '5%', alignItems: 'flex-end' }}>
                         <Text style={{ color: 'white', fontSize: 16 }}>{history.Status}</Text>
                     </View>
                 </View>
@@ -24,15 +24,6 @@ export const HistoryCard = (props) => {
                         </View>
                         <View style={{ width: '50%' }}>
                             <Text style={{ fontSize: 16 }}>{history.Observation}</Text>
-                        </View>
-                    </View>
-                    <View style={{ height: '2%' }} />
-                    <View style={{ width: '100%', flexDirection: 'row' }}>
-                        <View style={{ width: '50%', paddingLeft: '5%' }}>
-                            <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Observation Number: </Text>
-                        </View>
-                        <View style={{ width: '50%', paddingLeft: '5%' }}>
-                            <Text style={{ fontSize: 16 }}>{history.ObservationNumber}</Text>
                         </View>
                     </View>
                     <View style={{ height: '2%' }} />
