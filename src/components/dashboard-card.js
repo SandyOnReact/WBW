@@ -9,18 +9,12 @@ export const DashboardCard = (props) => {
         onDashboardPress( dashboard )
     }
 
-    return (
-        <ListItem bottomDivider containerStyle={{ paddingLeft: '7%'}} onPress={onPress}>
+    return (//#1e5873
+        <ListItem bottomDivider containerStyle={{ paddingLeft: '7%',backgroundColor :'#1e5873',borderRadius:8,borderWidth:1}} onPress={onPress}>
             <ListItem.Content>
-                <ListItem.Title style={{ color: '#1e5873' }}>{dashboard.Title}</ListItem.Title>
-                <ListItem.Subtitle>
-                    <View style={{ flex: 1, flexDirection: 'column'}}>
-                        <Text>{dashboard.Category}</Text>
-                        <Text>{dashboard.CreatedOn}</Text>
-                    </View>
-                </ListItem.Subtitle>
+                <ListItem.Title style={{ color: 'white' }}>{dashboard.Title}</ListItem.Title>
             </ListItem.Content>
-            <ListItem.Chevron style={{ height: 30 }} />
+            <ListItem.Chevron style={{ height: 25 ,backgroundColor :'#1e5873'}} />
         </ListItem>
     )
 }
