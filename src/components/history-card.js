@@ -1,112 +1,57 @@
 import React from 'react'
 import { View, Text, Dimensions } from 'react-native'
+import { isEmpty } from "lodash"
 
 export const HistoryCard = (props) => {
 
     const { history } = props;
 
-    return (
-        <View style={{ width: '90%', height: Dimensions.get('screen').height * 0.60, margin: '5%' }}>
-            <View style={{ width: '100%', height: Dimensions.get('screen').height * 0.6, borderRadius: 20, borderWidth: 0.5, backgroundColor: 'lightgray' }}>
+    const renderObservationNumberAndStatus = () => {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', borderTopLeftRadius: 20, borderTopRightRadius: 20, flexDirection: 'row', backgroundColor: '#1e5873' }}>
+                <View style={{ flex: 0.7, padding: '5%' }}>
+                    <Text style={{ fontSize: 16, fontWeight: 'bold' }}>{history.ObservationNumber}</Text>
+                </View>
+                <View style={{ flex: 0.3, justifyContent: 'center', height: '100%', padding: '5%', alignItems: 'flex-end' }}>
+                    <Text style={{ color: 'white', fontSize: 16 }}>{history.Status}</Text>
+                </View>
+            </View>
+        )
+    }
 
-                <View style={{ width: '100%', justifyContent: 'center', alignItems: 'center', borderTopLeftRadius: 20, borderTopRightRadius: 20, flexDirection: 'row', backgroundColor: '#1e5873' }}>
-                    <View style={{ width: '70%', height: '100%', padding: '5%' }}>
-                        <Text style={{ fontSize: 16, fontWeight: 'bold' }}>{history.ObservationNumber}</Text>
+    const renderHistoryCardDetails = (title, value) => {
+        return (
+            <View style={{ flex: 1}}>
+                <View style={{ flex: 1, flexDirection: 'row', paddingLeft: '5%' }}>
+                    <View style={{ flex: 0.5 }}>
+                        <Text style={{ fontSize: 18, fontWeight: 'bold' }}>{title}</Text>
                     </View>
-                    <View style={{ width: '32%', alignSelf: 'center', height: '100%', padding: '5%', alignItems: 'flex-end' }}>
-                        <Text style={{ color: 'white', fontSize: 16 }}>{history.Status}</Text>
+                    <View style={{ flex: 0.5 }}>
+                        <Text style={{ fontSize: 16 }}>{value}</Text>
                     </View>
                 </View>
-                <View style={{ height: '88%', marginTop: '5%' }}>
-                    <View style={{ width: '100%', flexDirection: 'row', paddingLeft: '5%' }}>
-                        <View style={{ width: '50%' }}>
-                            <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Observation Name: </Text>
-                        </View>
-                        <View style={{ width: '50%' }}>
-                            <Text style={{ fontSize: 16 }}>{history.Observation}</Text>
-                        </View>
-                    </View>
-                    <View style={{ height: '2%' }} />
-                    <View style={{ width: '100%', flexDirection: 'row' }}>
-                        <View style={{ width: '50%', paddingLeft: '5%' }}>
-                            <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Category: </Text>
-                        </View>
-                        <View style={{ width: '50%', paddingLeft: '5%' }}>
-                            <Text style={{ fontSize: 16 }}>{history.Category}</Text>
-                        </View>
-                    </View>
-                    <View style={{ height: '2%' }} />
-                    <View style={{ width: '100%', flexDirection: 'row' }}>
-                        <View style={{ width: '50%', paddingLeft: '5%' }}>
-                            <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Section: </Text>
-                        </View>
-                        <View style={{ width: '50%', paddingLeft: '5%' }}>
-                            <Text style={{ fontSize: 16 }}>{history.Section}</Text>
-                        </View>
-                    </View>
-                    <View style={{ height: '2%' }} />
-                    <View style={{ width: '100%', flexDirection: 'row' }}>
-                        <View style={{ width: '50%', paddingLeft: '5%' }}>
-                            <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Hazard: </Text>
-                        </View>
-                        <View style={{ width: '50%', paddingLeft: '5%' }}>
-                            <Text style={{ fontSize: 16 }}>{history.Hazard}</Text>
-                        </View>
-                    </View>
-                    <View style={{ height: '2%' }} />
-                    <View style={{ width: '100%', flexDirection: 'row' }}>
-                        <View style={{ width: '50%', paddingLeft: '5%' }}>
-                            <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Follow Up: </Text>
-                        </View>
-                        <View style={{ width: '50%', paddingLeft: '5%' }}>
-                            <Text style={{ fontSize: 16 }}>{history.IsFollowUpNeeded}</Text>
-                        </View>
-                    </View>
-                    <View style={{ height: '2%' }} />
-                    <View style={{ width: '100%', flexDirection: 'row' }}>
-                        <View style={{ width: '50%', paddingLeft: '5%' }}>
-                            <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Date Created: </Text>
-                        </View>
-                        <View style={{ width: '50%', paddingLeft: '5%' }}>
-                            <Text style={{ fontSize: 16 }}>{history.DateCreated}</Text>
-                        </View>
-                    </View>
-                    <View style={{ height: '2%' }} />
-                    <View style={{ width: '100%', flexDirection: 'row' }}>
-                        <View style={{ width: '50%', paddingLeft: '5%' }}>
-                            <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Submitted By: </Text>
-                        </View>
-                        <View style={{ width: '50%', paddingLeft: '5%' }}>
-                            <Text style={{ fontSize: 16 }}>{history.SubmittedBy}</Text>
-                        </View>
-                    </View>
-                    <View style={{ height: '2%' }} />
-                    <View style={{ width: '100%', flexDirection: 'row' }}>
-                        <View style={{ width: '50%', paddingLeft: '5%' }}>
-                            <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Show Manage Task: </Text>
-                        </View>
-                        <View style={{ width: '50%', paddingLeft: '5%' }}>
-                            <Text style={{ fontSize: 16 }}>{history.ShowManageTask}</Text>
-                        </View>
-                    </View>
-                    <View style={{ height: '2%' }} />
-                    <View style={{ width: '100%', flexDirection: 'row' }}>
-                        <View style={{ width: '50%', paddingLeft: '5%' }}>
-                            <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Outstanding Task: </Text>
-                        </View>
-                        <View style={{ width: '50%', paddingLeft: '5%' }}>
-                            <Text style={{ fontSize: 16 }}>{history.OutstandingTask}</Text>
-                        </View>
-                    </View>
-                    <View style={{ height: '2%' }} />
-                    <View style={{ width: '100%', flexDirection: 'row' }}>
-                        <View style={{ width: '50%', paddingLeft: '5%' }}>
-                            <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Location: </Text>
-                        </View>
-                        <View style={{ width: '50%', paddingLeft: '5%' }}>
-                            <Text style={{ fontSize: 16 }}>{history.Location}</Text>
-                        </View>
-                    </View>
+                <View style={{ flex: 0.1, marginBottom: 10 }} />
+            </View>
+
+        )
+    }
+
+    return (
+        <View flex={1} margin="5%">
+            <View style={{ borderRadius: 20, borderWidth: 0.5, backgroundColor: 'lightgray' }}>
+                {renderObservationNumberAndStatus()}
+                <View style={{ marginTop: '5%', marginBottom: '5%' }}>
+                    {!isEmpty(history.Observation) && renderHistoryCardDetails('Observation: ', history.Observation)}
+                    {!isEmpty(history.Location) && renderHistoryCardDetails('Location: ', history.Location)}
+                    {!isEmpty(history.Category) && renderHistoryCardDetails('Category: ', history.Category)}
+                    {!isEmpty(history.Section) && renderHistoryCardDetails('Section: ', history.Section)}
+                    {!isEmpty(history.Topic) && renderHistoryCardDetails('Topic: ', history.Topic)}
+                    {!isEmpty(history.PreventiveHazard) && renderHistoryCardDetails('Preventive Hazard: ', history.PreventiveHazard)}
+                    {!isEmpty(history.Hazard) && renderHistoryCardDetails('Hazard: ', history.Hazard)}
+                    {!isEmpty(history.IsFollowUpNeeded) && renderHistoryCardDetails('isFollowUpNeeded: ', history.IsFollowUpNeeded)}
+                    {!isEmpty(history.DateCreated) && renderHistoryCardDetails('Date Created: ', history.DateCreated)}
+                    {!isEmpty(history.SubmittedBy) && renderHistoryCardDetails('Submitted By: ', history.SubmittedBy)}
+                    {!isEmpty(history.OutstandingTask) && renderHistoryCardDetails('Outstanding Task: ', history.OutstandingTask)}
                 </View>
             </View>
         </View>
