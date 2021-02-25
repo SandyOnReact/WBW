@@ -2,6 +2,8 @@ import React from 'react'
 import { View, Text, Dimensions } from 'react-native'
 import { isEmpty } from "lodash"
 
+//TODO: Display date in MM/DD/YYYY format
+//TODO: Rename category to Act or Condition.
 export const HistoryCard = (props) => {
 
     const { history } = props;

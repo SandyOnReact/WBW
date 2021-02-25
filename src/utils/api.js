@@ -28,26 +28,30 @@ const post = async (props) => {
     return result;
 }
 
-const get = ( props ) => {
+const get = async ( props ) => {
     const {
         url
     } = props
     const apiUrl = `${config.API_URL}/${url}`
-    fetch(apiUrl, {
+    console.log( 'url is ',apiUrl )
+    const result = await fetch(apiUrl, {
         method: 'GET',
         headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json',
         }
     })
-    .then( res => res.json() )
+    .then( (res) => res.json() )
     .then( ( response ) => {
+        console.log( 'res in fetch',response )
         return response;
     } )
     .catch( error => {
+        console.log( error )
         Toast.showWithGravity('Something Went Wrong', Toast.LONG, Toast.CENTER);
         return null;
     })
+    return result;
 }
 
 export const api = {
