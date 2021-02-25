@@ -80,10 +80,10 @@ export const AddObservationScreen = ({ navigation }) => {
         <View style={{ flex: 1 }}>
             <Header
                 containerStyle={{ height: 56 + STATUS_BAR_HEIGHT }}
-                statusBarProps={{ barStyle: "dark-content", translucent: true, backgroundColor: "transparent" }}
+                statusBarProps={{ barStyle: "light-content", translucent: true, backgroundColor: "transparent" }}
                 containerStyle={{ backgroundColor: '#1e5873' }}
                 leftComponent={{ icon: 'arrow-back', type: 'ionicons', color: 'white', onPress: navigatetoBackScreen }}
-                centerComponent={{ text: 'Add Observation', style: { color: '#fff' } }}
+                centerComponent={{ text: 'Add Observation', style: { color: '#fff',fontSize:16 } }}
             />
             <View style={{ flex: 1, margin: '4%' }}>
                 <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>

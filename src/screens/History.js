@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import React, { useCallback } from 'react'
 import { Async } from 'react-async'
 import { View, ActivityIndicator } from 'react-native'
-import { Header } from 'react-native-elements'
+import { Header, Avatar } from 'react-native-elements'
 import { FlatList } from 'react-native-gesture-handler'
 import { getStatusBarHeight } from 'react-native-status-bar-height'
 import { api } from '../utils/api'
@@ -33,7 +33,8 @@ export const HistoryScreen = ({ route, navigation }) => {
 
     }, [])
 
-    const onRightIconPress = ( ) => {
+    const navigateToAddObservation = ( ) => {
+        console.log( 'Hello' )
         navigation.navigate( 'AddObservation' )
     }
 
@@ -67,11 +68,10 @@ export const HistoryScreen = ({ route, navigation }) => {
                         <View style={{ flex: 1 }}>
                             <Header
                                 containerStyle={{ height: 56 + STATUS_BAR_HEIGHT }}
-                                statusBarProps={{ barStyle: "dark-content", translucent: true, backgroundColor: "transparent" }}
+                                statusBarProps={{ barStyle: "light-content", translucent: true, backgroundColor: "transparent" }}
                                 containerStyle={{ backgroundColor: '#1e5873' }}
                                 leftComponent={{ icon: 'arrow-back', type: 'ionicons', color: 'white', onPress: navigatetoBackScreen }}
-                                centerComponent={{ text: category, style: { color: '#fff' } }}
-                                rightComponent={{ icon: 'add-circle', color: 'rgba(255,255,255,0.5)', type: 'ionicons', size: 30, style: { marginRight: 10 }, onPress: onRightIconPress}}
+                                centerComponent={{ text: category, style: { color: '#fff' ,fontWeight:'bold', fontSize:16} }}
                             />
                             <View>
                                 <FlatList 
@@ -80,6 +80,9 @@ export const HistoryScreen = ({ route, navigation }) => {
                                     keyExtractor={ (item,index) => String( index )}
                                     renderItem={renderItem}
                                 />
+                                <View style={{position: 'absolute', bottom: "15%", right: 10, top: '80%', left: '85%'}}>
+                                    <Avatar size="medium" onPress={navigateToAddObservation} rounded icon={{ name: 'add'}} containerStyle={{ backgroundColor: '#1e5873'}}/>
+                                </View>
                             </View>
                         </View>
                     )
