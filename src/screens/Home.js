@@ -117,7 +117,7 @@ export const HomeScreen = ({ navigation }) => {
                                 statusBarProps={{ barStyle: "light-content", translucent: true, backgroundColor: "transparent" }}
                                 leftComponent={{ icon: 'menu', color: '#fff' }}
                                 containerStyle={{ backgroundColor: '#1e5873' }}
-                                centerComponent={{ text: userInfo.CompanyName, style: { color: '#fff' } }}
+                                centerComponent={{ text: userInfo.CompanyName, style: { color: '#fff',fontWeight:'bold', fontSize:16 } }}
                             />
                             <View style={{margin:20}}>
                                 <FlatList
