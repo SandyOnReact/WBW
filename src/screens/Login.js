@@ -56,12 +56,12 @@ export const LoginScreen = ({ navigation }) => {
 
             // save Entire response object in Asynstorage
             const { ['AccessToken']: remove, ...rest } = result
-            
+
             /**
              *  Storing an entiree object as a string in asyncstorage.
              */
-            const userInfoWithoutToken = JSON.stringify( rest )
-            await saveUserInfo( userInfoWithoutToken )
+            const userInfoWithoutToken = JSON.stringify(rest)
+            await saveUserInfo(userInfoWithoutToken)
 
             // navigating to Home screen once logged in
             navigation.navigate('Home')
@@ -71,7 +71,7 @@ export const LoginScreen = ({ navigation }) => {
 
     const saveUserInfo = async (value) => {
         try {
-            await AsyncStorage.setItem('USER_INFO', value )
+            await AsyncStorage.setItem('USER_INFO', value)
         } catch (e) {
             // save error
             Toast.showWithGravity(result.Message, Toast.LONG, Toast.TOP);
@@ -100,7 +100,9 @@ export const LoginScreen = ({ navigation }) => {
     return (
         <View style={{ flex: 1, backgroundColor: 'white', }}>
             <View style={{ flex: 2.5, backgroundColor: 'white', marginTop: '25%', alignItems: 'center' }}>
-                <Image source={images.WBW_Logo} resizeMode='contain' width={90} height={90} />
+                <View  style={{ alignItems="center", justifyContent="center", marginTop="5%", paddingVertical: '5%' }} >
+                    <Avatar source={images.WBW_Logo} resizeMode='contain' width={90} height={90} />
+                </View>
             </View>
             <View style={{ flex: 6.5, marginHorizontal: '8%', marginTop: '2%' }}>
                 <Input
