@@ -62,6 +62,8 @@ export const AddObservationScreen = ({ navigation }) => {
     const [isVisible, setIsVisible] = useState(false);
     const [data,setData] = useState( false )
     const [sectionData,setSectionData] = useState( [] )
+    const [topicData,setTopicData] = useState( [] )
+    const [actData,setActData] = useState( [] )
     const [isLoading,setIsLoading] = useState( true )
 
 
@@ -118,14 +120,31 @@ export const AddObservationScreen = ({ navigation }) => {
             return null;
         }
         setData( result )
+        if( !result.ActOrConditions ) {
+            return null
+        }
+
+        const actList = result.ActOrConditions.map( item => {
+            const act = { label: item.Value, value: item.Value }
+            return act;
+        }, [] )
+
         if( !result.Sections ) {
             return null
         }
+        const topicList = []
         const sectionsList = result.Sections.map( (item, index) => {
             const section = { label: item.Value, value: item.Value }
+            item.Topics.map( obj => {
+                const topic = { label: obj.Value, value: obj.Value }
+                topicList.push( topic )
+                return topic
+            } )
             return section;
         })
         setSectionData( sectionsList )
+        setTopicData( topicList )
+        setActData( actList )
         setIsLoading( false )
         return result;
     }
@@ -171,19 +190,6 @@ export const AddObservationScreen = ({ navigation }) => {
         )
 
     }
-
-    const getSectionData = ( ) => {
-        if( !data.Sections ) {
-            return null
-        }
-        const sectionsList = data.Sections.map( (item, index) => {
-            const section = { label: item.Value, value: item.value }
-            return section;
-        })
-        console.log( sectionsList )
-        return sectionsList;
-    }
-
 
     return (
         <View style={{ flex: 1 }}>
@@ -319,7 +325,7 @@ export const AddObservationScreen = ({ navigation }) => {
                             fontWeight: 'bold', fontSize: 16, paddingLeft: '3%', marginBottom: '1%'
                         }}> Topic </Text>
                         <RNPickerSelect
-                            onValueChange={(value) => console.log(value)}
+                            onValueChange={(value) => topicValue = value}
                             useNativeAndroidPickerStyle={false}
                             style={{
                                 ...pickerSelectStyles,
@@ -328,11 +334,7 @@ export const AddObservationScreen = ({ navigation }) => {
                                     right: 12,
                                 },
                             }}
-                            items={[
-                                { label: 'Football', value: 'football' },
-                                { label: 'Baseball', value: 'baseball' },
-                                { label: 'Hockey', value: 'hockey' },
-                            ]}
+                            items={topicData}
                             Icon={() => {
                                 return <Icon name="caret-down" color="gray" size={24} type="ionicon" />;
                             }}
@@ -345,7 +347,7 @@ export const AddObservationScreen = ({ navigation }) => {
                             fontWeight: 'bold', fontSize: 16, paddingLeft: '3%', marginBottom: '1%'
                         }}> Act or Condition </Text>
                         <RNPickerSelect
-                            onValueChange={(value) => console.log(value)}
+                            onValueChange={(value) => actvalue = value }
                             useNativeAndroidPickerStyle={false}
                             style={{
                                 ...pickerSelectStyles,
@@ -354,11 +356,7 @@ export const AddObservationScreen = ({ navigation }) => {
                                     right: 12,
                                 },
                             }}
-                            items={[
-                                { label: 'Football', value: 'football' },
-                                { label: 'Baseball', value: 'baseball' },
-                                { label: 'Hockey', value: 'hockey' },
-                            ]}
+                            items={actData}
                             Icon={() => {
                                 return <Icon name="caret-down" color="gray" size={24} type="ionicon" />;
                             }}
