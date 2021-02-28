@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
-import { View, ScrollView, Text } from 'react-native'
-import { Input, Header } from 'react-native-elements'
+import React, { useState, useEffect } from 'react'
+import { View, ScrollView, Text, ActivityIndicator } from 'react-native'
+import { Input, Header, Button } from 'react-native-elements'
 import { useNavigation } from "@react-navigation/native"
 import { getStatusBarHeight } from 'react-native-status-bar-height'
 import { useFormik } from "formik"
@@ -10,6 +10,10 @@ import { CustomDropdown } from '../components/core/custom-dropdown'
 import { CustomDateTimePicker } from '../components/datetimepicker'
 import moment from 'moment';
 import RadioForm from 'react-native-simple-radio-button';
+import Autocomplete from 'react-native-autocomplete-input';
+import { StyleSheet } from 'react-native'
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { api } from '../utils/api'
 
 let date = new Date()
 const radioButtons = [
@@ -23,6 +27,17 @@ export const AddObservationScreen = () => {
     const [dateValue, setDateValue] = useState('');
     const [timeValue, setTimeValue] = useState('');
     const [radioValue, setRadioValue] = useState('');
+    const [observationOccur, setObservationOccur] = useState('');
+    const [actValue, setActValue] = useState('');
+    const [hazardValue, setHazardValue] = useState('');
+    const [isLoading, setIsLoading] = useState(true);
+    const [data, setData] = useState([]);
+    const [actList, setActList] = useState([]);
+    const [hazardList, setHazardList] = useState([]);
+    const [sectionList, setSectionList] = useState([]);
+    const [topicList, setTopicList] = useState([]);
+    const [sectionValue, setSectionValue] = useState('');
+    const [topicValue, setTopicValue] = useState('');
     const inputContainerStyle = { borderWidth: 1, borderColor: '#1e5873', borderRadius: 6 }
     const STATUS_BAR_HEIGHT = getStatusBarHeight()
     const navigation = useNavigation()
@@ -58,6 +73,78 @@ export const AddObservationScreen = () => {
             //
         }
     })
+
+    const fetchUserInfoFromStorage = async () => {
+        const userInfo = await AsyncStorage.getItem('USER_INFO');
+        return userInfo != null ? JSON.parse(userInfo) : null;
+    } 
+
+    useEffect(()=> {
+        getAllData()
+    }, [] )
+
+    const getAllData = async ( ) => {
+        const user = await fetchUserInfoFromStorage()
+        const token = await AsyncStorage.getItem('Token')
+        const result = await api.post({
+            url: `api/Common/GetAllFilters`,
+            body: {
+                UserID: user.UserID,
+                AccessToken: token,
+                CompanyID: user.CompanyID,
+                ObservationSettingID: 'aa7309ab-5bd8-4f2d-9b29-5f19d27495a8'
+            }
+        })
+        if (result === "Invalid User Token") {
+            Toast.showWithGravity('Invalid User Token', Toast.LONG, Toast.CENTER);
+            return null;
+        }
+        if( !result.ActOrConditions ) {
+            return null
+        }
+
+        if( !result.Sections ) {
+            return null
+        }
+
+        if( !result.ObservationTime ){
+            return null
+        }
+        setData( result )
+        const actData = result.ActOrConditions.map( item => {
+            const act = { label: item.Value, value: item.Value }
+            return act;
+        }, [] )
+        const hazardData = result.Hazards.map( item => {
+            const hazard = { label: item.Value, value: item.Value }
+            return hazard;
+        }, [] )
+        
+        const topicData = []
+        const sectionData = result.Sections.map( (item, index) => {
+            const section = { label: item.Value, value: item.Value }
+            item.Topics.map( obj => {
+                const topic = { label: obj.Value, value: obj.Value }
+                topicData.push( topic )
+                return topic
+            } )
+            return section;
+        })
+        setSectionList( sectionData )
+        setTopicList( topicData )
+        setActList( actData )
+        setHazardList( hazardData )
+        setIsLoading( false )
+        return result;
+    }
+
+    if( isLoading ) {
+        return(
+            <ActivityIndicator color="red"/>
+        )
+    }
+
+
 
     console.log('hjbh')
     const onChange = (event, selectedDate) => {
@@ -171,35 +258,27 @@ export const AddObservationScreen = () => {
                     <View>
                         <CustomDropdown
                             title="Section"
-                            items={[
-                                { label: 'Football', value: 'football' },
-                                { label: 'Baseball', value: 'baseball' },
-                                { label: 'Hockey', value: 'hockey' },
-                            ]}
+                            items={sectionList}
+                            value={sectionValue}
+                            onValueChange={(value) => setSectionValue( value )}
                         />
                         <CustomDropdown
                             title="Topic"
-                            items={[
-                                { label: 'Football', value: 'football' },
-                                { label: 'Baseball', value: 'baseball' },
-                                { label: 'Hockey', value: 'hockey' },
-                            ]}
+                            items={topicList}
+                            value={topicValue}
+                            onValueChange={(value) => setActValue( value )}
                         />
                         <CustomDropdown
                             title="Act or Condition"
-                            items={[
-                                { label: 'Football', value: 'football' },
-                                { label: 'Baseball', value: 'baseball' },
-                                { label: 'Hockey', value: 'hockey' },
-                            ]}
+                            value={actValue}
+                            onValueChange={(value) => setActValue( value )}
+                            items={actList}
                         />
                         <CustomDropdown
-                            title="Hazard"
-                            items={[
-                                { label: 'Football', value: 'football' },
-                                { label: 'Baseball', value: 'baseball' },
-                                { label: 'Hockey', value: 'hockey' },
-                            ]}
+                            title={actValue && actValue.startsWith( "Unsafe" ) ? "Hazard" : "Preventive Hazard"}
+                            items={hazardList}
+                            value={hazardValue}
+                            onValueChange={(value) => setHazardValue( value )}
                         />
                     </View>
                     <View style={{ marginTop: '2.5%' }}>
@@ -217,8 +296,22 @@ export const AddObservationScreen = () => {
                             errorMessage={errors.observation}
                         />
                     </View>
+                    <View>
+                        <Button title="Submit" />
+                    </View>
                 </ScrollView>
             </View>
         </View>
     )
 }
+
+const styles = StyleSheet.create({
+    autocompleteContainer: {
+        flex: 1,
+        left: 0,
+        position: 'absolute',
+        right: 0,
+        top: 0,
+        zIndex: 1
+    }
+})
