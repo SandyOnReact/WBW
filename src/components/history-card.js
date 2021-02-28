@@ -45,9 +45,9 @@ export const HistoryCard = (props) => {
                 <View style={{ marginTop: '5%', marginBottom: '5%' }}>
                     {!isEmpty(history.Observation) && renderHistoryCardDetails('Observation: ', history.Observation)}
                     {!isEmpty(history.Location) && renderHistoryCardDetails('Location: ', history.Location)}
-                    {!isEmpty(history.DateCreated) && renderHistoryCardDetails('Observation date: ', history.DateCreated)}
-                    {!isEmpty(history.DateCreated) && renderHistoryCardDetails('Observation time: ', history.DateCreated)}
-                    {!isEmpty(history.IsFollowUpNeeded) && renderHistoryCardDetails('Follow up needed: ', history.IsFollowUpNeeded)}
+                    {!isEmpty(history.DateCreated) && renderHistoryCardDetails('Observation Date: ', history.DateCreated)}
+                    {!isEmpty(history.DateCreated) && renderHistoryCardDetails('Observation Time: ', history.DateCreated)}
+                    {!isEmpty(history.IsFollowUpNeeded) && renderHistoryCardDetails('Follow Up Needed: ', history.IsFollowUpNeeded)}
                     {!isEmpty(history.Section) && renderHistoryCardDetails('Section: ', history.Section)}
                     {!isEmpty(history.Topic) && renderHistoryCardDetails('Topic: ', history.Topic)}
                     {!isEmpty(history.Category) && renderHistoryCardDetails('Act or Condition: ', history.Category)}
