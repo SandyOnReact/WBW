@@ -14,8 +14,10 @@ import Autocomplete from 'react-native-autocomplete-input';
 import { StyleSheet } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from '../utils/api'
+import { isEmpty } from 'lodash'
 
 let date = new Date()
+let topicList = []
 const radioButtons = [
     { label: 'Yes', value: 0 },
     { label: 'No', value: 1 }
@@ -35,7 +37,7 @@ export const AddObservationScreen = () => {
     const [actList, setActList] = useState([]);
     const [hazardList, setHazardList] = useState([]);
     const [sectionList, setSectionList] = useState([]);
-    const [topicList, setTopicList] = useState([]);
+    // const [topicList, setTopicList] = useState([]);
     const [sectionValue, setSectionValue] = useState('');
     const [topicValue, setTopicValue] = useState('');
     const inputContainerStyle = { borderWidth: 1, borderColor: '#1e5873', borderRadius: 6 }
@@ -120,18 +122,17 @@ export const AddObservationScreen = () => {
             return hazard;
         }, [] )
         
-        const topicData = []
         const sectionData = result.Sections.map( (item, index) => {
             const section = { label: item.Value, value: item.Value }
-            item.Topics.map( obj => {
-                const topic = { label: obj.Value, value: obj.Value }
-                topicData.push( topic )
-                return topic
-            } )
+            // item.Topics.map( obj => {
+            //     const topic = { label: obj.Value, value: obj.Value }
+            //     topicData.push( topic )
+            //     return topic
+            // } )
             return section;
         })
         setSectionList( sectionData )
-        setTopicList( topicData )
+        // setTopicList( topicData )
         setActList( actData )
         setHazardList( hazardData )
         setIsLoading( false )
@@ -147,7 +148,6 @@ export const AddObservationScreen = () => {
     const onChange = (event, selectedDate) => {
         if( event.type === "dismissed" ) return null
         const currentDate = selectedDate || date;
-        console.log( currentDate )
         setShow(false);
         if (mode === 'date') {
             const pickedDate = moment(currentDate).format("DD/MM/YYYY")
@@ -172,6 +172,22 @@ export const AddObservationScreen = () => {
     const showTimepicker = () => {
         showMode('time');
     };
+
+    const onSectionValueChange = ( value ) => {
+        if( isEmpty( value ) || value === null ) {
+            topicList = []
+            setSectionValue( '' )
+            return null
+        }
+        const topicsBasedOnSections = data.Sections.find( item => {
+            if( item.Value === value ) return item
+        } )
+        topicList = topicsBasedOnSections.Topics.map( item => {
+            const topic = { label: item.Value, value: item.Value }
+            return topic
+        })
+        setSectionValue( value )
+    }
 
     return (
         <View style={{ flex: 1 }}>
@@ -248,10 +264,11 @@ export const AddObservationScreen = () => {
                                 initial={0}
                                 formHorizontal={true}
                                 labelHorizontal={true}
+                                radioStyle={{paddingRight: 50}}
                                 buttonColor={'#86939e'}
                                 selectedButtonColor={'#1e5873'}
                                 animation={true}
-                                style={{ paddingHorizontal: 15, justifyContent: 'space-between' }}
+                                style={{ paddingHorizontal: 15 }}
                                 onPress={(value) => setRadioValue(value)}
                             />
                         </View>
@@ -261,7 +278,7 @@ export const AddObservationScreen = () => {
                             title="Section"
                             items={sectionList}
                             value={sectionValue}
-                            onValueChange={(value) => setSectionValue( value )}
+                            onValueChange={onSectionValueChange}
                         />
                         <CustomDropdown
                             title="Topic"
