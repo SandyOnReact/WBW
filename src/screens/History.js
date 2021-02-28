@@ -8,6 +8,7 @@ import { getStatusBarHeight } from 'react-native-status-bar-height'
 import { api } from '../utils/api'
 import { HistoryCard } from '../components/history-card'
 import { NavigationContainer } from '@react-navigation/native'
+import { result } from 'lodash'
 
 
 export const HistoryScreen = ({ route, navigation }) => {
@@ -32,9 +33,7 @@ export const HistoryScreen = ({ route, navigation }) => {
         return result;
 
     }, [])
-
     const navigateToAddObservation = ( ) => {
-        console.log( 'Hello' )
         navigation.navigate( 'AddObservation' )
     }
 
