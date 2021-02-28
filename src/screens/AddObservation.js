@@ -144,11 +144,10 @@ export const AddObservationScreen = () => {
         )
     }
 
-
-
-    console.log('hjbh')
     const onChange = (event, selectedDate) => {
+        if( event.type === "dismissed" ) return null
         const currentDate = selectedDate || date;
+        console.log( currentDate )
         setShow(false);
         if (mode === 'date') {
             const pickedDate = moment(currentDate).format("DD/MM/YYYY")
@@ -221,6 +220,7 @@ export const AddObservationScreen = () => {
                             show={show}
                             inputValue={dateValue}
                             mode={mode}
+                            display="spinner"
                             value={date}
                             onChange={onChange}
                         />
@@ -230,6 +230,7 @@ export const AddObservationScreen = () => {
                             label="What was the Time of Observation"
                             onRightIconPress={showTimepicker}
                             show={show}
+                            display="spinner"
                             inputValue={timeValue}
                             mode={mode}
                             value={date}
