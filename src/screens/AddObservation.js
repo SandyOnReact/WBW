@@ -266,7 +266,7 @@ export const AddObservationScreen = () => {
                             title="Topic"
                             items={topicList}
                             value={topicValue}
-                            onValueChange={(value) => setActValue( value )}
+                            onValueChange={(value) => setTopicValue( value )}
                         />
                         <CustomDropdown
                             title="Act or Condition"
