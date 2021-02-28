@@ -1,0 +1,88 @@
+import React from 'react'
+import { View, Text } from 'react-native'
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { Input } from 'react-native-elements'
+
+const containerStyle = {
+    borderWidth: 1,
+    borderColor: '#1e5873',
+    borderRadius: 6
+}
+export const CustomDateTimePicker = (props) => {
+    const {
+        customRightIcon,
+        numOfLines,
+        multiline,
+        editable,
+        label,
+        placeholder,
+        placeholderTextColor,
+        textAlignVertical,
+        inputContainerStyle,
+        show,
+        onRightIconPress,
+        onChange,
+        value,
+        mode,
+        is24Hour,
+        minuteInterval,
+        customLabelStyle,
+        display,
+        inputValue
+    } = props
+
+    const defaultRightIcon = {
+        type: 'font-awesome',
+        name: 'calendar',
+        onPress: onRightIconPress
+    }
+
+    const rightIcon = customRightIcon || defaultRightIcon
+
+    return (
+        <View style={{ flex: 1 }}>
+            <Input
+                numberOfLines={numOfLines}
+                multiline={multiline}
+                editable={editable}
+                label={label}
+                value={inputValue}
+                labelStyle={[{ marginBottom: 5 }, customLabelStyle]}
+                placeholder={placeholder}
+                placeholderTextColor={placeholderTextColor}
+                textAlignVertical={textAlignVertical}
+                rightIcon={rightIcon}
+                inputContainerStyle={[containerStyle, inputContainerStyle]}
+            />
+            {show && (
+                <DateTimePicker
+                    testID="dateTimePicker"
+                    value={value}
+                    mode={mode}
+                    minuteInterval={minuteInterval}
+                    is24Hour={is24Hour}
+                    display={display}
+                    onChange={onChange}
+                />
+            )}
+        </View>
+    )
+}
+
+CustomDateTimePicker.defaultProps = {
+    mode: 'date',
+    minuteInterval: 10,
+    is24Hour: false,
+    numOfLines: 1,
+    multiline: false,
+    editable: false,
+    label: '',
+    placeholder: 'Type Something',
+    placeholderTextColor: 'grey',
+    textAlignVertical: 'center',
+    inputContainerStyle: { },
+    show: false,
+    display: 'default',
+    onRightIconPress: ( ) => null,
+    inputValue: ''
+}
