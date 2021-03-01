@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { View, ScrollView, Text, ActivityIndicator } from 'react-native'
+import { View, ScrollView, Text, ActivityIndicator, TouchableOpacity } from 'react-native'
 import { Input, Header, Button } from 'react-native-elements'
 import { useNavigation } from "@react-navigation/native"
 import { getStatusBarHeight } from 'react-native-status-bar-height'
@@ -22,6 +22,42 @@ const radioButtons = [
     { label: 'Yes', value: 0 },
     { label: 'No', value: 1 }
 ]
+
+const autoCompleteArray = [{
+    Name: "Demo",
+    Id: 1
+}, {
+    Name: "Demo -> Corporate Office",
+    Id: 2
+}, {
+    Name: "Demo -> Corporate Office -> Human Resources",
+    Id: 3
+}, {
+    Name: "Demo -> Corporate Office -> Quality",
+    Id: 4
+}, {
+    Name: "Demo -> Corporate Office -> H.S.E",
+    Id: 5
+}, {
+    Name: "Demo -> Region 1 -> Location 1",
+    Id: 6
+}, {
+    Name: "Demo -> Region 1 -> Location 1 -> Location 1 - Area 1",
+    Id: 11
+}, {
+    Name: "Demo -> Region 1 -> Location 1 -> Location 1 - Area 2",
+    Id: 88
+}, {
+    Name: "Demo -> Demo -> Region 1 -> Location 1 -> Location 1 - Area 3",
+    Id: 76
+}, {
+    Name: "Demo -> Region 1 -> Location 1 -> Location 1 - Area 3",
+    Id: 98
+}, {
+    Name: "Demo -> Region 1 -> Regional office",
+    Id: 23
+}];
+
 export const AddObservationScreen = () => {
 
     const [mode, setMode] = useState('date');
@@ -37,9 +73,10 @@ export const AddObservationScreen = () => {
     const [actList, setActList] = useState([]);
     const [hazardList, setHazardList] = useState([]);
     const [sectionList, setSectionList] = useState([]);
-    // const [topicList, setTopicList] = useState([]);
     const [sectionValue, setSectionValue] = useState('');
     const [topicValue, setTopicValue] = useState('');
+    const [selectedValue, setSelectedValue] = useState({});
+    const [filteredData, setFilteredData] = useState([]);
     const inputContainerStyle = { borderWidth: 1, borderColor: '#1e5873', borderRadius: 6 }
     const STATUS_BAR_HEIGHT = getStatusBarHeight()
     const navigation = useNavigation()
@@ -79,13 +116,13 @@ export const AddObservationScreen = () => {
     const fetchUserInfoFromStorage = async () => {
         const userInfo = await AsyncStorage.getItem('USER_INFO');
         return userInfo != null ? JSON.parse(userInfo) : null;
-    } 
+    }
 
-    useEffect(()=> {
+    useEffect(() => {
         getAllData()
-    }, [] )
+    }, [])
 
-    const getAllData = async ( ) => {
+    const getAllData = async () => {
         const user = await fetchUserInfoFromStorage()
         const token = await AsyncStorage.getItem('Token')
         const result = await api.post({
@@ -101,28 +138,28 @@ export const AddObservationScreen = () => {
             Toast.showWithGravity('Invalid User Token', Toast.LONG, Toast.CENTER);
             return null;
         }
-        if( !result.ActOrConditions ) {
+        if (!result.ActOrConditions) {
             return null
         }
 
-        if( !result.Sections ) {
+        if (!result.Sections) {
             return null
         }
 
-        if( !result.ObservationTime ){
+        if (!result.ObservationTime) {
             return null
         }
-        setData( result )
-        const actData = result.ActOrConditions.map( item => {
+        setData(result)
+        const actData = result.ActOrConditions.map(item => {
             const act = { label: item.Value, value: item.Value }
             return act;
-        }, [] )
-        const hazardData = result.Hazards.map( item => {
+        }, [])
+        const hazardData = result.Hazards.map(item => {
             const hazard = { label: item.Value, value: item.Value }
             return hazard;
-        }, [] )
-        
-        const sectionData = result.Sections.map( (item, index) => {
+        }, [])
+
+        const sectionData = result.Sections.map((item, index) => {
             const section = { label: item.Value, value: item.Value }
             // item.Topics.map( obj => {
             //     const topic = { label: obj.Value, value: obj.Value }
@@ -131,22 +168,22 @@ export const AddObservationScreen = () => {
             // } )
             return section;
         })
-        setSectionList( sectionData )
+        setSectionList(sectionData)
         // setTopicList( topicData )
-        setActList( actData )
-        setHazardList( hazardData )
-        setIsLoading( false )
+        setActList(actData)
+        setHazardList(hazardData)
+        setIsLoading(false)
         return result;
     }
 
-    if( isLoading ) {
-        return(
-            <ActivityIndicator color="red"/>
+    if (isLoading) {
+        return (
+            <ActivityIndicator color="red" />
         )
     }
 
     const onChange = (event, selectedDate) => {
-        if( event.type === "dismissed" ) return null
+        if (event.type === "dismissed") return null
         const currentDate = selectedDate || date;
         setShow(false);
         if (mode === 'date') {
@@ -173,20 +210,68 @@ export const AddObservationScreen = () => {
         showMode('time');
     };
 
-    const onSectionValueChange = ( value ) => {
-        if( isEmpty( value ) || value === null ) {
+    const onSectionValueChange = (value) => {
+        if (isEmpty(value) || value === null) {
             topicList = []
-            setSectionValue( '' )
+            setSectionValue('')
             return null
         }
-        const topicsBasedOnSections = data.Sections.find( item => {
-            if( item.Value === value ) return item
-        } )
-        topicList = topicsBasedOnSections.Topics.map( item => {
+        const topicsBasedOnSections = data.Sections.find(item => {
+            if (item.Value === value) return item
+        })
+        topicList = topicsBasedOnSections.Topics.map(item => {
             const topic = { label: item.Value, value: item.Value }
             return topic
         })
-        setSectionValue( value )
+        setSectionValue(value)
+    }
+
+    const findSearchedObservation = (query) => {
+        // Method called every time when we change the value of the input
+        console.log( query )
+        if (query) {
+            const regex = new RegExp(`${query.trim()}`, 'i');
+            // Setting the filtered film array according the query
+            console.log( query )
+            setFilteredData(
+                autoCompleteArray.filter((item) => item.Name.search(regex) >= 0)
+            );
+            setSelectedValue( query )
+        } else {
+            // If the query is null then return blank
+            setFilteredData([]);
+        }
+    }
+
+    const renderTextInput = () => {
+        return (
+            <Input
+                label="Where Did Observation Occur"
+                labelStyle={{ marginBottom: 5 }}
+                placeholder="Type Something"
+                placeholderTextColor="gray"
+                multiline={true}
+                numberOfLines={1}
+                value={selectedValue.Name}
+                inputContainerStyle={inputContainerStyle}
+                onChangeText={(text) => findSearchedObservation(text)}
+                errorMessage={errors.whereDidObservationOccur}
+            />
+        )
+    }
+
+    const renderItem = ({ item }) => {
+        return (
+            <TouchableOpacity
+                onPress={() => {
+                    setSelectedValue(item);
+                    setFilteredData([]);
+                }}>
+                <Text style={styles.itemText}>
+                    {item.Name}
+                </Text>
+            </TouchableOpacity>
+        )
     }
 
     return (
@@ -203,7 +288,8 @@ export const AddObservationScreen = () => {
             <View style={{ flex: 1, marginHorizontal: '5%' }}>
                 <ScrollView style={{ flex: 1 }}>
                     <View style={{ marginTop: '3%' }}>
-                        <Input
+                        <View>
+                            {/* <Input
                             label="Where Did Observation Occur"
                             labelStyle={{ marginBottom: 5 }}
                             placeholder="Type Something"
@@ -212,7 +298,23 @@ export const AddObservationScreen = () => {
                             onChangeText={handleChange("whereDidObservationOccur")}
                             onBlur={handleBlur("whereDidObservationOccur")}
                             errorMessage={errors.whereDidObservationOccur}
-                        />
+                        /> */}
+                            <Autocomplete
+                                autoCapitalize="none"
+                                autoCorrect={false}
+                                renderTextInput={renderTextInput}
+                                containerStyle={styles.autocompleteContainer}
+                                data={filteredData}
+                                keyExtractor={item=>item.Id}
+                                defaultValue={
+                                    JSON.stringify(selectedValue) === '{}' ?
+                                        '' :
+                                        selectedValue.Name
+                                }
+                                onChangeText={(text) => findSearchedObservation(text)}
+                                renderItem={renderItem}
+                            />
+                        </View>
                     </View>
                     <View>
                         <Input
@@ -264,7 +366,7 @@ export const AddObservationScreen = () => {
                                 initial={0}
                                 formHorizontal={true}
                                 labelHorizontal={true}
-                                radioStyle={{paddingRight: 50}}
+                                radioStyle={{ paddingRight: 50 }}
                                 buttonColor={'#86939e'}
                                 selectedButtonColor={'#1e5873'}
                                 animation={true}
@@ -284,19 +386,19 @@ export const AddObservationScreen = () => {
                             title="Topic"
                             items={topicList}
                             value={topicValue}
-                            onValueChange={(value) => setTopicValue( value )}
+                            onValueChange={(value) => setTopicValue(value)}
                         />
                         <CustomDropdown
                             title="Act or Condition"
                             value={actValue}
-                            onValueChange={(value) => setActValue( value )}
+                            onValueChange={(value) => setActValue(value)}
                             items={actList}
                         />
                         <CustomDropdown
-                            title={actValue && actValue.startsWith( "Unsafe" ) ? "Hazard" : "Preventive Hazard"}
+                            title={actValue && actValue.startsWith("Unsafe") ? "Hazard" : "Preventive Hazard"}
                             items={hazardList}
                             value={hazardValue}
-                            onValueChange={(value) => setHazardValue( value )}
+                            onValueChange={(value) => setHazardValue(value)}
                         />
                     </View>
                     <View style={{ marginTop: '2.5%' }}>
@@ -325,11 +427,21 @@ export const AddObservationScreen = () => {
 
 const styles = StyleSheet.create({
     autocompleteContainer: {
+        backgroundColor: '#ffffff',
+        borderWidth: 0,
+    },
+    descriptionContainer: {
         flex: 1,
-        left: 0,
-        position: 'absolute',
-        right: 0,
-        top: 0,
-        zIndex: 1
+        justifyContent: 'center',
+    },
+    itemText: {
+        fontSize: 15,
+        paddingTop: 5,
+        paddingBottom: 5,
+        margin: 2,
+    },
+    infoText: {
+        textAlign: 'center',
+        fontSize: 16,
     }
 })
