@@ -286,11 +286,11 @@ export const AddObservationScreen = () => {
                 />
             </View>
             <View style={{ flex: 1, marginHorizontal: '5%' }}>
-                <ScrollView style={{ flex: 1 }}>
-                    <View style={{ marginTop: '3%' }}>
+                <ScrollView style={{ flex: 1  }}>
+                    <View style={{ marginTop: '3%' ,marginBottom:"%"}}>
                         <View>
-                            {/* <Input
-                            label="Where Did Observation Occur"
+                            <Input
+                            label="Where did the Observation occur"
                             labelStyle={{ marginBottom: 5 }}
                             placeholder="Type Something"
                             placeholderTextColor="gray"
@@ -298,8 +298,8 @@ export const AddObservationScreen = () => {
                             onChangeText={handleChange("whereDidObservationOccur")}
                             onBlur={handleBlur("whereDidObservationOccur")}
                             errorMessage={errors.whereDidObservationOccur}
-                        /> */}
-                            <Autocomplete
+                        />
+                            {/* <Autocomplete
                                 autoCapitalize="none"
                                 autoCorrect={false}
                                 renderTextInput={renderTextInput}
@@ -313,12 +313,12 @@ export const AddObservationScreen = () => {
                                 }
                                 onChangeText={(text) => findSearchedObservation(text)}
                                 renderItem={renderItem}
-                            />
+                            /> */}
                         </View>
                     </View>
                     <View>
                         <Input
-                            label="Describe Where the Observation Happened"
+                            label="Describe where the Observation happened"
                             labelStyle={{ marginBottom: 5 }}
                             numberOfLines={3}
                             multiline={true}
@@ -333,7 +333,7 @@ export const AddObservationScreen = () => {
                     </View>
                     <View>
                         <CustomDateTimePicker
-                            label="What was the Date of Observation"
+                            label="What was the Date of the Observation"
                             onRightIconPress={showDatepicker}
                             show={show}
                             inputValue={dateValue}
@@ -345,7 +345,7 @@ export const AddObservationScreen = () => {
                     </View>
                     <View>
                         <CustomDateTimePicker
-                            label="What was the Time of Observation"
+                            label="What was the Time of the Observation"
                             onRightIconPress={showTimepicker}
                             show={show}
                             display="spinner"
@@ -443,5 +443,13 @@ const styles = StyleSheet.create({
     infoText: {
         textAlign: 'center',
         fontSize: 16,
-    }
+    } ,
+    autocompleteContainer: {
+        flex: 1,
+        left: 0,
+        position: 'absolute',
+        right: 0,
+        top: 0,
+        zIndex: 1
+      }
 })
