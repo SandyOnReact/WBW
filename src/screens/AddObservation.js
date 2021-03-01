@@ -10,11 +10,12 @@ import { CustomDropdown } from '../components/core/custom-dropdown'
 import { CustomDateTimePicker } from '../components/datetimepicker'
 import moment from 'moment';
 import RadioForm from 'react-native-simple-radio-button';
-import Autocomplete from 'react-native-autocomplete-input';
 import { StyleSheet } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from '../utils/api'
 import { isEmpty } from 'lodash'
+import { AutoCompleteInput } from '../components/autocomplete-input/autocomplete.input'
+import { CustomTimePicker } from '../components/core/custom-time-picker'
 
 let date = new Date()
 let topicList = []
@@ -76,6 +77,7 @@ export const AddObservationScreen = () => {
     const [sectionValue, setSectionValue] = useState('');
     const [topicValue, setTopicValue] = useState('');
     const [selectedValue, setSelectedValue] = useState({});
+    const [finalValue, setFinalView] = useState('');
     const [filteredData, setFilteredData] = useState([]);
     const inputContainerStyle = { borderWidth: 1, borderColor: '#1e5873', borderRadius: 6 }
     const STATUS_BAR_HEIGHT = getStatusBarHeight()
@@ -96,13 +98,10 @@ export const AddObservationScreen = () => {
         resetForm,
     } = useFormik({
         initialValues: {
-            whereDidObservationOccur: "",
             whereDidObservationHappened: "",
             Observation: "",
         },
         validationSchema: object({
-            whereDidObservationOccur: string()
-                .required('This field is required'),
             whereDidObservationHappened: string()
                 .required('This field is required'),
             observation: string()
@@ -161,11 +160,6 @@ export const AddObservationScreen = () => {
 
         const sectionData = result.Sections.map((item, index) => {
             const section = { label: item.Value, value: item.Value }
-            // item.Topics.map( obj => {
-            //     const topic = { label: obj.Value, value: obj.Value }
-            //     topicData.push( topic )
-            //     return topic
-            // } )
             return section;
         })
         setSectionList(sectionData)
@@ -185,7 +179,7 @@ export const AddObservationScreen = () => {
     const onChange = (event, selectedDate) => {
         if (event.type === "dismissed") return null
         const currentDate = selectedDate || date;
-        setShow(false);
+        setShow(Platform.OS === 'ios' ? true : false);
         if (mode === 'date') {
             const pickedDate = moment(currentDate).format("DD/MM/YYYY")
             setDateValue(pickedDate)
@@ -226,22 +220,24 @@ export const AddObservationScreen = () => {
         setSectionValue(value)
     }
 
-    const findSearchedObservation = (query) => {
-        // Method called every time when we change the value of the input
-        console.log( query )
-        if (query) {
-            const regex = new RegExp(`${query.trim()}`, 'i');
-            // Setting the filtered film array according the query
-            console.log( query )
-            setFilteredData(
-                autoCompleteArray.filter((item) => item.Name.search(regex) >= 0)
-            );
-            setSelectedValue( query )
+    const searchFilterFunction = (text) => {
+        // Check if searched text is not blank
+        console.log(text)
+        if (text) {
+            const newData = autoCompleteArray.filter(function (item) {
+                const itemData = item.Name
+                    ? item.Name.toUpperCase()
+                    : ''.toUpperCase();
+                const textData = text.toUpperCase();
+                return itemData.indexOf(textData) > -1;
+            });
+            setFilteredData(newData);
+            setFinalView(text);
         } else {
-            // If the query is null then return blank
             setFilteredData([]);
+            setFinalView(text);
         }
-    }
+    };
 
     const renderTextInput = () => {
         return (
@@ -252,9 +248,10 @@ export const AddObservationScreen = () => {
                 placeholderTextColor="gray"
                 multiline={true}
                 numberOfLines={1}
-                value={selectedValue.Name}
+                value={finalValue}
+                inputStyle={{ fontSize: 14 }}
                 inputContainerStyle={inputContainerStyle}
-                onChangeText={(text) => findSearchedObservation(text)}
+                onChangeText={(text) => searchFilterFunction(text)}
                 errorMessage={errors.whereDidObservationOccur}
             />
         )
@@ -266,6 +263,7 @@ export const AddObservationScreen = () => {
                 onPress={() => {
                     setSelectedValue(item);
                     setFilteredData([]);
+                    setFinalView(item.Name)
                 }}>
                 <Text style={styles.itemText}>
                     {item.Name}
@@ -286,35 +284,15 @@ export const AddObservationScreen = () => {
                 />
             </View>
             <View style={{ flex: 1, marginHorizontal: '5%' }}>
-                <ScrollView style={{ flex: 1 }}>
-                    <View style={{ marginTop: '3%' }}>
-                        <View>
-                            {/* <Input
-                            label="Where Did Observation Occur"
-                            labelStyle={{ marginBottom: 5 }}
-                            placeholder="Type Something"
-                            placeholderTextColor="gray"
-                            inputContainerStyle={inputContainerStyle}
-                            onChangeText={handleChange("whereDidObservationOccur")}
-                            onBlur={handleBlur("whereDidObservationOccur")}
-                            errorMessage={errors.whereDidObservationOccur}
-                        /> */}
-                            <Autocomplete
-                                autoCapitalize="none"
-                                autoCorrect={false}
-                                renderTextInput={renderTextInput}
-                                containerStyle={styles.autocompleteContainer}
-                                data={filteredData}
-                                keyExtractor={item=>item.Id}
-                                defaultValue={
-                                    JSON.stringify(selectedValue) === '{}' ?
-                                        '' :
-                                        selectedValue.Name
-                                }
-                                onChangeText={(text) => findSearchedObservation(text)}
-                                renderItem={renderItem}
-                            />
-                        </View>
+
+                <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 30 }} showsVerticalScrollIndicator={false}>
+                    <View style={{ marginTop: '3%'}}>
+                        <AutoCompleteInput
+                            data={filteredData}
+                            renderItem={renderItem}
+                            renderTextInput={renderTextInput}
+                            maxListHeight={400}
+                        />
                     </View>
                     <View>
                         <Input
@@ -342,13 +320,14 @@ export const AddObservationScreen = () => {
                             value={date}
                             onChange={onChange}
                         />
+
                     </View>
                     <View>
-                        <CustomDateTimePicker
+                        <CustomTimePicker
                             label="What was the Time of Observation"
-                            onRightIconPress={showTimepicker}
                             show={show}
                             display="spinner"
+                            customRightIcon={{ name: 'time-outline', type: 'ionicon', size: 24, onPress: showTimepicker }}
                             inputValue={timeValue}
                             mode={mode}
                             value={date}
@@ -435,7 +414,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     itemText: {
-        fontSize: 15,
+        fontSize: 14,
         paddingTop: 5,
         paddingBottom: 5,
         margin: 2,
