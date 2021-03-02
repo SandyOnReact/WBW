@@ -11,27 +11,10 @@ target 'WBW' do
   pod 'RNVectorIcons', :path => '../node_modules/react-native-vector-icons'
 
   pod 'RNCAsyncStorage', :path => '../node_modules/@react-native-async-storage/async-storage'
-
-  target 'WBWTests' do
-    inherit! :complete
-    # Pods for testing
-  end
-
-  # Enables Flipper.
-  #
-  # Note that if you have use_frameworks! enabled, Flipper will not work and
-  # you should disable these next few lines.
+  permissions_path = '../node_modules/react-native-permissions/ios'
+  pod 'react-native-image-crop-tools', :path => '../node_modules/react-native-image-crop-tools'
   use_flipper!
   post_install do |installer|
     flipper_post_install(installer)
-  end
-end
-
-target 'WBW-tvOS' do
-  # Pods for WBW-tvOS
-
-  target 'WBW-tvOSTests' do
-    inherit! :search_paths
-    # Pods for testing
   end
 end

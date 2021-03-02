@@ -34,7 +34,7 @@ export const HistoryScreen = ({ route, navigation }) => {
 
     }, [])
     const navigateToAddObservation = ( ) => {
-        navigation.navigate( 'AddObservation' )
+        navigation.navigate( 'UploadImage' )
     }
 
     const renderItem = ( { item } ) => {
