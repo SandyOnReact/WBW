@@ -8,7 +8,7 @@ const containerStyle = {
     borderColor: '#1e5873',
     borderRadius: 6
 }
-export const CustomDateTimePicker = (props) => {
+export const CustomTimePicker = (props) => {
     const {
         customRightIcon,
         numOfLines,
@@ -32,8 +32,8 @@ export const CustomDateTimePicker = (props) => {
     } = props
 
     const defaultRightIcon = {
-        type: 'font-awesome',
-        name: 'calendar',
+        type: 'ionicon',
+        name: 'time-outline',
         onPress: onRightIconPress
     }
 
@@ -46,7 +46,6 @@ export const CustomDateTimePicker = (props) => {
                 multiline={multiline}
                 editable={editable}
                 label={label}
-                onPress={onRightIconPress}
                 value={inputValue}
                 labelStyle={[{ marginBottom: 5 }, customLabelStyle]}
                 placeholder={placeholder}
@@ -70,7 +69,7 @@ export const CustomDateTimePicker = (props) => {
     )
 }
 
-CustomDateTimePicker.defaultProps = {
+CustomTimePicker.defaultProps = {
     mode: 'time',
     minuteInterval: 10,
     is24Hour: false,
