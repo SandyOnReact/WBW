@@ -16,7 +16,6 @@ const User = types.model({
 })
 .views( self => ( {
     getUsers ( ) {
-        console.log( 'user is ', self.items )
         return self.items;
     }
 }))

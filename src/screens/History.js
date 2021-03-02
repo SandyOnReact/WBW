@@ -12,7 +12,7 @@ import { result } from 'lodash'
 
 
 export const HistoryScreen = ({ route, navigation }) => {
-    const { userId, levelId, category } = route.params
+    const { userId, levelId, category, dashboard } = route.params
 
     const STATUS_BAR_HEIGHT = getStatusBarHeight()
 
@@ -34,7 +34,10 @@ export const HistoryScreen = ({ route, navigation }) => {
 
     }, [])
     const navigateToAddObservation = ( ) => {
-        navigation.navigate( 'UploadImage' )
+        navigation.navigate( 'AddObservation',{
+            dashboard: dashboard,
+            userId: userId
+        } )
     }
 
     const renderItem = ( { item } ) => {
