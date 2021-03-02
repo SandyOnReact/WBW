@@ -16,12 +16,13 @@ import { api } from '../utils/api'
 import { isEmpty } from 'lodash'
 import { AutoCompleteInput } from '../components/autocomplete-input/autocomplete.input'
 import { CustomTimePicker } from '../components/core/custom-time-picker'
+import { Alert } from 'react-native'
 
 let date = new Date()
 let topicList = []
 const radioButtons = [
-    { label: 'Yes', value: 0 },
-    { label: 'No', value: 1 }
+    { label: 'Yes', value: "1" },
+    { label: 'No', value: "0" }
 ]
 
 const autoCompleteArray = [{
@@ -59,8 +60,9 @@ const autoCompleteArray = [{
     Id: 23
 }];
 
-export const AddObservationScreen = () => {
+export const AddObservationScreen = ( props ) => {
 
+    const { dashboard } = props.route.params
     const [mode, setMode] = useState('date');
     const [show, setShow] = useState(false);
     const [dateValue, setDateValue] = useState('');
@@ -79,38 +81,22 @@ export const AddObservationScreen = () => {
     const [selectedValue, setSelectedValue] = useState({});
     const [finalValue, setFinalView] = useState('');
     const [filteredData, setFilteredData] = useState([]);
+
+    const [whereObservationHappened,setWhereObservationHappened] = useState( '' )
+    const [observation,setObservation] = useState( '' )
+    const [token,setToken] = useState( '' )
+    const [userData,setUserData] = useState( {} )
+    const [actText,setActText] = useState( '' )
+    const [isButtonLoading,setIsButtonLoading] = useState( false )
+
+
+
     const inputContainerStyle = { borderWidth: 1, borderColor: '#1e5873', borderRadius: 6 }
     const STATUS_BAR_HEIGHT = getStatusBarHeight()
     const navigation = useNavigation()
     const navigatetoBackScreen = () => {
         navigation.goBack()
     }
-
-    const {
-        touched,
-        handleBlur,
-        handleChange,
-        handleSubmit,
-        errors,
-        isValid,
-        isValidating,
-        isSubmitting,
-        resetForm,
-    } = useFormik({
-        initialValues: {
-            whereDidObservationHappened: "",
-            Observation: "",
-        },
-        validationSchema: object({
-            whereDidObservationHappened: string()
-                .required('This field is required'),
-            observation: string()
-                .required('This field is required')
-        }),
-        async onSubmit({ whereDidObservationOccur, whereDidObservationHappened, observation }) {
-            //
-        }
-    })
 
     const fetchUserInfoFromStorage = async () => {
         const userInfo = await AsyncStorage.getItem('USER_INFO');
@@ -121,16 +107,26 @@ export const AddObservationScreen = () => {
         getAllData()
     }, [])
 
-    const getAllData = async () => {
+    const getUser = async ( ) => {
         const user = await fetchUserInfoFromStorage()
+        return user;
+    }
+
+    const getToken = async ( ) => {
         const token = await AsyncStorage.getItem('Token')
+        return token
+    }
+
+    const getAllData = async () => {
+        const user = await getUser()
+        const token = await getToken()
         const result = await api.post({
             url: `api/Common/GetAllFilters`,
             body: {
                 UserID: user.UserID,
                 AccessToken: token,
                 CompanyID: user.CompanyID,
-                ObservationSettingID: 'aa7309ab-5bd8-4f2d-9b29-5f19d27495a8'
+                ObservationSettingID: dashboard.ObservationSettingID
             }
         })
         if (result === "Invalid User Token") {
@@ -150,16 +146,16 @@ export const AddObservationScreen = () => {
         }
         setData(result)
         const actData = result.ActOrConditions.map(item => {
-            const act = { label: item.Value, value: item.Value }
+            const act = { label: item.Value, value: item.ID }
             return act;
         }, [])
         const hazardData = result.Hazards.map(item => {
-            const hazard = { label: item.Value, value: item.Value }
+            const hazard = { label: item.Value, value: item.ID }
             return hazard;
         }, [])
 
         const sectionData = result.Sections.map((item, index) => {
-            const section = { label: item.Value, value: item.Value }
+            const section = { label: item.Value, value: item.ID }
             return section;
         })
         setSectionList(sectionData)
@@ -181,7 +177,7 @@ export const AddObservationScreen = () => {
         const currentDate = selectedDate || date;
         setShow(Platform.OS === 'ios' ? true : false);
         if (mode === 'date') {
-            const pickedDate = moment(currentDate).format("DD/MM/YYYY")
+            const pickedDate = moment(currentDate).format("MM/DD/YYYY")
             setDateValue(pickedDate)
             date = currentDate
         } else {
@@ -211,10 +207,10 @@ export const AddObservationScreen = () => {
             return null
         }
         const topicsBasedOnSections = data.Sections.find(item => {
-            if (item.Value === value) return item
+            if (item.ID === value) return item
         })
         topicList = topicsBasedOnSections.Topics.map(item => {
-            const topic = { label: item.Value, value: item.Value }
+            const topic = { label: item.Value, value: item.ID }
             return topic
         })
         setSectionValue(value)
@@ -222,7 +218,6 @@ export const AddObservationScreen = () => {
 
     const searchFilterFunction = (text) => {
         // Check if searched text is not blank
-        console.log(text)
         if (text) {
             const newData = autoCompleteArray.filter(function (item) {
                 const itemData = item.Name
@@ -242,7 +237,7 @@ export const AddObservationScreen = () => {
     const renderTextInput = () => {
         return (
             <Input
-                label="Where Did Observation Occur"
+                label="Where did the Observation occur"
                 labelStyle={{ marginBottom: 5 }}
                 placeholder="Type Something"
                 placeholderTextColor="gray"
@@ -252,7 +247,6 @@ export const AddObservationScreen = () => {
                 inputStyle={{ fontSize: 14 }}
                 inputContainerStyle={inputContainerStyle}
                 onChangeText={(text) => searchFilterFunction(text)}
-                errorMessage={errors.whereDidObservationOccur}
             />
         )
     }
@@ -272,6 +266,68 @@ export const AddObservationScreen = () => {
         )
     }
 
+    const submitForm = async ( ) => {
+        // D1FA00FA-419F-465C-8694-0838066C3011
+        setIsButtonLoading( true )
+        const user = await getUser()
+        const token = await getToken()
+
+
+        const payload = {
+            UserID: user.UserID,
+            AccessToken: token,
+            LevelID: "d1fa00fa-419f-465c-8694-0838066c3011",
+            ObservationSettingID: dashboard.ObservationSettingID,
+            SectionID: sectionValue,
+            TopicID: topicValue,
+            ActOrConditionID: actValue,
+            ActOrCondition: actText,
+            HazardID: hazardValue,
+            Observation: observation,
+            IsFollowUpNeeded: radioValue,
+            ObservationDate: dateValue,
+            ObservationTime: timeValue,	
+            DescribeWhereTheIncidentHappened: whereObservationHappened
+        }
+        const result = await api.postAPI({
+            url: 'api/Observation/SaveObservation',
+            body: payload
+        })
+
+        setIsButtonLoading( false )
+
+
+        return result
+    }
+
+    const showImagePickerAlert = async ( ) => {
+        const result = await submitForm()
+        Alert.alert(
+            "upload",
+            "Do you want to upload image",
+            [
+              {
+                text: "Cancel",
+                onPress: () => navigation.navigate( 'Home' ),
+                style: "No"
+              },
+              { text: "Yes", onPress: () => navigation.navigate( 'UploadImage', {
+                  observationId: result.ObservationID
+              } ) }
+            ],
+            { cancelable: false }
+          );
+    }
+
+    const getActValue = ( id ) => {
+        if( isEmpty( id ) ) return null
+        const currentActObject = actList.find( item => {
+            if( item.value === String( id ) ) return item
+        })
+        setActValue( currentActObject.value )
+        setActText( currentActObject.label )
+    }
+
     return (
         <View style={{ flex: 1 }}>
             <View>
@@ -285,7 +341,7 @@ export const AddObservationScreen = () => {
             </View>
             <View style={{ flex: 1, marginHorizontal: '5%' }}>
 
-                <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 30 }} showsVerticalScrollIndicator={false}>
+                <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 30 }} keyboardShouldPersistTaps="always" showsVerticalScrollIndicator={false}>
                     <View style={{ marginTop: '3%'}}>
                         <AutoCompleteInput
                             data={filteredData}
@@ -296,22 +352,21 @@ export const AddObservationScreen = () => {
                     </View>
                     <View>
                         <Input
-                            label="Describe Where the Observation Happened"
+                            label="Describe where the Observation happened"
                             labelStyle={{ marginBottom: 5 }}
                             numberOfLines={3}
-                            multiline={true}
+                            multiline={true}   
                             textAlignVertical="top"
                             placeholder="Type Something"
                             placeholderTextColor="gray"
                             inputContainerStyle={inputContainerStyle}
-                            onChangeText={handleChange("whereDidObservationHappened")}
-                            onBlur={handleBlur("whereDidObservationHappened")}
-                            errorMessage={errors.whereDidObservationHappened}
+                            onChangeText={(text)=> setWhereObservationHappened( text )}
+                            value={whereObservationHappened}
                         />
                     </View>
                     <View>
                         <CustomDateTimePicker
-                            label="What was the Date of Observation"
+                            label="What was the Date of the Observation"
                             onRightIconPress={showDatepicker}
                             show={show}
                             inputValue={dateValue}
@@ -324,7 +379,7 @@ export const AddObservationScreen = () => {
                     </View>
                     <View>
                         <CustomTimePicker
-                            label="What was the Time of Observation"
+                            label="What was the Time of the Observation"
                             show={show}
                             display="spinner"
                             customRightIcon={{ name: 'time-outline', type: 'ionicon', size: 24, onPress: showTimepicker }}
@@ -339,7 +394,7 @@ export const AddObservationScreen = () => {
                             <Text style={{
                                 color: '#86939e',
                                 fontWeight: 'bold', fontSize: 16, paddingLeft: '3%', marginBottom: '1%'
-                            }}> Follow Up Needed: </Text>
+                            }}>  Follow up needed </Text>
                             <RadioForm style={{ marginLeft: 100 }}
                                 radio_props={radioButtons}
                                 initial={0}
@@ -370,11 +425,11 @@ export const AddObservationScreen = () => {
                         <CustomDropdown
                             title="Act or Condition"
                             value={actValue}
-                            onValueChange={(value) => setActValue(value)}
+                            onValueChange={getActValue}
                             items={actList}
                         />
                         <CustomDropdown
-                            title={actValue && actValue.startsWith("Unsafe") ? "Hazard" : "Preventive Hazard"}
+                            title={actText && actText.startsWith("Unsafe") ? "Hazard" : "Preventive Hazard"}
                             items={hazardList}
                             value={hazardValue}
                             onValueChange={(value) => setHazardValue(value)}
@@ -390,13 +445,12 @@ export const AddObservationScreen = () => {
                             placeholder="Type Something"
                             placeholderTextColor="gray"
                             inputContainerStyle={inputContainerStyle}
-                            onChangeText={handleChange("observation")}
-                            onBlur={handleBlur("observation")}
-                            errorMessage={errors.observation}
+                            onChangeText={(text)=> setObservation( text )}
+                            value={observation}
                         />
                     </View>
-                    <View>
-                        <Button title="Submit" />
+                    <View style={{ marginHorizontal: '3%'}}>
+                        <Button title="Submit" onPress={showImagePickerAlert} loading={isButtonLoading}/>
                     </View>
                 </ScrollView>
             </View>

@@ -76,7 +76,8 @@ export const HomeScreen = ({ navigation }) => {
         navigation.navigate('History', {
             userId: userInfo.UserID,
             levelId: userInfo.LevelID,
-            category: dashboard.Category
+            category: dashboard.Category,
+            dashboard: dashboard
         })
     }
 
