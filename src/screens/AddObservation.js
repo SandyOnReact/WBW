@@ -289,7 +289,7 @@ export const AddObservationScreen = ( props ) => {
             ObservationTime: timeValue,	
             DescribeWhereTheIncidentHappened: whereObservationHappened
         }
-        const result = await api.postAPI({
+        const result = await api.post({
             url: 'api/Observation/SaveObservation',
             body: payload
         })
