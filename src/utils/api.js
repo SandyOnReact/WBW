@@ -18,33 +18,9 @@ const post = async (props) => {
         },
         body: JSON.stringify(body)
     })
-        .then((response) => response.json())
-        .then((res) => {
-            return res;
+        .then((response) => {
+            return response.json()
         })
-        .catch(error => {
-            Toast.showWithGravity('Something Went Wrong', Toast.LONG, Toast.CENTER);
-            return null;
-        })
-    return result;
-}
-const postAPI = async (props) => {
-
-    const {
-        url,
-        body
-    } = props;
-
-    const apiUrl = `${config.API_URL}/${url}`
-    const result = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(body)
-    })
-        .then((response) => response.text())
         .then((res) => {
             return res;
         })
@@ -84,8 +60,11 @@ const imageUpload = async (props) => {
       };
     const apiUrl = `${config.API_URL}/${url}`
     const result = await fetch(apiUrl, requestOptions)
-        .then((response) => response.text())
+        .then((response) => {
+            return response.json()
+        })
         .then((res) => {
+            console.log( JSON.stringify( res ))
             return res;
         })
         .catch(error => {
@@ -121,6 +100,5 @@ const get = async (props) => {
 export const api = {
     get,
     post,
-    imageUpload,
-    postAPI
+    imageUpload
 }
