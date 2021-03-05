@@ -81,7 +81,8 @@ export const AddObservationScreen = ( props ) => {
     const [selectedValue, setSelectedValue] = useState({});
     const [finalValue, setFinalView] = useState('');
     const [filteredData, setFilteredData] = useState([]);
-
+    const [autoCompleteList, setAutoCompleteList] = useState([]);
+    const [autoCompleteValue, setAutoCompleteValue] = useState('');
     const [whereObservationHappened,setWhereObservationHappened] = useState( '' )
     const [observation,setObservation] = useState( '' )
     const [token,setToken] = useState( '' )
@@ -137,6 +138,10 @@ export const AddObservationScreen = ( props ) => {
             return null
         }
 
+        if(!result.Locations) {
+            return null
+        }
+
         if (!result.Sections) {
             return null
         }
@@ -158,11 +163,16 @@ export const AddObservationScreen = ( props ) => {
             const section = { label: item.Value, value: item.ID }
             return section;
         })
+        const autoCompleteData = result.Locations.map((item) => {
+            const autoComplete = { label: item.Value, value: item.ID }
+            return autoComplete;
+        })
         setSectionList(sectionData)
         // setTopicList( topicData )
         setActList(actData)
         setHazardList(hazardData)
         setIsLoading(false)
+        setAutoCompleteList( autoCompleteData )
         return result;
     }
 
@@ -219,18 +229,18 @@ export const AddObservationScreen = ( props ) => {
     const searchFilterFunction = (text) => {
         // Check if searched text is not blank
         if (text) {
-            const newData = autoCompleteArray.filter(function (item) {
-                const itemData = item.Name
-                    ? item.Name.toUpperCase()
+            const newData = autoCompleteList.filter(function (item) {
+                const itemData = item.label
+                    ? item.label.toUpperCase()
                     : ''.toUpperCase();
                 const textData = text.toUpperCase();
                 return itemData.indexOf(textData) > -1;
             });
             setFilteredData(newData);
-            setFinalView(text);
+            setAutoCompleteValue(text);
         } else {
             setFilteredData([]);
-            setFinalView(text);
+            setAutoCompleteValue(text);
         }
     };
 
@@ -243,7 +253,7 @@ export const AddObservationScreen = ( props ) => {
                 placeholderTextColor="gray"
                 multiline={true}
                 numberOfLines={1}
-                value={finalValue}
+                value={autoCompleteValue}
                 inputStyle={{ fontSize: 14 }}
                 inputContainerStyle={inputContainerStyle}
                 onChangeText={(text) => searchFilterFunction(text)}
@@ -257,10 +267,10 @@ export const AddObservationScreen = ( props ) => {
                 onPress={() => {
                     setSelectedValue(item);
                     setFilteredData([]);
-                    setFinalView(item.Name)
+                    setAutoCompleteValue(item.label)
                 }}>
                 <Text style={styles.itemText}>
-                    {item.Name}
+                    {item.label}
                 </Text>
             </TouchableOpacity>
         )
@@ -272,7 +282,7 @@ export const AddObservationScreen = ( props ) => {
         const user = await getUser()
         const token = await getToken()
 
-
+        console.log( 'ID is ',autoCompleteValue)
         const payload = {
             UserID: user.UserID,
             AccessToken: token,
@@ -449,9 +459,15 @@ export const AddObservationScreen = ( props ) => {
                             value={observation}
                         />
                     </View>
-                    <View style={{ marginHorizontal: '3%'}}>
-                        <Button title="Submit" onPress={showImagePickerAlert} loading={isButtonLoading}/>
+                    <View style={{ marginHorizontal: '3%', justifyContent:'center', alignItems: 'center'}} >
+                        <Button containerStyle={{ width: '50%'}} buttonStyle={{backgroundColor: '#1e5873'}}  title="Submit" onPress={showImagePickerAlert} loading={isButtonLoading}/>
                     </View>
+                    <View style={{ marginHorizontal: '3%', justifyContent:'center', alignItems: 'center', marginVertical: '5%', flexDirection: 'row'}}>
+                        <Button buttonStyle={{backgroundColor: '#1e5873'}}  containerStyle={{ width: '50%'}} title="Submit as Anonymous" />
+                        <View style={{ width: '5%'}}/>
+                        <Button  buttonStyle={{backgroundColor: '#1e5873'}} containerStyle={{ width: '50%'}} title="Submit and Come Back" />
+                    </View>
+
                 </ScrollView>
             </View>
         </View>
