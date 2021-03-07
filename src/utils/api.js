@@ -66,7 +66,6 @@ const imageUpload = async (props) => {
             return response.json()
         })
         .then((res) => {
-            console.log( JSON.stringify( res ))
             return res;
         })
         .catch(error => {
