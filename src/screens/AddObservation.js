@@ -121,6 +121,13 @@ export const AddObservationScreen = ( props ) => {
     const getAllData = async () => {
         const user = await getUser()
         const token = await getToken()
+        const payload = {
+            UserID: user.UserID,
+            AccessToken: token,
+            CompanyID: user.CompanyID,
+            ObservationSettingID: dashboard.ObservationSettingID
+        }
+        console.log( 'payload is ',JSON.stringify( payload ) )
         const result = await api.post({
             url: `api/Common/GetAllFilters`,
             body: {
@@ -130,6 +137,7 @@ export const AddObservationScreen = ( props ) => {
                 ObservationSettingID: dashboard.ObservationSettingID
             }
         })
+        console.log( 'result is ',result );
         if (result === "Invalid User Token") {
             Toast.showWithGravity('Invalid User Token', Toast.LONG, Toast.CENTER);
             return null;
@@ -251,6 +259,7 @@ export const AddObservationScreen = ( props ) => {
                 labelStyle={{ marginBottom: 5 }}
                 placeholder="Type Something"
                 placeholderTextColor="gray"
+                style={{ fontSize: 18 }}
                 multiline={true}
                 numberOfLines={1}
                 value={autoCompleteValue}
@@ -351,13 +360,14 @@ export const AddObservationScreen = ( props ) => {
             </View>
             <View style={{ flex: 1, marginHorizontal: '5%' }}>
 
-                <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 30 }} keyboardShouldPersistTaps="always" showsVerticalScrollIndicator={false}>
+                <ScrollView style={{ flex: 1 }} nestedScrollEnabled={true} contentContainerStyle={{ paddingBottom: 30 }} keyboardShouldPersistTaps="always" showsVerticalScrollIndicator={false}>
                     <View style={{ marginTop: '3%'}}>
                         <AutoCompleteInput
                             data={filteredData}
                             renderItem={renderItem}
                             renderTextInput={renderTextInput}
                             maxListHeight={400}
+                            flatListProps={{ nestedScrollEnabled: true }}
                         />
                     </View>
                     <View>

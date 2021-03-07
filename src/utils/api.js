@@ -19,12 +19,14 @@ const post = async (props) => {
         body: JSON.stringify(body)
     })
         .then((response) => {
+            if( response.status === 200 || response.status === 201)
             return response.json()
         })
         .then((res) => {
             return res;
         })
         .catch(error => {
+            console.log( 'error is ',error )
             Toast.showWithGravity('Something Went Wrong', Toast.LONG, Toast.CENTER);
             return null;
         })
