@@ -27,7 +27,7 @@ const post = async (props) => {
         })
         .catch(error => {
             console.log( 'error is ',error )
-            Toast.showWithGravity('Something Went Wrong', Toast.LONG, Toast.CENTER);
+            Toast.showWithGravity(error.message, Toast.LONG, Toast.CENTER);
             return null;
         })
     return result;
