@@ -13,10 +13,12 @@ import RadioForm from 'react-native-simple-radio-button';
 import { StyleSheet } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from '../utils/api'
-import { isEmpty } from 'lodash'
+import { isEmpty, isNull } from 'lodash'
 import { AutoCompleteInput } from '../components/autocomplete-input/autocomplete.input'
 import { CustomTimePicker } from '../components/core/custom-time-picker'
 import { Alert } from 'react-native'
+import Toast from 'react-native-simple-toast';
+
 
 let date = new Date()
 let topicList = []
@@ -24,41 +26,6 @@ const radioButtons = [
     { label: 'Yes', value: "1" },
     { label: 'No', value: "0" }
 ]
-
-const autoCompleteArray = [{
-    Name: "Demo",
-    Id: 1
-}, {
-    Name: "Demo -> Corporate Office",
-    Id: 2
-}, {
-    Name: "Demo -> Corporate Office -> Human Resources",
-    Id: 3
-}, {
-    Name: "Demo -> Corporate Office -> Quality",
-    Id: 4
-}, {
-    Name: "Demo -> Corporate Office -> H.S.E",
-    Id: 5
-}, {
-    Name: "Demo -> Region 1 -> Location 1",
-    Id: 6
-}, {
-    Name: "Demo -> Region 1 -> Location 1 -> Location 1 - Area 1",
-    Id: 11
-}, {
-    Name: "Demo -> Region 1 -> Location 1 -> Location 1 - Area 2",
-    Id: 88
-}, {
-    Name: "Demo -> Demo -> Region 1 -> Location 1 -> Location 1 - Area 3",
-    Id: 76
-}, {
-    Name: "Demo -> Region 1 -> Location 1 -> Location 1 - Area 3",
-    Id: 98
-}, {
-    Name: "Demo -> Region 1 -> Regional office",
-    Id: 23
-}];
 
 export const AddObservationScreen = ( props ) => {
 
@@ -81,13 +48,15 @@ export const AddObservationScreen = ( props ) => {
     const [selectedValue, setSelectedValue] = useState({});
     const [finalValue, setFinalView] = useState('');
     const [filteredData, setFilteredData] = useState([]);
-
+    const [autoCompleteList, setAutoCompleteList] = useState([]);
+    const [autoCompleteValue, setAutoCompleteValue] = useState('');
     const [whereObservationHappened,setWhereObservationHappened] = useState( '' )
     const [observation,setObservation] = useState( '' )
     const [token,setToken] = useState( '' )
     const [userData,setUserData] = useState( {} )
     const [actText,setActText] = useState( '' )
     const [isButtonLoading,setIsButtonLoading] = useState( false )
+
 
 
 
@@ -120,6 +89,12 @@ export const AddObservationScreen = ( props ) => {
     const getAllData = async () => {
         const user = await getUser()
         const token = await getToken()
+        const payload = {
+            UserID: user.UserID,
+            AccessToken: token,
+            CompanyID: user.CompanyID,
+            ObservationSettingID: dashboard.ObservationSettingID
+        }
         const result = await api.post({
             url: `api/Common/GetAllFilters`,
             body: {
@@ -134,6 +109,10 @@ export const AddObservationScreen = ( props ) => {
             return null;
         }
         if (!result.ActOrConditions) {
+            return null
+        }
+
+        if(!result.Locations) {
             return null
         }
 
@@ -158,17 +137,24 @@ export const AddObservationScreen = ( props ) => {
             const section = { label: item.Value, value: item.ID }
             return section;
         })
+        const autoCompleteData = result.Locations.map((item) => {
+            const autoComplete = { label: item.Value, value: item.ID }
+            return autoComplete;
+        })
         setSectionList(sectionData)
         // setTopicList( topicData )
         setActList(actData)
         setHazardList(hazardData)
         setIsLoading(false)
+        setAutoCompleteList( autoCompleteData )
         return result;
     }
 
     if (isLoading) {
         return (
-            <ActivityIndicator color="red" />
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+                <ActivityIndicator color="red"/>
+            </View>
         )
     }
 
@@ -219,31 +205,32 @@ export const AddObservationScreen = ( props ) => {
     const searchFilterFunction = (text) => {
         // Check if searched text is not blank
         if (text) {
-            const newData = autoCompleteArray.filter(function (item) {
-                const itemData = item.Name
-                    ? item.Name.toUpperCase()
+            const newData = autoCompleteList.filter(function (item) {
+                const itemData = item.label
+                    ? item.label.toUpperCase()
                     : ''.toUpperCase();
                 const textData = text.toUpperCase();
                 return itemData.indexOf(textData) > -1;
             });
             setFilteredData(newData);
-            setFinalView(text);
+            setAutoCompleteValue(text);
         } else {
             setFilteredData([]);
-            setFinalView(text);
+            setAutoCompleteValue(text);
         }
     };
 
     const renderTextInput = () => {
         return (
             <Input
-                label="Where did the Observation occur"
+                label="*  Where did the Observation occur"
                 labelStyle={{ marginBottom: 5 }}
                 placeholder="Type Something"
                 placeholderTextColor="gray"
+                style={{ fontSize: 18 }}
                 multiline={true}
                 numberOfLines={1}
-                value={finalValue}
+                value={autoCompleteValue}
                 inputStyle={{ fontSize: 14 }}
                 inputContainerStyle={inputContainerStyle}
                 onChangeText={(text) => searchFilterFunction(text)}
@@ -257,26 +244,31 @@ export const AddObservationScreen = ( props ) => {
                 onPress={() => {
                     setSelectedValue(item);
                     setFilteredData([]);
-                    setFinalView(item.Name)
+                    setAutoCompleteValue(item.label)
                 }}>
                 <Text style={styles.itemText}>
-                    {item.Name}
+                    {item.label}
                 </Text>
             </TouchableOpacity>
         )
     }
 
     const submitForm = async ( ) => {
-        // D1FA00FA-419F-465C-8694-0838066C3011
         setIsButtonLoading( true )
         const user = await getUser()
         const token = await getToken()
-
-
+        const validArray = [autoCompleteValue, whereObservationHappened, dateValue,
+            timeValue, actValue, actText, observation]
+        const notValid = validArray.includes( "" )
+        if( notValid ){
+            setIsButtonLoading( false )
+            Toast.showWithGravity('Please fill all the details marked as required', Toast.LONG, Toast.CENTER);
+            return null
+        }
         const payload = {
             UserID: user.UserID,
             AccessToken: token,
-            LevelID: "d1fa00fa-419f-465c-8694-0838066c3011",
+            LevelID: autoCompleteValue,
             ObservationSettingID: dashboard.ObservationSettingID,
             SectionID: sectionValue,
             TopicID: topicValue,
@@ -302,6 +294,9 @@ export const AddObservationScreen = ( props ) => {
 
     const showImagePickerAlert = async ( ) => {
         const result = await submitForm()
+        if( isEmpty( result ) || isNull( result )) {
+            return null
+        }
         Alert.alert(
             "upload",
             "Do you want to upload image",
@@ -341,18 +336,20 @@ export const AddObservationScreen = ( props ) => {
             </View>
             <View style={{ flex: 1, marginHorizontal: '5%' }}>
 
-                <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 30 }} keyboardShouldPersistTaps="always" showsVerticalScrollIndicator={false}>
+                <ScrollView style={{ flex: 1 }} nestedScrollEnabled={true} contentContainerStyle={{ paddingBottom: 30 }} keyboardShouldPersistTaps="always" showsVerticalScrollIndicator={false}>
                     <View style={{ marginTop: '3%'}}>
                         <AutoCompleteInput
                             data={filteredData}
                             renderItem={renderItem}
                             renderTextInput={renderTextInput}
+                            keyExtractor={(item,i) => item.ID }
                             maxListHeight={400}
+                            flatListProps={{ nestedScrollEnabled: true }}
                         />
                     </View>
                     <View>
                         <Input
-                            label="Describe where the Observation happened"
+                            label="*  Describe where the Observation happened"
                             labelStyle={{ marginBottom: 5 }}
                             numberOfLines={3}
                             multiline={true}   
@@ -366,7 +363,7 @@ export const AddObservationScreen = ( props ) => {
                     </View>
                     <View>
                         <CustomDateTimePicker
-                            label="What was the Date of the Observation"
+                            label="*  What was the Date of the Observation"
                             onRightIconPress={showDatepicker}
                             show={show}
                             inputValue={dateValue}
@@ -379,7 +376,7 @@ export const AddObservationScreen = ( props ) => {
                     </View>
                     <View>
                         <CustomTimePicker
-                            label="What was the Time of the Observation"
+                            label="*  What was the Time of the Observation"
                             show={show}
                             display="spinner"
                             customRightIcon={{ name: 'time-outline', type: 'ionicon', size: 24, onPress: showTimepicker }}
@@ -403,6 +400,7 @@ export const AddObservationScreen = ( props ) => {
                                 radioStyle={{ paddingRight: 50 }}
                                 buttonColor={'#86939e'}
                                 selectedButtonColor={'#1e5873'}
+                                labelStyle={{ fontSize: 16 }}
                                 animation={true}
                                 style={{ paddingHorizontal: 15 }}
                                 onPress={(value) => setRadioValue(value)}
@@ -423,7 +421,7 @@ export const AddObservationScreen = ( props ) => {
                             onValueChange={(value) => setTopicValue(value)}
                         />
                         <CustomDropdown
-                            title="Act or Condition"
+                            title="*  Act or Condition"
                             value={actValue}
                             onValueChange={getActValue}
                             items={actList}
@@ -437,7 +435,7 @@ export const AddObservationScreen = ( props ) => {
                     </View>
                     <View style={{ marginTop: '2.5%' }}>
                         <Input
-                            label="Observation"
+                            label="*  Observation"
                             labelStyle={{ marginBottom: 5 }}
                             numberOfLines={3}
                             multiline={true}
@@ -449,8 +447,13 @@ export const AddObservationScreen = ( props ) => {
                             value={observation}
                         />
                     </View>
-                    <View style={{ marginHorizontal: '3%'}}>
-                        <Button title="Submit" onPress={showImagePickerAlert} loading={isButtonLoading}/>
+                    <View style={{ marginHorizontal: '3%', justifyContent:'center', alignItems: 'center'}} >
+                        <Button containerStyle={{ width: '50%'}} buttonStyle={{backgroundColor: '#1e5873'}}  title="Submit" onPress={showImagePickerAlert} loading={isButtonLoading}/>
+                    </View>
+                    <View style={{ marginHorizontal: '3%', justifyContent:'center', alignItems: 'center', marginVertical: '5%', flexDirection: 'row'}}>
+                        <Button buttonStyle={{backgroundColor: '#1e5873'}}  containerStyle={{ width: '50%'}} title="Submit as Anonymous" />
+                        <View style={{ width: '5%'}}/>
+                        <Button  buttonStyle={{backgroundColor: '#1e5873'}} containerStyle={{ width: '50%'}} title="Submit and Come Back" />
                     </View>
                 </ScrollView>
             </View>
