@@ -268,7 +268,7 @@ export const AddObservationScreen = ( props ) => {
         const payload = {
             UserID: user.UserID,
             AccessToken: token,
-            LevelID: autoCompleteValue,
+            LevelID: selectedValue.value,
             ObservationSettingID: dashboard.ObservationSettingID,
             SectionID: sectionValue,
             TopicID: topicValue,

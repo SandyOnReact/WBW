@@ -7,6 +7,7 @@ import { FlatList } from 'react-native-gesture-handler'
 import { getStatusBarHeight } from 'react-native-status-bar-height'
 import { api } from '../utils/api'
 import { HistoryCard } from '../components/history-card'
+import { isEmpty } from 'lodash-es'
 
 
 export const HistoryScreen = ({ route, navigation }) => {
@@ -14,14 +15,15 @@ export const HistoryScreen = ({ route, navigation }) => {
     const [historyList,setHistoryList] = useState( [] )
     const [page,setPage] = useState( 1 )
     const [isLoading, setIsLoading] = useState( false )
+    const [loadMore, setLoadMore] = useState( true )
 
     const STATUS_BAR_HEIGHT = getStatusBarHeight()
 
     useEffect(()=> {
         fetchHistoryData()
-    }, [] )
+    }, [page] )
 
-    const fetchHistoryData = useCallback(async () => {
+    const fetchHistoryData = async () => {
         const token = await AsyncStorage.getItem('Token')
         setIsLoading( true )
         const result = await api.post({
@@ -33,11 +35,15 @@ export const HistoryScreen = ({ route, navigation }) => {
                 PageNumber: String( page )
             }
         })
-        // setHistoryList( historyList => [...historyList, ...result ] )
-        setHistoryList( result )
+        if( isEmpty( result ) || result === "No Records Found" ) {
+            setLoadMore( false )
+            setIsLoading( false )
+            return null
+        }
+        setHistoryList( historyList => [...historyList, ...result ] )
         setIsLoading( false )
         return result;
-    }, [page])
+    }
     const navigateToAddObservation = ( ) => {
         navigation.navigate( 'AddObservation',{
             dashboard: dashboard,
@@ -55,17 +61,28 @@ export const HistoryScreen = ({ route, navigation }) => {
         navigation.goBack()
     }
 
-    const loadMoreResults = useCallback( ( ) => {
-        setPage( page => page + 1 )
-    }, [fetchHistoryData] )
+    const loadMoreResults = ( ) => {
+        if( loadMore ) {
+            setIsLoading( true )
+            setPage( page => page + 1 )
+        }else {
+            return null
+        }
+        
+    } 
 
-    if (isLoading) {
-        return (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+    const ListFooterComponent = ( ) => {
+        if( isLoading ) {
+            return (
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center'}}>
                 <ActivityIndicator color="red"/>
-            </View>
-        )
+                </View>
+            )
+        }else{
+            return null
+        }
     }
+
     return (
             <View style={{ flex: 1 }}>
                 <Header
@@ -82,7 +99,8 @@ export const HistoryScreen = ({ route, navigation }) => {
                         keyExtractor={ (item,index) => String( index )}
                         renderItem={renderItem}
                         onEndReached={loadMoreResults}
-                        onEndReachedThreshold={0.8}
+                        onEndReachedThreshold={0}
+                        ListFooterComponent={ListFooterComponent}
                     />
                     <View style={{position: 'absolute', bottom: "15%", right: 10, top: '80%', left: '85%'}}>
                         <Avatar size="medium" onPress={navigateToAddObservation} rounded icon={{ name: 'add'}} containerStyle={{ backgroundColor: '#1e5873'}}/>

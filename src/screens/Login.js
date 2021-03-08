@@ -62,7 +62,7 @@ export const LoginScreen = ({ navigation }) => {
              */
             const userInfoWithoutToken = JSON.stringify(rest)
             await saveUserInfo(userInfoWithoutToken)
-
+            resetForm({ username: "", password: ""})
             // navigating to Home screen once logged in
             navigation.navigate('Home')
         },
@@ -88,15 +88,7 @@ export const LoginScreen = ({ navigation }) => {
             return null
         }
     }
-
-    useFocusEffect(
-        useCallback(() => {
-            return () => {
-                resetForm()
-            }
-        }, []),
-    )
-
+    
     return (
         <View style={{ flex: 1, backgroundColor: 'white' }}>
             <View style={{ flex: 2.5, backgroundColor: 'white', marginTop: '25%', alignItems: 'center' }}>
