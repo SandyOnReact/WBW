@@ -19,8 +19,9 @@ const post = async (props) => {
         body: JSON.stringify(body)
     })
         .then((response) => {
-            if( response.status === 200 || response.status === 201)
-            return response.json()
+            if( response.status === 200 || response.status === 201 ) {
+                 return response.json()
+            }
         })
         .then((res) => {
             return res;

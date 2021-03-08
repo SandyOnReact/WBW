@@ -59,7 +59,7 @@ export const HomeScreen = ({ navigation }) => {
                 AccessToken: token
             }
         })
-        if (result === "Invalid User Token") {
+        if (result.Message === "Invalid User Token") {
             navigation.dispatch(
                 CommonActions.reset({
                   index: 0,
