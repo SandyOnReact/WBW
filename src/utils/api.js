@@ -50,7 +50,7 @@ function createFormData( media ) {
 }
 
 const imageUpload = async (props) => {
-    const { url, image } = props
+    const { image, url } = props
     const formdata = createFormData( image )
     
     var requestOptions = {
@@ -64,7 +64,7 @@ const imageUpload = async (props) => {
     const apiUrl = `${config.API_URL}/${url}`
     const result = await fetch(apiUrl, requestOptions)
         .then((response) => {
-            return response.json()
+            return response.text()
         })
         .then((res) => {
             return res;
