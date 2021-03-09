@@ -20,7 +20,7 @@ import { Alert } from 'react-native'
 import Toast from 'react-native-simple-toast';
 
 
-let date = new Date()
+let date = new Date( )
 let topicList = []
 const radioButtons = [
     { label: 'Yes', value: "1" },
@@ -32,6 +32,7 @@ export const AddObservationScreen = ( props ) => {
     const { dashboard } = props.route.params
     const [mode, setMode] = useState('date');
     const [show, setShow] = useState(false);
+    const [showTime, setShowTime] = useState(false);
     const [dateValue, setDateValue] = useState('');
     const [timeValue, setTimeValue] = useState('');
     const [radioValue, setRadioValue] = useState('');
@@ -156,8 +157,10 @@ export const AddObservationScreen = ( props ) => {
     }
 
     const onChange = (event, selectedDate) => {
-        if (event.type === "dismissed") return null
-        const currentDate = selectedDate || date;
+        if( event.type === "dismissed" ) {
+            setShow( false )
+        }else {
+            const currentDate = selectedDate || date;
         setShow(Platform.OS === 'ios' ? true : false);
         if (mode === 'date') {
             const pickedDate = moment(currentDate).format("MM/DD/YYYY")
@@ -168,10 +171,28 @@ export const AddObservationScreen = ( props ) => {
             setTimeValue(pickedTime)
             date = currentDate
         }
+        }
+    };
+    
+    const onChangeTime = (event, selectedDate) => {
+        if( event.type === "dismissed" ) {
+            setShowTime( false )
+        }else {
+            const currentDate = selectedDate || date;
+        setShowTime(Platform.OS === 'ios' ? true : false);
+
+            const pickedTime = moment(currentDate).format("hh:mm a")
+            setTimeValue(pickedTime)
+            date = currentDate
+        }
     };
 
     const showMode = (currentMode) => {
-        setShow(true);
+        if( currentMode === 'date' ) {
+            setShow(true);
+        }else{
+            setShowTime( true )
+        }
         setMode(currentMode);
     };
 
@@ -367,7 +388,7 @@ export const AddObservationScreen = ( props ) => {
                     <View>
                         <CustomDateTimePicker
                             label="*  What was the Date of the Observation"
-                            onRightIconPress={showDatepicker}
+                            onPress={showDatepicker}
                             show={show}
                             inputValue={dateValue}
                             mode={mode}
@@ -375,18 +396,18 @@ export const AddObservationScreen = ( props ) => {
                             value={date}
                             onChange={onChange}
                         />
-
                     </View>
                     <View>
-                        <CustomTimePicker
+                        <CustomDateTimePicker
                             label="*  What was the Time of the Observation"
-                            show={show}
+                            show={showTime}
                             display="spinner"
-                            customRightIcon={{ name: 'time-outline', type: 'ionicon', size: 24, onPress: showTimepicker }}
+                            customRightIcon={{ name: 'time-outline', type: 'ionicon', size: 24 }}
+                            onPress={showTimepicker}
                             inputValue={timeValue}
                             mode={mode}
                             value={date}
-                            onChange={onChange}
+                            onChange={onChangeTime}
                         />
                     </View>
                     <View>

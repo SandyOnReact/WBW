@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, Text } from 'react-native'
+import { View, Text, TouchableOpacity } from 'react-native'
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Input } from 'react-native-elements'
 
@@ -8,7 +8,7 @@ const containerStyle = {
     borderColor: '#1e5873',
     borderRadius: 6
 }
-export const CustomTimePicker = (props) => {
+const TimePicker = (props) => {
     const {
         customRightIcon,
         numOfLines,
@@ -28,7 +28,8 @@ export const CustomTimePicker = (props) => {
         minuteInterval,
         customLabelStyle,
         display,
-        inputValue
+        inputValue,
+        onPress
     } = props
 
     const defaultRightIcon = {
@@ -40,7 +41,7 @@ export const CustomTimePicker = (props) => {
     const rightIcon = customRightIcon || defaultRightIcon
 
     return (
-        <View style={{ flex: 1 }}>
+        <TouchableOpacity onPress={onPress} style={{ flex: 1 }}>
             <Input
                 numberOfLines={numOfLines}
                 multiline={multiline}
@@ -65,11 +66,18 @@ export const CustomTimePicker = (props) => {
                     onChange={onChange}
                 />
             )}
-        </View>
+        </TouchableOpacity>
     )
 }
 
-CustomTimePicker.defaultProps = {
+export const CustomTimePicker = React.memo( TimePicker, showPickerProps)
+
+const showPickerProps = ( nextProps, prevProps ) => {
+    return (
+        nextProps.show === prevProps.show
+    )
+}
+TimePicker.defaultProps = {
     mode: 'time',
     minuteInterval: 10,
     is24Hour: false,
