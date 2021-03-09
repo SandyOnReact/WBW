@@ -57,9 +57,6 @@ export const LoginScreen = ({ navigation }) => {
             // save Entire response object in Asynstorage
             const { ['AccessToken']: remove, ...rest } = result
 
-            /**
-             *  Storing an entiree object as a string in asyncstorage.
-             */
             const userInfoWithoutToken = JSON.stringify(rest)
             await saveUserInfo(userInfoWithoutToken)
             resetForm({ username: "", password: ""})
@@ -91,10 +88,10 @@ export const LoginScreen = ({ navigation }) => {
     
     return (
         <View style={{ flex: 1, backgroundColor: 'white' }}>
-            <View style={{ flex: 2.5, backgroundColor: 'white', marginTop: '25%', alignItems: 'center' }}>
-                {/* <View  style={{ alignItems: "center", justifyContent: "center", width: 100, height: 500, marginTop: "5%", paddingVertical: '5%' }}>
-                    <Avatar source={images.WBW_Logo} />
-                </View> */}
+        
+            <View style={{ flex: 9, marginHorizontal: '8%' }}>
+
+            <View style={{ backgroundColor: 'white', marginTop: '25%', alignItems: 'center' ,marginBottom :"15%"}}>
                 <Image source={images.WBW_Logo} style={{
                     width: 150,
                     height: 150,
@@ -104,7 +101,6 @@ export const LoginScreen = ({ navigation }) => {
                     borderColor: "white"
                 }} />
             </View>
-            <View style={{ flex: 6.5, marginHorizontal: '8%' }}>
                 <Text style={{fontSize:22,alignSelf:'center',fontWeight:'bold',marginTop:"-2%",marginBottom:"4%"}}> Login</Text>
                 <Input
                     touched={touched.username}
