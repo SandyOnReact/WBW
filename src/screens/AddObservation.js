@@ -45,7 +45,7 @@ export const AddObservationScreen = ( props ) => {
     const [sectionList, setSectionList] = useState([]);
     const [sectionValue, setSectionValue] = useState('');
     const [topicValue, setTopicValue] = useState('');
-    const [selectedValue, setSelectedValue] = useState({});
+    const [selectedValue, setSelectedValue] = useState('');
     const [finalValue, setFinalView] = useState('');
     const [filteredData, setFilteredData] = useState([]);
     const [autoCompleteList, setAutoCompleteList] = useState([]);
@@ -56,9 +56,6 @@ export const AddObservationScreen = ( props ) => {
     const [userData,setUserData] = useState( {} )
     const [actText,setActText] = useState( '' )
     const [isButtonLoading,setIsButtonLoading] = useState( false )
-
-
-
 
     const inputContainerStyle = { borderWidth: 1, borderColor: '#1e5873', borderRadius: 6 }
     const STATUS_BAR_HEIGHT = getStatusBarHeight()
@@ -216,6 +213,7 @@ export const AddObservationScreen = ( props ) => {
             setAutoCompleteValue(text);
         } else {
             setFilteredData([]);
+            setSelectedValue('')
             setAutoCompleteValue(text);
         }
     };
@@ -242,7 +240,7 @@ export const AddObservationScreen = ( props ) => {
         return (
             <TouchableOpacity
                 onPress={() => {
-                    setSelectedValue(item);
+                    setSelectedValue(item.value);
                     setFilteredData([]);
                     setAutoCompleteValue(item.label)
                 }}>
@@ -257,39 +255,44 @@ export const AddObservationScreen = ( props ) => {
         setIsButtonLoading( true )
         const user = await getUser()
         const token = await getToken()
-        const validArray = [autoCompleteValue, whereObservationHappened, dateValue,
+        const validArray = [whereObservationHappened, dateValue,
             timeValue, actValue, actText, observation]
         const notValid = validArray.includes( "" )
         if( notValid ){
             setIsButtonLoading( false )
             Toast.showWithGravity('Please fill all the details marked as required', Toast.LONG, Toast.CENTER);
             return null
+        }else if( selectedValue === "" || selectedValue === undefined ) {
+            setIsButtonLoading( false )
+            Toast.showWithGravity('Please select values from where did observation occur dropdown', Toast.LONG, Toast.CENTER);
+            return null
+        }else{
+            const payload = {
+                UserID: user.UserID,
+                AccessToken: token,
+                LevelID: selectedValue,
+                ObservationSettingID: dashboard.ObservationSettingID,
+                SectionID: sectionValue,
+                TopicID: topicValue,
+                ActOrConditionID: actValue,
+                ActOrCondition: actText,
+                HazardID: hazardValue,
+                Observation: observation,
+                IsFollowUpNeeded: radioValue,
+                ObservationDate: dateValue,
+                ObservationTime: timeValue,	
+                DescribeWhereTheIncidentHappened: whereObservationHappened
+            }
+            const result = await api.post({
+                url: 'api/Observation/SaveObservation',
+                body: payload
+            })
+    
+            setIsButtonLoading( false )
+    
+    
+            return result
         }
-        const payload = {
-            UserID: user.UserID,
-            AccessToken: token,
-            LevelID: selectedValue.value,
-            ObservationSettingID: dashboard.ObservationSettingID,
-            SectionID: sectionValue,
-            TopicID: topicValue,
-            ActOrConditionID: actValue,
-            ActOrCondition: actText,
-            HazardID: hazardValue,
-            Observation: observation,
-            IsFollowUpNeeded: radioValue,
-            ObservationDate: dateValue,
-            ObservationTime: timeValue,	
-            DescribeWhereTheIncidentHappened: whereObservationHappened
-        }
-        const result = await api.post({
-            url: 'api/Observation/SaveObservation',
-            body: payload
-        })
-
-        setIsButtonLoading( false )
-
-
-        return result
     }
 
     const showImagePickerAlert = async ( ) => {
@@ -342,7 +345,7 @@ export const AddObservationScreen = ( props ) => {
                             data={filteredData}
                             renderItem={renderItem}
                             renderTextInput={renderTextInput}
-                            keyExtractor={(item,i) => item.ID }
+                            keyExtractor={(i) => String( i ) }
                             maxListHeight={400}
                             flatListProps={{ nestedScrollEnabled: true }}
                         />
