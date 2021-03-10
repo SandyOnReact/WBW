@@ -7,40 +7,12 @@ import { api } from '../utils/api'
 import { DashboardCard } from '../components/dashboard-card'
 import { Divider, Header } from 'react-native-elements'
 import { CommonActions } from '@react-navigation/native';
+import { isEmpty } from 'lodash-es';
 
 
 export const HomeScreen = ({ navigation }) => {
     const [userInfo, setUserInfo] = useState({})
 
-    /**
-     *  handling back handler 
-     *  Whenever user does hardware back press, exit App instead if navigating to back screen.
-     */
-    // useEffect(() => {
-    //     const backAction = () => {
-    //         Alert.alert("Hold on!", "Are you sure you want to Exit App?", [
-    //             {
-    //                 text: "Cancel",
-    //                 onPress: () => null,
-    //                 style: "cancel"
-    //             },
-    //             { text: "YES", onPress: () => BackHandler.exitApp() }
-    //         ]);
-    //         return true;
-    //     };
-
-    //     const backHandler = BackHandler.addEventListener(
-    //         "hardwareBackPress",
-    //         backAction
-    //     );
-
-    //     return () => backHandler.remove();
-    // }, []);
-
-    /**
-    *  Fetch object as a string
-    *  & then convert that string to object again.
-    */
     const fetchUserInfoFromStorage = async () => {
         const userInfo = await AsyncStorage.getItem('USER_INFO');
         return userInfo != null ? JSON.parse(userInfo) : null;
@@ -59,7 +31,7 @@ export const HomeScreen = ({ navigation }) => {
                 AccessToken: token
             }
         })
-        if (result.Message === "Invalid User Token") {
+        if ( isEmpty(result ) || result.Message === "Invalid User Token") {
             navigation.dispatch(
                 CommonActions.reset({
                   index: 0,
