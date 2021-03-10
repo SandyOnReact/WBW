@@ -1,19 +1,22 @@
 import React, { useState, useCallback } from 'react'
-import { View, Text, Image, Keyboard } from 'react-native'
+import { View, Text, Image, Keyboard ,Platform} from 'react-native'
 import { images } from '../utils/images'
 import { Button, Input, Avatar } from "react-native-elements";
 import { api } from '../utils/api'
 import { useFormik } from "formik"
+import { useKeyboard } from "@react-native-community/hooks";
+
 import { string, object } from 'yup'
 import { useFocusEffect } from "@react-navigation/native"
 import Toast from 'react-native-simple-toast'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { ScrollView } from 'react-native';
 
 //TODO: reset form on login button click.
 //TODO: formik should only validate the given field and not others. 
 //TODO: once authentication flow is setup, remove navigataion.navigate function()
 export const LoginScreen = ({ navigation }) => {
-
+    const keyboard = useKeyboard();
     const [isSecured, setIsSecured] = useState(true)
     const {
         touched,
@@ -87,11 +90,10 @@ export const LoginScreen = ({ navigation }) => {
     }
     
     return (
-        <View style={{ flex: 1, backgroundColor: 'white' }}>
-        
-            <View style={{ flex: 9, marginHorizontal: '8%' }}>
+            <View style={{ flex:9, marginHorizontal: '8%'}}>
+                <ScrollView style={{flex:1}} showsVerticalScrollIndicator={false}>
 
-            <View style={{ backgroundColor: 'white', marginTop: '25%', alignItems: 'center' ,marginBottom :"15%"}}>
+            <View style={{  marginTop: '25%', alignItems: 'center' ,marginBottom :"15%"}}>
                 <Image source={images.WBW_Logo} style={{
                     width: 150,
                     height: 150,
@@ -110,7 +112,6 @@ export const LoginScreen = ({ navigation }) => {
                     inputStyle={{ height: 4 }}
                     onChangeText={handleChange("username")}
                     onBlur={handleBlur("username")}
-                    onSubmitEditing={() => passwordRef.current.focus()}
                 />
                 <Input
                     placeholder='Enter Password'
@@ -121,7 +122,6 @@ export const LoginScreen = ({ navigation }) => {
                     secureTextEntry={isSecured}
                     onChangeText={handleChange("password")}
                     onBlur={handleBlur("password")}
-                    onSubmitEditing={handleSubmit}
                 />
                 <Button
                     title='Login'
@@ -131,8 +131,15 @@ export const LoginScreen = ({ navigation }) => {
                     disabled={!isValid || isSubmitting || isValidating}
                     loading={isSubmitting || isValidating}
                 />
+                 {
+                keyboard.keyboardShown && Platform.OS === 'ios' ?
+                    <View height = { keyboard.keyboardHeight }/> :
+                    null
+            }
+              </ScrollView>
+             
             </View>
-        </View>
+                    
     )
 
 }
