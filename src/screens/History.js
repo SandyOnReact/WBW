@@ -9,23 +9,23 @@ import { api } from '../utils/api'
 import { HistoryCard } from '../components/history-card'
 import { isEmpty } from 'lodash-es'
 
-
+let page = 1
+let isLoading = false
+let shouldFetch = true
 export const HistoryScreen = ({ route, navigation }) => {
     const { userId, levelId, category, dashboard } = route.params
     const [historyList,setHistoryList] = useState( [] )
-    const [page,setPage] = useState( 1 )
-    const [isLoading, setIsLoading] = useState( false )
-    const [loadMore, setLoadMore] = useState( true )
 
     const STATUS_BAR_HEIGHT = getStatusBarHeight()
 
     useEffect(()=> {
-        fetchHistoryData()
-    }, [page] )
+        fetchHistoryData( page )
+    }, [] )
 
-    const fetchHistoryData = async () => {
+    const fetchHistoryData = async ( page ) => {
         const token = await AsyncStorage.getItem('Token')
-        setIsLoading( true )
+        isLoading = true
+        console.log( page )
         const result = await api.post({
             url: 'api/Observation/GetObservationHistory_WithPaging',
             body: {
@@ -35,13 +35,14 @@ export const HistoryScreen = ({ route, navigation }) => {
                 PageNumber: String( page )
             }
         })
-        if( isEmpty( result ) || result === "No Records Found" ) {
-            setLoadMore( false )
-            setIsLoading( false )
+        if( isEmpty( result ) || result.Message === "No Records Found" || result === undefined ) {
+            isLoading = false
+            shouldFetch = false
             return null
         }
         setHistoryList( historyList => [...historyList, ...result ] )
-        setIsLoading( false )
+        shouldFetch = true
+        isLoading = false
         return result;
     }
     const navigateToAddObservation = ( ) => {
@@ -62,13 +63,10 @@ export const HistoryScreen = ({ route, navigation }) => {
     }
 
     const loadMoreResults = ( ) => {
-        if( loadMore ) {
-            setIsLoading( true )
-            setPage( page => page + 1 )
-        }else {
-            return null
+        if( shouldFetch ) {
+            page = page + 1
+            fetchHistoryData( page )
         }
-        
     } 
 
     const ListFooterComponent = ( ) => {
@@ -99,7 +97,7 @@ export const HistoryScreen = ({ route, navigation }) => {
                         keyExtractor={ (item,index) => String( index )}
                         renderItem={renderItem}
                         onEndReached={loadMoreResults}
-                        onEndReachedThreshold={0}
+                        onEndReachedThreshold={0.8}
                         ListFooterComponent={ListFooterComponent}
                     />
                     <View style={{position: 'absolute', bottom: "15%", right: 10, top: '80%', left: '85%'}}>
