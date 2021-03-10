@@ -248,7 +248,7 @@ export const AddObservationScreen = ( props ) => {
                 placeholderTextColor="#9EA0A4"
                 style={{ fontSize: 16 }}
                 multiline={true}
-                numberOfLines={4}
+                numberOfLines={1}
                 value={autoCompleteValue}
                 inputStyle={{padding:10, textAlign: 'auto', fontSize: 12}}
                 inputContainerStyle={inputContainerStyle}
@@ -473,7 +473,7 @@ export const AddObservationScreen = ( props ) => {
                             value={observation}
                         />
                     </View>
-                    <View style={{ marginHorizontal: '1%', justifyContent:'center', alignItems: 'center', marginVertical: '5%'}}>
+                    <View style={{ marginHorizontal: '1%', justifyContent:'center', alignItems: 'center', marginVertical: '2%'}}>
                         <Button containerStyle={{ width: '90%'}} buttonStyle={{backgroundColor: '#1e5873',marginVertical: '1%'}}  title="Submit" onPress={showImagePickerAlert} loading={isButtonLoading}/>
                         <Button buttonStyle={{backgroundColor: '#1e5873'}}  containerStyle={{ width: '90%',marginVertical: '1%'}} title="Submit as Anonymous" />
                         <Button  buttonStyle={{backgroundColor: '#1e5873'}} containerStyle={{ width: '90%',marginVertical: '1%'}} title="Save and Come Back" />
