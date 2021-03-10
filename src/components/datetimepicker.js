@@ -36,6 +36,7 @@ export const CustomDateTimePicker = (props) => {
     const defaultRightIcon = {
         type: 'font-awesome',
         name: 'calendar',
+        color: '#1e5873'
     }
 
     const rightIcon = customRightIcon || defaultRightIcon
@@ -50,9 +51,10 @@ export const CustomDateTimePicker = (props) => {
                 value={inputValue}
                 labelStyle={[{ marginBottom: 5 }, customLabelStyle]}
                 placeholder={placeholder}
-                placeholderTextColor={placeholderTextColor}
                 textAlignVertical={textAlignVertical}
                 rightIcon={rightIcon}
+                placeholderTextColor="#9EA0A4"
+                inputStyle={{padding:10, textAlign: 'auto',fontSize:16}}
                 inputContainerStyle={[containerStyle, inputContainerStyle]}
             />
             {show && (

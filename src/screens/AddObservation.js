@@ -245,12 +245,12 @@ export const AddObservationScreen = ( props ) => {
                 label="*  Where did the Observation occur"
                 labelStyle={{ marginBottom: 5 }}
                 placeholder="Type Something"
-                placeholderTextColor="gray"
-                style={{ fontSize: 18 }}
+                placeholderTextColor="#9EA0A4"
+                style={{ fontSize: 16 }}
                 multiline={true}
-                numberOfLines={1}
+                numberOfLines={4}
                 value={autoCompleteValue}
-                inputStyle={{ fontSize: 14 }}
+                inputStyle={{padding:10, textAlign: 'auto', fontSize: 12}}
                 inputContainerStyle={inputContainerStyle}
                 onChangeText={(text) => searchFilterFunction(text)}
             />
@@ -358,7 +358,7 @@ export const AddObservationScreen = ( props ) => {
                     centerComponent={{ text: 'Add Observation', style: { color: '#fff', fontSize: 16 } }}
                 />
             </View>
-            <View style={{ flex: 1, marginHorizontal: '5%' }}>
+            <View style={{ flex: 1, marginHorizontal: '3%' }}>
 
                 <ScrollView style={{ flex: 1 }} nestedScrollEnabled={true} contentContainerStyle={{ paddingBottom: 30 }} keyboardShouldPersistTaps="always" showsVerticalScrollIndicator={false}>
                     <View style={{ marginTop: '3%'}}>
@@ -379,8 +379,9 @@ export const AddObservationScreen = ( props ) => {
                             multiline={true}   
                             textAlignVertical="top"
                             placeholder="Type Something"
-                            placeholderTextColor="gray"
                             inputContainerStyle={inputContainerStyle}
+                            placeholderTextColor="#9EA0A4"
+                            inputStyle={{padding:10, textAlign: 'auto',fontSize:16}}
                             onChangeText={(text)=> setWhereObservationHappened( text )}
                             value={whereObservationHappened}
                         />
@@ -402,7 +403,7 @@ export const AddObservationScreen = ( props ) => {
                             label="*  What was the Time of the Observation"
                             show={showTime}
                             display="spinner"
-                            customRightIcon={{ name: 'time-outline', type: 'ionicon', size: 24 }}
+                            customRightIcon={{ name: 'time-outline', type: 'ionicon', size: 24 ,color:'#1e5873' }}
                             onPress={showTimepicker}
                             inputValue={timeValue}
                             mode={mode}
@@ -465,19 +466,17 @@ export const AddObservationScreen = ( props ) => {
                             multiline={true}
                             textAlignVertical="top"
                             placeholder="Type Something"
-                            placeholderTextColor="gray"
+                            placeholderTextColor="#9EA0A4"
+                            inputStyle={{padding:10, textAlign: 'auto',fontSize:16}}
                             inputContainerStyle={inputContainerStyle}
                             onChangeText={(text)=> setObservation( text )}
                             value={observation}
                         />
                     </View>
-                    <View style={{ marginHorizontal: '3%', justifyContent:'center', alignItems: 'center'}} >
-                        <Button containerStyle={{ width: '50%'}} buttonStyle={{backgroundColor: '#1e5873'}}  title="Submit" onPress={showImagePickerAlert} loading={isButtonLoading}/>
-                    </View>
-                    <View style={{ marginHorizontal: '3%', justifyContent:'center', alignItems: 'center', marginVertical: '5%', flexDirection: 'row'}}>
-                        <Button buttonStyle={{backgroundColor: '#1e5873'}}  containerStyle={{ width: '50%'}} title="Submit as Anonymous" />
-                        <View style={{ width: '5%'}}/>
-                        <Button  buttonStyle={{backgroundColor: '#1e5873'}} containerStyle={{ width: '50%'}} title="Submit and Come Back" />
+                    <View style={{ marginHorizontal: '1%', justifyContent:'center', alignItems: 'center', marginVertical: '5%'}}>
+                        <Button containerStyle={{ width: '90%'}} buttonStyle={{backgroundColor: '#1e5873',marginVertical: '1%'}}  title="Submit" onPress={showImagePickerAlert} loading={isButtonLoading}/>
+                        <Button buttonStyle={{backgroundColor: '#1e5873'}}  containerStyle={{ width: '90%',marginVertical: '1%'}} title="Submit as Anonymous" />
+                        <Button  buttonStyle={{backgroundColor: '#1e5873'}} containerStyle={{ width: '90%',marginVertical: '1%'}} title="Save and Come Back" />
                     </View>
                 </ScrollView>
             </View>

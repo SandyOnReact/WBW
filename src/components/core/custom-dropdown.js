@@ -4,7 +4,7 @@ import RNPickerSelect from 'react-native-picker-select'
 import { Icon } from "react-native-elements"
 
 const defaultIcon = () => {
-    return <Icon name="caret-down" color="gray" size={24} type="ionicon" />;
+    return <Icon name="caret-down" color="#1e5873" size={24} type="ionicon" />;
 }
 
 export const CustomDropdown = ( props ) => {
@@ -48,7 +48,7 @@ export const CustomDropdown = ( props ) => {
     }
 
     return (
-        <View style={{ flex: 1, marginVertical: '2.5%' }}>
+        <View style={{ flex: 1,margin:"4%", marginVertical: '2.5%' }}>
             <View>
                 <Text style={[titleStyle,customTitleStyle]}>{title}</Text>
             </View>
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
             paddingVertical: 12,
             paddingHorizontal: 10,
             borderWidth: 1,
-            borderColor: 'gray',
+            borderColor: '#1e5873',
             borderRadius: 4,
             color: 'black',
             paddingRight: 30,
@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
             borderRadius: 8,
             borderWidth: 1,
             color: 'black',
-            borderColor: '#86939e',
+            borderColor: '#1e5873',
             paddingRight: 30,
         },
 })
