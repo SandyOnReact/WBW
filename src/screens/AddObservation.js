@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { View, ScrollView, Text, ActivityIndicator, TouchableOpacity } from 'react-native'
-import { Input, Header, Button } from 'react-native-elements'
+import { Input, Header, Button,Icon } from 'react-native-elements'
 import { useNavigation } from "@react-navigation/native"
 import { getStatusBarHeight } from 'react-native-status-bar-height'
 import { useFormik } from "formik"
@@ -244,14 +244,13 @@ export const AddObservationScreen = ( props ) => {
             <Input
                 label="*  Where did the Observation occur"
                 labelStyle={{ marginBottom: 5 }}
-                placeholder="Type Something"
+                placeholder="Search Location"
                 placeholderTextColor="#9EA0A4"
                 style={{ fontSize: 16 }}
-                multiline={true}
-                numberOfLines={1}
                 value={autoCompleteValue}
                 inputStyle={{padding:10, textAlign: 'auto', fontSize: 12}}
                 inputContainerStyle={inputContainerStyle}
+                rightIcon={<Icon name="caret-down" color="#1e5873" size={24} type="ionicon"/> }
                 onChangeText={(text) => searchFilterFunction(text)}
             />
         )
@@ -360,7 +359,7 @@ export const AddObservationScreen = ( props ) => {
             </View>
             <View style={{ flex: 1, marginHorizontal: '3%' }}>
 
-                <ScrollView style={{ flex: 1 }} nestedScrollEnabled={true} contentContainerStyle={{ paddingBottom: 30 }} keyboardShouldPersistTaps="always" showsVerticalScrollIndicator={false}>
+                <ScrollView style={{ flex: 1 }} nestedScrollEnabled={true} contentContainerStyle={{ paddingBottom: 30 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
                     <View style={{ marginTop: '3%'}}>
                         <AutoCompleteInput
                             data={filteredData}
@@ -376,10 +375,10 @@ export const AddObservationScreen = ( props ) => {
                             label="*  Describe where the Observation happened"
                             labelStyle={{ marginBottom: 5 }}
                             numberOfLines={3}
-                            multiline={true}   
+                            multiline={true}
                             textAlignVertical="top"
                             placeholder="Type Something"
-                            inputContainerStyle={inputContainerStyle}
+                            inputContainerStyle={{...inputContainerStyle, minHeight: 60, maxHeight: 90 }}
                             placeholderTextColor="#9EA0A4"
                             inputStyle={{padding:10, textAlign: 'auto',fontSize:16}}
                             onChangeText={(text)=> setWhereObservationHappened( text )}
@@ -403,6 +402,7 @@ export const AddObservationScreen = ( props ) => {
                             label="*  What was the Time of the Observation"
                             show={showTime}
                             display="spinner"
+                            placeholder="Select Time"
                             customRightIcon={{ name: 'time-outline', type: 'ionicon', size: 24 ,color:'#1e5873' }}
                             onPress={showTimepicker}
                             inputValue={timeValue}

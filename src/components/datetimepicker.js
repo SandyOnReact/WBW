@@ -80,7 +80,7 @@ CustomDateTimePicker.defaultProps = {
     multiline: false,
     editable: false,
     label: '',
-    placeholder: 'Type Something',
+    placeholder: 'Select Date',
     placeholderTextColor: 'grey',
     textAlignVertical: 'center',
     inputContainerStyle: { },

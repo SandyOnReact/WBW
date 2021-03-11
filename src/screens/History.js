@@ -12,21 +12,26 @@ import { isEmpty } from 'lodash-es'
 let page = 1
 let isLoading = false
 let shouldFetch = true
+let onEndReachedCalledDuringMomentum = true;
 export const HistoryScreen = ({ route, navigation }) => {
     const { userId, levelId, category, dashboard } = route.params
     const [historyList,setHistoryList] = useState( [] )
 
     const STATUS_BAR_HEIGHT = getStatusBarHeight()
 
-    useEffect(()=> {
+    useEffect(() => {
         fetchHistoryData( page )
-    }, [] )
+        return () => {
+            page = 1,
+            isLoading = false,
+            shouldFetch = true
+        }
+    }, [])
 
     const fetchHistoryData = async ( page ) => {
         const token = await AsyncStorage.getItem('Token')
         isLoading = true
-        console.log( page )
-        const result = await api.post({
+                const result = await api.post({
             url: 'api/Observation/GetObservationHistory_WithPaging',
             body: {
                 UserID: userId,
@@ -63,9 +68,10 @@ export const HistoryScreen = ({ route, navigation }) => {
     }
 
     const loadMoreResults = ( ) => {
-        if( shouldFetch ) {
+        if( shouldFetch && !onEndReachedCalledDuringMomentum ) {
             page = page + 1
             fetchHistoryData( page )
+            onEndReachedCalledDuringMomentum = true
         }
     } 
 
@@ -96,8 +102,9 @@ export const HistoryScreen = ({ route, navigation }) => {
                         contentContainerStyle={{ paddingBottom: 80 }}
                         keyExtractor={ (item,index) => String( index )}
                         renderItem={renderItem}
-                        onEndReached={loadMoreResults}
+                        onEndReached={()=>loadMoreResults()}
                         onEndReachedThreshold={0.8}
+                        onMomentumScrollBegin={() => { onEndReachedCalledDuringMomentum = false; }}
                         ListFooterComponent={ListFooterComponent}
                     />
                     <View style={{position: 'absolute', bottom: "15%", right: 10, top: '80%', left: '85%'}}>
