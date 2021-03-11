@@ -62,7 +62,8 @@ const imageUpload = async (props) => {
     const apiUrl = `${config.API_URL}/${url}`
     const result = await fetch(apiUrl, requestOptions)
         .then((response) => {
-            return response.text()
+            Toast.showWithGravity('File Saved Successfully', Toast.LONG, Toast.CENTER);
+            return response.json()
         })
         .then((res) => {
             return res;

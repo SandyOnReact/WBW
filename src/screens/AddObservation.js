@@ -462,13 +462,13 @@ export const AddObservationScreen = ( props ) => {
                         <Input
                             label="*  Observation"
                             labelStyle={{ marginBottom: 5 }}
-                            numberOfLines={3}
+                            enablesReturnKeyAutomatically={true}
                             multiline={true}
                             textAlignVertical="top"
                             placeholder="Type Something"
                             placeholderTextColor="#9EA0A4"
                             inputStyle={{padding:10, textAlign: 'auto',fontSize:16}}
-                            inputContainerStyle={inputContainerStyle}
+                            inputContainerStyle={{...inputContainerStyle, minHeight: 60, maxHeight: 90 }}
                             onChangeText={(text)=> setObservation( text )}
                             value={observation}
                         />
