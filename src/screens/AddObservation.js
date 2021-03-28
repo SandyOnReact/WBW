@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { View, ScrollView, Text, ActivityIndicator, TouchableOpacity } from 'react-native'
-import { Input, Header, Button,Icon } from 'react-native-elements'
+import { Input, Header, Avatar,Button, Icon } from 'react-native-elements'
 import { useNavigation } from "@react-navigation/native"
 import { getStatusBarHeight } from 'react-native-status-bar-height'
 import { useFormik } from "formik"
@@ -18,6 +18,9 @@ import { AutoCompleteInput } from '../components/autocomplete-input/autocomplete
 import { CustomTimePicker } from '../components/core/custom-time-picker'
 import { Alert } from 'react-native'
 import Toast from 'react-native-simple-toast';
+import { useKeyboard } from '@react-native-community/hooks'
+import { StackActions } from '@react-navigation/native';
+
 
 
 let date = new Date( )
@@ -56,7 +59,12 @@ export const AddObservationScreen = ( props ) => {
     const [token,setToken] = useState( '' )
     const [userData,setUserData] = useState( {} )
     const [actText,setActText] = useState( '' )
-    const [isButtonLoading,setIsButtonLoading] = useState( false )
+    const [shouldHideResults,setShouldHideResults] = useState( true )
+    const [isButtonLoading, setIsButtonLoading] = useState( false )
+    const [isButtonAnonymously, setIsButtonAnonymously] = useState( false )
+    const [isButtonComeBack, setIsButtonComeBack] = useState( false )
+    
+    const keyboard = useKeyboard()
 
     const inputContainerStyle = { borderWidth: 1, borderColor: '#1e5873', borderRadius: 6 }
     const STATUS_BAR_HEIGHT = getStatusBarHeight()
@@ -161,7 +169,7 @@ export const AddObservationScreen = ( props ) => {
             setShow( false )
         }else {
             const currentDate = selectedDate || date;
-        setShow(Platform.OS === 'ios' ? true : false);
+            setShow(false);
         if (mode === 'date') {
             const pickedDate = moment(currentDate).format("MM/DD/YYYY")
             setDateValue(pickedDate)
@@ -179,8 +187,7 @@ export const AddObservationScreen = ( props ) => {
             setShowTime( false )
         }else {
             const currentDate = selectedDate || date;
-        setShowTime(Platform.OS === 'ios' ? true : false);
-
+        setShowTime(false);
             const pickedTime = moment(currentDate).format("hh:mm a")
             setTimeValue(pickedTime)
             date = currentDate
@@ -248,7 +255,9 @@ export const AddObservationScreen = ( props ) => {
                 placeholderTextColor="#9EA0A4"
                 style={{ fontSize: 16 }}
                 value={autoCompleteValue}
-                inputStyle={{padding:10, textAlign: 'auto', fontSize: 12}}
+                onFocus={()=>setShouldHideResults( false )}
+                onEndEditing={()=>setShouldHideResults( true )}
+                inputStyle={{padding:10, textAlign: 'auto', color: 'black', fontSize: 12}}
                 inputContainerStyle={inputContainerStyle}
                 rightIcon={<Icon name="caret-down" color="#1e5873" size={24} type="ionicon"/> }
                 onChangeText={(text) => searchFilterFunction(text)}
@@ -258,17 +267,57 @@ export const AddObservationScreen = ( props ) => {
 
     const renderItem = ({ item }) => {
         return (
-            <TouchableOpacity
-                onPress={() => {
+            <View>
+                <Text onPress={() => {
                     setSelectedValue(item.value);
                     setFilteredData([]);
                     setAutoCompleteValue(item.label)
-                }}>
-                <Text style={styles.itemText}>
+                }} style={styles.itemText}>
                     {item.label}
                 </Text>
-            </TouchableOpacity>
+            </View>
         )
+    }
+
+    const saveAndComeBack = async ( ) => {
+        setIsButtonComeBack( true )
+        const user = await getUser()
+        const token = await getToken()
+        if( selectedValue === "" || selectedValue === undefined ) {
+            setIsButtonComeBack( false )
+            Toast.showWithGravity('Please select values from where did observation occur dropdown', Toast.LONG, Toast.CENTER);
+            return null
+        }else{
+            try {
+                const payload = {
+                    UserID: user.UserID,
+                    AccessToken: token,
+                    LevelID: selectedValue,
+                    ObservationSettingID: dashboard.ObservationSettingID,
+                    SectionID: sectionValue,
+                    TopicID: topicValue,
+                    ActOrConditionID: actValue,
+                    ActOrCondition: actText,
+                    HazardID: hazardValue,
+                    Observation: observation,
+                    IsFollowUpNeeded: radioValue,
+                    ObservationDate: dateValue,
+                    ObservationTime: timeValue,	
+                    DescribeWhereTheIncidentHappened: whereObservationHappened
+                }
+                const result = await api.post({
+                    url: 'api/Observation/SaveAndComeBackObservation',
+                    body: payload
+                })
+                console.log( result )
+                return result
+            }catch( error ) {
+                Toast.showWithGravity(error.message, Toast.LONG, Toast.CENTER);
+                return null
+            }finally {
+                setIsButtonComeBack( false )    
+            }
+        }
     }
 
     const submitForm = async ( ) => {
@@ -287,39 +336,89 @@ export const AddObservationScreen = ( props ) => {
             Toast.showWithGravity('Please select values from where did observation occur dropdown', Toast.LONG, Toast.CENTER);
             return null
         }else{
-            const payload = {
-                UserID: user.UserID,
-                AccessToken: token,
-                LevelID: selectedValue,
-                ObservationSettingID: dashboard.ObservationSettingID,
-                SectionID: sectionValue,
-                TopicID: topicValue,
-                ActOrConditionID: actValue,
-                ActOrCondition: actText,
-                HazardID: hazardValue,
-                Observation: observation,
-                IsFollowUpNeeded: radioValue,
-                ObservationDate: dateValue,
-                ObservationTime: timeValue,	
-                DescribeWhereTheIncidentHappened: whereObservationHappened
+            try {
+                const payload = {
+                    UserID: user.UserID,
+                    AccessToken: token,
+                    LevelID: selectedValue,
+                    ObservationSettingID: dashboard.ObservationSettingID,
+                    SectionID: sectionValue,
+                    TopicID: topicValue,
+                    ActOrConditionID: actValue,
+                    ActOrCondition: actText,
+                    HazardID: hazardValue,
+                    Observation: observation,
+                    IsFollowUpNeeded: radioValue,
+                    ObservationDate: dateValue,
+                    ObservationTime: timeValue,	
+                    DescribeWhereTheIncidentHappened: whereObservationHappened
+                }
+                const result = await api.post({
+                    url: 'api/Observation/SaveObservation',
+                    body: payload
+                })
+                return result
+            }catch( error ) {
+                Toast.showWithGravity(error.message, Toast.LONG, Toast.CENTER);
+                return null
+            }finally {
+                setIsButtonLoading( false )    
             }
-            const result = await api.post({
-                url: 'api/Observation/SaveObservation',
-                body: payload
-            })
-    
-            setIsButtonLoading( false )
-    
-    
+        }
+    }
+
+    const submitFormAnonymously = async ( ) => {
+        setIsButtonAnonymously( true )
+        const user = await getUser()
+        const token = await getToken()
+        const validArray = [whereObservationHappened, dateValue,
+            timeValue, actValue, actText, observation]
+        const notValid = validArray.includes( "" )
+        if( notValid ){
+            setIsButtonAnonymously( false )
+            Toast.showWithGravity('Please fill all the details marked as required', Toast.LONG, Toast.CENTER);
+            return null
+        }else if( selectedValue === "" || selectedValue === undefined ) {
+            setIsButtonAnonymously( false )
+            Toast.showWithGravity('Please select values from where did observation occur dropdown', Toast.LONG, Toast.CENTER);
+            return null
+        }else{
+            try {
+                const payload = {
+                    UserID: user.UserID,
+                    AccessToken: token,
+                    LevelID: selectedValue,
+                    ObservationSettingID: dashboard.ObservationSettingID,
+                    SectionID: sectionValue,
+                    TopicID: topicValue,
+                    ActOrConditionID: actValue,
+                    ActOrCondition: actText,
+                    HazardID: hazardValue,
+                    Observation: observation,
+                    IsFollowUpNeeded: radioValue,
+                    ObservationDate: dateValue,
+                    ObservationTime: timeValue,	
+                    DescribeWhereTheIncidentHappened: whereObservationHappened
+                }
+                const result = await api.post({
+                    url: 'api/Observation/SaveAnonymousObservation',
+                    body: payload
+                })
+            }catch( error ) {
+                Toast.showWithGravity(error.message, Toast.LONG, Toast.CENTER);
+                return null
+            }finally {
+                setIsButtonAnonymously( false )    
+            }
             return result
         }
     }
 
     const showImagePickerAlert = async ( ) => {
-        const result = await submitForm()
-        if( isEmpty( result ) || isNull( result )) {
-            return null
-        }
+        // const result = await submitForm()
+        // if( isEmpty( result ) || isNull( result )) {
+        //     return null
+        // }
         Alert.alert(
             "upload",
             "Do you want to upload image",
@@ -346,6 +445,7 @@ export const AddObservationScreen = ( props ) => {
         setActText( currentActObject.label )
     }
 
+
     return (
         <View style={{ flex: 1 }}>
             <View>
@@ -357,13 +457,14 @@ export const AddObservationScreen = ( props ) => {
                     centerComponent={{ text: 'Add Observation', style: { color: '#fff', fontSize: 16 } }}
                 />
             </View>
-            <View style={{ flex: 1, marginHorizontal: '3%' }}>
-
-                <ScrollView style={{ flex: 1 }} nestedScrollEnabled={true} contentContainerStyle={{ paddingBottom: 30 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+            <View style={{ flex: 0.9, marginHorizontal: '3%' }}>
+                <ScrollView style={{ flex: 1 }} nestedScrollEnabled={true}  keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
                     <View style={{ marginTop: '3%'}}>
                         <AutoCompleteInput
-                            data={filteredData}
+                            style={{ color: 'black', borderColor: 'red' }}
+                            data={autoCompleteValue.length === 0 && !shouldHideResults ? autoCompleteList : filteredData}
                             renderItem={renderItem}
+                            hideResults={shouldHideResults}
                             renderTextInput={renderTextInput}
                             keyExtractor={(i) => String( i ) }
                             maxListHeight={400}
@@ -473,13 +574,22 @@ export const AddObservationScreen = ( props ) => {
                             value={observation}
                         />
                     </View>
-                    <View style={{ marginHorizontal: '1%', justifyContent:'center', alignItems: 'center', marginVertical: '2%'}}>
-                        <Button containerStyle={{ width: '90%'}} buttonStyle={{backgroundColor: '#1e5873',marginVertical: '1%'}}  title="Submit" onPress={showImagePickerAlert} loading={isButtonLoading}/>
-                        <Button buttonStyle={{backgroundColor: '#1e5873'}}  containerStyle={{ width: '90%',marginVertical: '1%'}} title="Submit as Anonymous" />
-                        <Button  buttonStyle={{backgroundColor: '#1e5873'}} containerStyle={{ width: '90%',marginVertical: '1%'}} title="Save and Come Back" />
-                    </View>
                 </ScrollView>
             </View>
+            <View style={{position: 'absolute', bottom: keyboard.keyboardShown ? '20%' : '15%' , right: 10, left: '85%'}}>
+                <Avatar size="medium" rounded icon={{ name: 'camera'}} containerStyle={{ backgroundColor: '#1e5873'}} onPress={showImagePickerAlert}/>
+                <Avatar size="medium" rounded icon={{ name: 'md-document-attach-outline', type: 'ionicon'}} containerStyle={{ marginTop: '30%' ,backgroundColor: '#1e5873'}}/>
+            </View>
+            <View style={{ flex: 0.1, flexDirection: 'row', marginHorizontal: '1%', justifyContent:'space-around', alignItems: 'center', marginVertical: '2%'}}>
+                <Button icon={{ name: 'save' }} title="Submit" titleStyle={{ fontSize: 10 }}  buttonStyle={{ backgroundColor: '#1e5873'}} onPress={submitForm} loading={isButtonLoading}/>
+                <Button icon={{ name: 'save' }} title="Save as Anonymous" titleStyle={{ fontSize: 10 }} buttonStyle={{ backgroundColor: '#1e5873'}} onPress={submitFormAnonymously} loading={isButtonAnonymously}/>
+                <Button icon={{ name: 'save' }} title="Come Back" titleStyle={{ fontSize: 10 }} buttonStyle={{ backgroundColor: '#1e5873'}} onPress={saveAndComeBack} loading={isButtonComeBack}/>
+            </View>
+            {
+                keyboard.keyboardShown
+                ? <View style={{ height: '3%'}} />
+                : null
+            }
         </View>
     )
 }
@@ -498,6 +608,7 @@ const styles = StyleSheet.create({
         paddingTop: 5,
         paddingBottom: 5,
         margin: 2,
+        color: 'black'
     },
     infoText: {
         textAlign: 'center',
