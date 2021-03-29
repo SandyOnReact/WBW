@@ -9,8 +9,9 @@ import { ActivityIndicator } from 'react-native'
 
 
 export const CropImageScreen = (props) => {
-    const { imageUrl, imageData, observationId } = props.route.params
+    const { imageUrl, imageData, callback } = props.route.params
     const [url, setUrl] = useState(imageUrl)
+    const [res, setRes] = useState({})
     const [isLoading, setIsLoading] = useState( false )
     const cropperView = useRef()
     const navigation = useNavigation()
@@ -18,24 +19,16 @@ export const CropImageScreen = (props) => {
     function goBack() {
         navigation.goBack()
     }
-
-    function cropImage() {
-        cropperView.current.saveImage(true, 90)
-    }
-
-   
+ 
     function onImageCrop(res) {
         setUrl(res.uri)
+        setRes( res )
     }
 
     async function onSubmit( ) {
-        setIsLoading( true )    
-        const result = await api.imageUpload({
-            image: imageData,
-            url: `api/Observation/Upload?ObservationID=${observationId}`
-        })
-        setIsLoading( false )    
-        navigation.navigate( 'Home' )
+        setIsLoading( true )
+        callback( url, imageData )    
+        navigation.goBack( ) 
     }
 
     if( isLoading ) {

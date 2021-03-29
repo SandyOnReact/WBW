@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { View, ScrollView, Text, ActivityIndicator, TouchableOpacity } from 'react-native'
+import { View, ScrollView, Text, ActivityIndicator, Image, Switch } from 'react-native'
 import { Input, Header, Avatar,Button, Icon } from 'react-native-elements'
 import { useNavigation } from "@react-navigation/native"
 import { getStatusBarHeight } from 'react-native-status-bar-height'
@@ -29,7 +29,13 @@ const radioButtons = [
     { label: 'Yes', value: "1" },
     { label: 'No', value: "0" }
 ]
-
+/**
+ * API for uploading Images
+ * const result = await api.imageUpload({
+            image: imageData,
+            url: `api/Observation/Upload?ObservationID=${observationId}`
+    })
+ */
 export const AddObservationScreen = ( props ) => {
 
     const { dashboard } = props.route.params
@@ -63,6 +69,8 @@ export const AddObservationScreen = ( props ) => {
     const [isButtonLoading, setIsButtonLoading] = useState( false )
     const [isButtonAnonymously, setIsButtonAnonymously] = useState( false )
     const [isButtonComeBack, setIsButtonComeBack] = useState( false )
+    const [isEnabled, setIsEnabled] = useState( false )
+    const [imagesArray, setImagesArray] = useState( [] )
     
     const keyboard = useKeyboard()
 
@@ -309,8 +317,9 @@ export const AddObservationScreen = ( props ) => {
                     url: 'api/Observation/SaveAndComeBackObservation',
                     body: payload
                 })
-                console.log( result )
-                return result
+                if( !isEmpty( result ) ) {
+                    navigation.navigate( 'Home' )
+                }
             }catch( error ) {
                 Toast.showWithGravity(error.message, Toast.LONG, Toast.CENTER);
                 return null
@@ -357,7 +366,9 @@ export const AddObservationScreen = ( props ) => {
                     url: 'api/Observation/SaveObservation',
                     body: payload
                 })
-                return result
+                if( !isEmpty( result ) ) {
+                    navigation.navigate( 'Home' )
+                }
             }catch( error ) {
                 Toast.showWithGravity(error.message, Toast.LONG, Toast.CENTER);
                 return null
@@ -404,6 +415,9 @@ export const AddObservationScreen = ( props ) => {
                     url: 'api/Observation/SaveAnonymousObservation',
                     body: payload
                 })
+                if( !isEmpty( result ) ) {
+                    navigation.navigate( 'Home' )
+                }
             }catch( error ) {
                 Toast.showWithGravity(error.message, Toast.LONG, Toast.CENTER);
                 return null
@@ -414,26 +428,15 @@ export const AddObservationScreen = ( props ) => {
         }
     }
 
-    const showImagePickerAlert = async ( ) => {
-        // const result = await submitForm()
-        // if( isEmpty( result ) || isNull( result )) {
-        //     return null
-        // }
-        Alert.alert(
-            "upload",
-            "Do you want to upload image",
-            [
-              {
-                text: "Cancel",
-                onPress: () => navigation.navigate( 'Home' ),
-                style: "No"
-              },
-              { text: "Yes", onPress: () => navigation.navigate( 'UploadImage', {
-                  observationId: result.ObservationID
-              } ) }
-            ],
-            { cancelable: false }
-          );
+    const onImageReceive = ( url, imageData ) => {
+        const imageObj = { ...imageData, uri: url }
+        setImagesArray( imagesArray => [...imagesArray, imageObj ])
+    }
+
+    const navigateToImagePicker = ( ) => {
+        navigation.navigate( 'UploadImage', {
+            callback: ( url, imageData ) => onImageReceive( url, imageData )
+        } )
     }
 
     const getActValue = ( id ) => {
@@ -445,6 +448,8 @@ export const AddObservationScreen = ( props ) => {
         setActText( currentActObject.label )
     }
 
+
+    const toggleSwitch = () => setIsEnabled(previousState => !previousState);
 
     return (
         <View style={{ flex: 1 }}>
@@ -574,16 +579,60 @@ export const AddObservationScreen = ( props ) => {
                             value={observation}
                         />
                     </View>
+                    <View style={{ marginVertical: '3%', marginHorizontal: '4%', flexDirection: 'row', alignItems: 'center' }}>
+                        <Text style={{ color: '#86939e', fontSize: 18}}>Submit as Anonymous</Text>
+                        <Switch
+                            trackColor={{ false: "gray", true: "lightpink" }}
+                            thumbColor={isEnabled ? "#1e5873" : "#1e5873"}
+                            ios_backgroundColor="#3e3e3e"
+                            onValueChange={toggleSwitch}
+                            value={isEnabled}
+                            style={{ marginHorizontal: '10%'}}
+                        />
+                    </View>
+                    <View style={{ flexDirection: 'row' }}>
+                    {
+                        imagesArray.length > 0 &&
+                    imagesArray.map( ( item, index ) => {
+                        if( index >= 2 ) {
+                            return null
+                        }
+                        return (
+                            <View key={index} style={{ width: 100, height: 100, marginHorizontal: '5%', flexDirection: 'row'}}>
+                                <Image
+                                    source={{ uri: item.uri }}
+                                    style={{
+                                        width: 100,
+                                        height: 100,
+                                        borderRadius: 8,
+                                        flexDirection: 'row',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center'
+                                    }}
+                                />
+                            </View>
+                        )
+                    } )
+                        }
+                        </View>
                 </ScrollView>
             </View>
-            <View style={{position: 'absolute', bottom: keyboard.keyboardShown ? '20%' : '15%' , right: 10, left: '85%'}}>
-                <Avatar size="medium" rounded icon={{ name: 'camera'}} containerStyle={{ backgroundColor: '#1e5873'}} onPress={showImagePickerAlert}/>
+            <View style={{position: 'absolute', bottom: keyboard.keyboardShown ? '15%' : '10%' , right: 10, left: '85%'}}>
+                <Avatar size="medium" rounded icon={{ name: 'camera'}} containerStyle={{ backgroundColor: '#1e5873'}} onPress={navigateToImagePicker}/>
                 <Avatar size="medium" rounded icon={{ name: 'md-document-attach-outline', type: 'ionicon'}} containerStyle={{ marginTop: '30%' ,backgroundColor: '#1e5873'}}/>
             </View>
-            <View style={{ flex: 0.1, flexDirection: 'row', marginHorizontal: '1%', justifyContent:'space-around', alignItems: 'center', marginVertical: '2%'}}>
-                <Button icon={{ name: 'save' }} title="Submit" titleStyle={{ fontSize: 10 }}  buttonStyle={{ backgroundColor: '#1e5873'}} onPress={submitForm} loading={isButtonLoading}/>
-                <Button icon={{ name: 'save' }} title="Save as Anonymous" titleStyle={{ fontSize: 10 }} buttonStyle={{ backgroundColor: '#1e5873'}} onPress={submitFormAnonymously} loading={isButtonAnonymously}/>
-                <Button icon={{ name: 'save' }} title="Come Back" titleStyle={{ fontSize: 10 }} buttonStyle={{ backgroundColor: '#1e5873'}} onPress={saveAndComeBack} loading={isButtonComeBack}/>
+            <View style={{ flex: 0.1 }}>
+                {
+                    isEnabled 
+                    ?  <View style={{ flex: 1, marginTop: '3%'}}>
+                            <Button containerStyle={{ marginHorizontal: '5%'}}  icon={{ name: 'save' }} title="Save as Anonymous" titleStyle={{ fontSize: 14 }} buttonStyle={{ backgroundColor: '#1e5873', width: '100%'}} onPress={submitFormAnonymously} loading={isButtonAnonymously}/>
+                        </View>
+                    :  <View style={{ flex: 1, marginTop: '3%', flexDirection: 'row', marginHorizontal: '1%', justifyContent: 'space-around', alignItems: 'center'}}>
+                            <Button icon={{ name: 'save' }} title="Submit" titleStyle={{ fontSize: 14 }}  buttonStyle={{ backgroundColor: '#1e5873'}} containerStyle={{ width: '45%'}} onPress={submitForm} loading={isButtonLoading}/>
+                            <Button icon={{ name: 'save' }} title="Save & Come Back" titleStyle={{ fontSize: 14 }} buttonStyle={{ backgroundColor: '#1e5873'}} containerStyle={{ width: '45%'}} onPress={saveAndComeBack} loading={isButtonComeBack}/>
+                        </View>
+                       
+                }
             </View>
             {
                 keyboard.keyboardShown

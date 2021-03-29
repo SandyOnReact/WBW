@@ -8,7 +8,7 @@ import { RNCamera } from "react-native-camera"
 import { useNavigation } from "@react-navigation/native"
 
 export const UploadImageScreen = ( props ) => {
-    const { observationId } = props.route.params
+    const { callback } = props.route.params
     const [imageData, setImageData] = useState({})
     const STATUS_BAR_HEIGHT = getStatusBarHeight()
     const [imageUrl, setImageUrl] = useState('')
@@ -39,11 +39,16 @@ export const UploadImageScreen = ( props ) => {
         navigation.goBack()
     }
 
+    const navigateToAddObservation = ( url, imageData ) => {
+        callback( url, imageData )
+        navigation.goBack()
+    }
+
     function goToEditImage( uri, response ) {
         navigation.navigate( 'CropImage', {
             imageUrl: uri,
             imageData: response,
-            observationId: observationId
+            callback: ( url, imageData ) => navigateToAddObservation( url, imageData )
         })
     }
 
