@@ -30,7 +30,8 @@ const STYLES = {
     listStyle: { 
         maxHeight: 100,
         borderColor: "rgba(0,0,0,0)", 
-        backgroundColor: "rgba(0,0,0,0)"
+        backgroundColor: "rgba(0,0,0,0)",
+        shadowColor:'white'
     } as ViewStyle,
     inputContainerStyle: { 
         borderColor: "rgba(0,0,0,0)",

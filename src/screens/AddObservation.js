@@ -23,6 +23,8 @@ import { StackActions } from '@react-navigation/native';
 
 
 
+
+
 let date = new Date( )
 let topicList = []
 const radioButtons = [
@@ -495,6 +497,17 @@ export const AddObservationScreen = ( props ) => {
                     centerComponent={{ text: 'Add Observation', style: { color: '#fff', fontSize: 16 } }}
                 />
             </View>
+            <View style={{ marginVertical: '3%', marginHorizontal: '1%', flexDirection: 'row', alignItems: 'center' }}>
+                        <Text style={{ color: '#1e5873', fontSize: 16,marginStart:20}}>Submit as Anonymous</Text>
+                        <Switch
+                           // trackColor={{ false: "white", true: "white" }}
+                            //thumbColor={isEnabled ? "#white" : "white"}
+                            ios_backgroundColor='lightgray'
+                            onValueChange={toggleSwitch}
+                            value={isEnabled}
+                            style={{ marginHorizontal: '5%'}}
+                        />
+                    </View>
             <View style={{ flex: 0.9, marginHorizontal: '3%' }}>
                 <ScrollView style={{ flex: 1 }} nestedScrollEnabled={true}  keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
                     <View style={{ marginTop: '3%'}}>
@@ -612,17 +625,6 @@ export const AddObservationScreen = ( props ) => {
                             value={observation}
                         />
                     </View>
-                    <View style={{ marginVertical: '3%', marginHorizontal: '4%', flexDirection: 'row', alignItems: 'center' }}>
-                        <Text style={{ color: '#86939e', fontSize: 18}}>Submit as Anonymous</Text>
-                        <Switch
-                            trackColor={{ false: "gray", true: "lightpink" }}
-                            thumbColor={isEnabled ? "#1e5873" : "#1e5873"}
-                            ios_backgroundColor="#3e3e3e"
-                            onValueChange={toggleSwitch}
-                            value={isEnabled}
-                            style={{ marginHorizontal: '10%'}}
-                        />
-                    </View>
                     <View style={{ flexDirection: 'row' }}>
                     {
                         imagesArray.length > 0 &&
@@ -651,25 +653,24 @@ export const AddObservationScreen = ( props ) => {
                 </ScrollView>
             </View>
             <View style={{position: 'absolute', bottom: keyboard.keyboardShown ? '15%' : '10%' , right: 10, left: '85%'}}>
-                <Avatar size="medium" rounded icon={{ name: 'camera'}} containerStyle={{ backgroundColor: '#1e5873'}} onPress={navigateToImagePicker}/>
-                <Avatar size="medium" rounded icon={{ name: 'md-document-attach-outline', type: 'ionicon'}} containerStyle={{ marginTop: '30%' ,backgroundColor: '#1e5873'}}/>
+                <Avatar size="medium" rounded icon={{ name: 'camera', type:'SimpleLineIcons'}} containerStyle={{ backgroundColor: '#1e5873'}} onPress={navigateToImagePicker}/>
+                <Avatar size="medium" rounded icon={{ name: 'attachment', type: 'MaterialCommunityIcons'}} containerStyle={{ marginTop: '30%' ,backgroundColor: '#1e5873'}}/>
             </View>
-            <View style={{ flex: 0.1 }}>
+            <View style={{ flex: 0.1}}>
                 {
                     isEnabled 
-                    ?  <View style={{ flex: 1, marginTop: '3%'}}>
-                            <Button containerStyle={{ marginHorizontal: '5%'}}  icon={{ name: 'save' }} title="Save as Anonymous" titleStyle={{ fontSize: 14 }} buttonStyle={{ backgroundColor: '#1e5873', width: '100%'}} onPress={submitFormAnonymously} loading={isButtonAnonymously}/>
+                    ?  <View style={{ flex: 1, marginTop: '0%'}}>
+                            <Button containerStyle={{ marginHorizontal: '5%'}}  icon={{ name: 'incognito', type:'material-community', color:'white'}} title="Submit as Anonymous" titleStyle={{ fontSize: 14 }} buttonStyle={{ backgroundColor: '#1e5873', width: '100%'}} onPress={submitFormAnonymously} loading={isButtonAnonymously}/>
                         </View>
-                    :  <View style={{ flex: 1, marginTop: '3%', flexDirection: 'row', marginHorizontal: '1%', justifyContent: 'space-around', alignItems: 'center'}}>
-                            <Button icon={{ name: 'save' }} title="Submit" titleStyle={{ fontSize: 14 }}  buttonStyle={{ backgroundColor: '#1e5873'}} containerStyle={{ width: '45%'}} onPress={submitForm} loading={isButtonLoading}/>
-                            <Button icon={{ name: 'save' }} title="Save & Come Back" titleStyle={{ fontSize: 14 }} buttonStyle={{ backgroundColor: '#1e5873'}} containerStyle={{ width: '45%'}} onPress={saveAndComeBack} loading={isButtonComeBack}/>
+                    :  <View style={{ flex: 1, marginTop: '0%', flexDirection: 'row', marginHorizontal: '0%', justifyContent: 'space-around', alignItems: 'center'}}>
+                            <Button icon={{ name: 'save', type: 'FontAwesome',color:'white'}} title="Submit" titleStyle={{ fontSize: 14 }}  buttonStyle={{ backgroundColor: '#1e5873'}} containerStyle={{ width: '45%'}} onPress={submitForm} loading={isButtonLoading}/>
+                            <Button icon={{ name: 'content-save-edit', type:'material-community',color:'white' }}  title="Save & Come Back" titleStyle={{ fontSize: 14 }} buttonStyle={{ backgroundColor: '#1e5873'}} containerStyle={{ width: '45%'}} onPress={saveAndComeBack} loading={isButtonComeBack}/>
                         </View>
-                       
                 }
             </View>
             {
                 keyboard.keyboardShown
-                ? <View style={{ height: '3%'}} />
+                ? <View style={{ height: '30%'}} />
                 : null
             }
         </View>
