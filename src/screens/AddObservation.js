@@ -103,7 +103,6 @@ export const AddObservationScreen = ( props ) => {
     const getAllData = async () => {
         const user = await getUser()
         const token = await getToken()
-        console.log( 'obs ID', dashboard.ObservationSettingID )
         const payload = {
             UserID: user.UserID,
             AccessToken: token,
@@ -323,7 +322,7 @@ export const AddObservationScreen = ( props ) => {
                             image: imagesArray[0],
                             url: `api/Observation/Upload?ObservationID=${result}`
                     })
-                    if( !isEmpty( response ) ) {
+                    if( isEmpty( response ) ) {
                         return null
                     }
                     navigation.navigate( 'Home' )
@@ -383,7 +382,7 @@ export const AddObservationScreen = ( props ) => {
                             image: imagesArray[0],
                             url: `api/Observation/Upload?ObservationID=${result}`
                     })
-                    if( !isEmpty( response ) ) {
+                    if( isEmpty( response ) ) {
                         return null
                     }
                     navigation.navigate( 'Home' )
@@ -443,7 +442,7 @@ export const AddObservationScreen = ( props ) => {
                             image: imagesArray[0],
                             url: `api/Observation/Upload?ObservationID=${result}`
                     })
-                    if( !isEmpty( response ) ) {
+                    if( isEmpty( response ) ) {
                         return null
                     }
                     navigation.navigate( 'Home' )

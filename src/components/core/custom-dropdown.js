@@ -48,7 +48,7 @@ export const CustomDropdown = ( props ) => {
     }
 
     return (
-        <View style={{ flex: 1,margin:"4%", marginVertical: '2.5%' }}>
+        <View style={{ flex: 1,margin:"2.5%", marginVertical: '2.5%' }}>
             <View>
                 <Text style={[titleStyle,customTitleStyle]}>{title}</Text>
             </View>

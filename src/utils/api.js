@@ -25,7 +25,6 @@ const post = async (props) => {
             return res;
         })
         .catch(error => {
-            console.log( 'error is ',error )
             Toast.showWithGravity(error.message, Toast.LONG, Toast.CENTER);
             return null;
         })
@@ -62,14 +61,14 @@ const imageUpload = async (props) => {
     const apiUrl = `${config.API_URL}/${url}`
     const result = await fetch(apiUrl, requestOptions)
         .then((response) => {
-            Toast.showWithGravity('File Saved Successfully', Toast.LONG, Toast.CENTER);
-            return response.json()
+            return response.text()
         })
         .then((res) => {
+            Toast.showWithGravity('File Saved Successfully', Toast.LONG, Toast.CENTER);
             return res;
         })
         .catch(error => {
-            Toast.showWithGravity('Something Went Wrong', Toast.LONG, Toast.CENTER);
+            Toast.showWithGravity(error.message || 'Something went wrong', Toast.LONG, Toast.CENTER);
             return null;
         })
     return result;
