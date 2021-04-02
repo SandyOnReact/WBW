@@ -51,6 +51,7 @@ export const HistoryScreen = ({ route, navigation }) => {
         return result;
     }
     const navigateToAddObservation = ( ) => {
+        console.log( dashboard )
         navigation.navigate( 'AddObservation',{
             dashboard: dashboard,
             userId: userId

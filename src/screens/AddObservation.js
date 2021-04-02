@@ -103,6 +103,7 @@ export const AddObservationScreen = ( props ) => {
     const getAllData = async () => {
         const user = await getUser()
         const token = await getToken()
+        console.log( 'obs ID', dashboard.ObservationSettingID )
         const payload = {
             UserID: user.UserID,
             AccessToken: token,
@@ -317,8 +318,19 @@ export const AddObservationScreen = ( props ) => {
                     url: 'api/Observation/SaveAndComeBackObservation',
                     body: payload
                 })
-                if( !isEmpty( result ) ) {
+                if( !isEmpty( result ) && imagesArray.length > 0 ) {
+                    const response = await api.imageUpload({
+                            image: imagesArray[0],
+                            url: `api/Observation/Upload?ObservationID=${result}`
+                    })
+                    if( !isEmpty( response ) ) {
+                        return null
+                    }
                     navigation.navigate( 'Home' )
+                }else if( !isEmpty( result ) && imagesArray.length === 0 ) {
+                    navigation.navigate( 'Home' )
+                }else{
+                    return null
                 }
             }catch( error ) {
                 Toast.showWithGravity(error.message, Toast.LONG, Toast.CENTER);
@@ -366,8 +378,19 @@ export const AddObservationScreen = ( props ) => {
                     url: 'api/Observation/SaveObservation',
                     body: payload
                 })
-                if( !isEmpty( result ) ) {
+                if( !isEmpty( result ) && imagesArray.length > 0 ) {
+                    const response = await api.imageUpload({
+                            image: imagesArray[0],
+                            url: `api/Observation/Upload?ObservationID=${result}`
+                    })
+                    if( !isEmpty( response ) ) {
+                        return null
+                    }
                     navigation.navigate( 'Home' )
+                }else if( !isEmpty( result ) && imagesArray.length === 0 ) {
+                    navigation.navigate( 'Home' )
+                }else{
+                    return null
                 }
             }catch( error ) {
                 Toast.showWithGravity(error.message, Toast.LONG, Toast.CENTER);
@@ -415,8 +438,19 @@ export const AddObservationScreen = ( props ) => {
                     url: 'api/Observation/SaveAnonymousObservation',
                     body: payload
                 })
-                if( !isEmpty( result ) ) {
+                if( !isEmpty( result ) && imagesArray.length > 0 ) {
+                    const response = await api.imageUpload({
+                            image: imagesArray[0],
+                            url: `api/Observation/Upload?ObservationID=${result}`
+                    })
+                    if( !isEmpty( response ) ) {
+                        return null
+                    }
                     navigation.navigate( 'Home' )
+                }else if( !isEmpty( result ) && imagesArray.length === 0 ) {
+                    navigation.navigate( 'Home' )
+                }else{
+                    return null
                 }
             }catch( error ) {
                 Toast.showWithGravity(error.message, Toast.LONG, Toast.CENTER);
