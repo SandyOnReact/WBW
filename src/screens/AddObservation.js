@@ -20,6 +20,7 @@ import { Alert } from 'react-native'
 import Toast from 'react-native-simple-toast';
 import { useKeyboard } from '@react-native-community/hooks'
 import { StackActions } from '@react-navigation/native';
+import { Platform } from 'react-native'
 
 
 
@@ -486,6 +487,22 @@ export const AddObservationScreen = ( props ) => {
 
     const toggleSwitch = () => setIsEnabled(previousState => !previousState);
 
+    const MyCustomRightComponent = ( ) => {
+        return (
+            <View style={{ flexDirection: 'row'}}>
+                <Icon name= 'incognito' type='material-community' color='white'/>
+                <Switch
+                     trackColor={{ false: "gray", true: "violet" }}
+                     thumbColor={isEnabled ? "blue" : "white"}
+                     ios_backgroundColor='lightgray'
+                     onValueChange={toggleSwitch}
+                     value={isEnabled}
+                     style={{ marginHorizontal: '5%'}}
+                />
+            </View>
+        )
+    }
+
     return (
         <View style={{ flex: 1 }}>
             <View>
@@ -495,19 +512,9 @@ export const AddObservationScreen = ( props ) => {
                     containerStyle={{ backgroundColor: '#1e5873' }}
                     leftComponent={{ icon: 'arrow-back', type: 'ionicons', color: 'white', onPress: navigatetoBackScreen }}
                     centerComponent={{ text: 'Add Observation', style: { color: '#fff', fontSize: 16 } }}
+                    rightComponent={<MyCustomRightComponent />}
                 />
             </View>
-            <View style={{ marginVertical: '3%', marginHorizontal: '1%', flexDirection: 'row', alignItems: 'center' }}>
-                        <Text style={{ color: '#1e5873', fontSize: 16,marginStart:20}}>Submit as Anonymous</Text>
-                        <Switch
-                           // trackColor={{ false: "white", true: "white" }}
-                            //thumbColor={isEnabled ? "#white" : "white"}
-                            ios_backgroundColor='lightgray'
-                            onValueChange={toggleSwitch}
-                            value={isEnabled}
-                            style={{ marginHorizontal: '5%'}}
-                        />
-                    </View>
             <View style={{ flex: 0.9, marginHorizontal: '3%' }}>
                 <ScrollView style={{ flex: 1 }} nestedScrollEnabled={true}  keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
                     <View style={{ marginTop: '3%'}}>
@@ -616,6 +623,7 @@ export const AddObservationScreen = ( props ) => {
                             labelStyle={{ marginBottom: 5 }}
                             enablesReturnKeyAutomatically={true}
                             multiline={true}
+                            returnKeyLabel="done"
                             textAlignVertical="top"
                             placeholder="Type Something"
                             placeholderTextColor="#9EA0A4"
@@ -659,10 +667,10 @@ export const AddObservationScreen = ( props ) => {
             <View style={{ flex: 0.1}}>
                 {
                     isEnabled 
-                    ?  <View style={{ flex: 1, marginTop: '0%'}}>
+                    ?  <View style={{ flex: 0.8, marginTop: '5%'}}>
                             <Button containerStyle={{ marginHorizontal: '5%'}}  icon={{ name: 'incognito', type:'material-community', color:'white'}} title="Submit as Anonymous" titleStyle={{ fontSize: 14 }} buttonStyle={{ backgroundColor: '#1e5873', width: '100%'}} onPress={submitFormAnonymously} loading={isButtonAnonymously}/>
                         </View>
-                    :  <View style={{ flex: 1, marginTop: '0%', flexDirection: 'row', marginHorizontal: '0%', justifyContent: 'space-around', alignItems: 'center'}}>
+                    :  <View style={{ flex: 0.8, marginTop: '5%', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center'}}>
                             <Button icon={{ name: 'save', type: 'FontAwesome',color:'white'}} title="Submit" titleStyle={{ fontSize: 14 }}  buttonStyle={{ backgroundColor: '#1e5873'}} containerStyle={{ width: '45%'}} onPress={submitForm} loading={isButtonLoading}/>
                             <Button icon={{ name: 'content-save-edit', type:'material-community',color:'white' }}  title="Save & Come Back" titleStyle={{ fontSize: 14 }} buttonStyle={{ backgroundColor: '#1e5873'}} containerStyle={{ width: '45%'}} onPress={saveAndComeBack} loading={isButtonComeBack}/>
                         </View>
@@ -670,7 +678,7 @@ export const AddObservationScreen = ( props ) => {
             </View>
             {
                 keyboard.keyboardShown
-                ? <View style={{ height: '30%'}} />
+                ? <View style={{ height: Platform.OS === 'ios' ? '30%' : '3%' }} />
                 : null
             }
         </View>

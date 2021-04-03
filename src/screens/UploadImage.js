@@ -12,7 +12,7 @@ export const UploadImageScreen = ( props ) => {
     const [imageData, setImageData] = useState({})
     const STATUS_BAR_HEIGHT = getStatusBarHeight()
     const [imageUrl, setImageUrl] = useState('')
-    const [cameraType, setCameraType] = useState("front" | "back")
+    const [cameraType, setCameraType] = useState("front")
     const camera = useRef()
     const navigation = useNavigation()
 
