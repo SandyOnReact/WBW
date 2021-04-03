@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { memo } from 'react'
 import { View, Text } from 'react-native'
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Input } from 'react-native-elements'
@@ -9,7 +9,7 @@ const containerStyle = {
     borderColor: '#1e5873',
     borderRadius: 6
 }
-export const CustomDateTimePicker = (props) => {
+export const CustomDateTimePicker = memo( (props) => {
     const {
         customRightIcon,
         numOfLines,
@@ -60,7 +60,7 @@ export const CustomDateTimePicker = (props) => {
             {show && (
                 <DateTimePicker
                     testID="dateTimePicker"
-                    value={new Date()}
+                    value={value}
                     mode={mode}
                     minuteInterval={minuteInterval}
                     is24Hour={is24Hour}
@@ -70,7 +70,9 @@ export const CustomDateTimePicker = (props) => {
             )}
         </TouchableOpacity>
     )
-}
+}, ( prevProps, nextProps ) => {
+    prevProps.inputValue === nextProps.inputValue
+})
 
 CustomDateTimePicker.defaultProps = {
     mode: 'time',

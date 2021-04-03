@@ -26,7 +26,7 @@ import { Platform } from 'react-native'
 
 
 
-let date = new Date( )
+let date = new Date();
 let topicList = []
 const radioButtons = [
     { label: 'Yes', value: "1" },
@@ -180,7 +180,6 @@ export const AddObservationScreen = ( props ) => {
             setShow( false )
         }else {
             const currentDate = selectedDate || date;
-            setShow(false);
         if (mode === 'date') {
             const pickedDate = moment(currentDate).format("MM/DD/YYYY")
             setDateValue(pickedDate)
@@ -198,7 +197,6 @@ export const AddObservationScreen = ( props ) => {
             setShowTime( false )
         }else {
             const currentDate = selectedDate || date;
-        setShowTime(false);
             const pickedTime = moment(currentDate).format("hh:mm a")
             setTimeValue(pickedTime)
             date = currentDate
@@ -489,7 +487,7 @@ export const AddObservationScreen = ( props ) => {
 
     const MyCustomRightComponent = ( ) => {
         return (
-            <View style={{ flexDirection: 'row'}}>
+            <View style={{ alignItems: 'center', flexDirection: 'row'}}>
                 <Icon name= 'incognito' type='material-community' color='white'/>
                 <Switch
                      trackColor={{ false: "gray", true: "violet" }}
@@ -517,12 +515,13 @@ export const AddObservationScreen = ( props ) => {
             </View>
             <View style={{ flex: 0.9, marginHorizontal: '3%' }}>
                 <ScrollView style={{ flex: 1 }} nestedScrollEnabled={true}  keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-                    <View style={{ marginTop: '3%'}}>
+                    <View style={{ flex: 1, marginTop: '3%'}}>
                         <AutoCompleteInput
                             style={{ color: 'black', borderColor: 'red' }}
                             data={autoCompleteValue.length === 0 && !shouldHideResults ? autoCompleteList : filteredData}
                             renderItem={renderItem}
                             hideResults={shouldHideResults}
+                            containerStyle={{flex:1, zIndex: 1}}
                             renderTextInput={renderTextInput}
                             keyExtractor={(i) => String( i ) }
                             maxListHeight={400}

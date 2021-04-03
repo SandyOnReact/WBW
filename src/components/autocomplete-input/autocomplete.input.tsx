@@ -31,7 +31,8 @@ const STYLES = {
         maxHeight: 100,
         borderColor: "rgba(0,0,0,0)", 
         backgroundColor: "rgba(0,0,0,0)",
-        shadowColor:'white'
+        shadowColor:'white',
+        position:'relative'
     } as ViewStyle,
     inputContainerStyle: { 
         borderColor: "rgba(0,0,0,0)",
