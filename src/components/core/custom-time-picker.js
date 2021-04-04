@@ -85,7 +85,7 @@ TimePicker.defaultProps = {
     multiline: false,
     editable: false,
     label: '',
-    placeholder: 'Type Something',
+    placeholder: 'Type Here',
     placeholderTextColor: 'grey',
     textAlignVertical: 'center',
     inputContainerStyle: { },
