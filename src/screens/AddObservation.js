@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, memo } from 'react'
 import { View, ScrollView, Text, ActivityIndicator, Image, Switch } from 'react-native'
 import { Input, Header, Avatar,Button, Icon } from 'react-native-elements'
 import { useNavigation } from "@react-navigation/native"
@@ -22,23 +22,52 @@ import { useKeyboard } from '@react-native-community/hooks'
 import { StackActions } from '@react-navigation/native';
 import { Platform } from 'react-native'
 
-
-
-
-
 let date = new Date();
 let topicList = []
 const radioButtons = [
     { label: 'Yes', value: "1" },
     { label: 'No', value: "0" }
 ]
-/**
- * API for uploading Images
- * const result = await api.imageUpload({
-            image: imageData,
-            url: `api/Observation/Upload?ObservationID=${observationId}`
-    })
- */
+
+export const MyCustomRightComponent = memo( ( props ) => {
+    const { isEnabled, toggleSwitch } = props
+    return (
+        <View style={{ alignItems: 'center', flexDirection: 'row'}}>
+            <Icon name= 'incognito' type='material-community' color='white'/>
+            <Switch
+                 trackColor={{ false: "gray", true: "violet" }}
+                 thumbColor={isEnabled ? "blue" : "white"}
+                 ios_backgroundColor='lightgray'
+                 onValueChange={toggleSwitch}
+                 value={isEnabled}
+                 style={{ marginHorizontal: '5%'}}
+            />
+        </View>
+    )
+}, ( prevProps, nextProps) => {
+    prevProps.isEnabled === nextProps.isEnabled
+})
+export const HeaderComponent = ( props ) => {
+    const { isEnabled, toggleSwitch } = props
+    const STATUS_BAR_HEIGHT = getStatusBarHeight()
+    const navigation = useNavigation()
+    const navigatetoBackScreen = () => {
+        navigation.goBack()
+    }
+    return (
+        <View>
+            <Header
+                containerStyle={{ height: 56 + STATUS_BAR_HEIGHT }}
+                statusBarProps={{ barStyle: "light-content", translucent: true, backgroundColor: "transparent" }}
+                containerStyle={{ backgroundColor: '#1e5873' }}
+                leftComponent={{ icon: 'arrow-back', type: 'ionicons', color: 'white', onPress: navigatetoBackScreen }}
+                centerComponent={{ text: 'Add Observation', style: { color: '#fff', fontSize: 16 } }}
+                rightComponent={<MyCustomRightComponent  isEnabled={isEnabled} toggleSwitch={toggleSwitch}/>}
+            />
+        </View>
+    )
+
+}
 export const AddObservationScreen = ( props ) => {
 
     const { dashboard } = props.route.params
@@ -78,12 +107,8 @@ export const AddObservationScreen = ( props ) => {
     const keyboard = useKeyboard()
 
     const inputContainerStyle = { borderWidth: 1, borderColor: '#1e5873', borderRadius: 6 }
-    const STATUS_BAR_HEIGHT = getStatusBarHeight()
     const navigation = useNavigation()
-    const navigatetoBackScreen = () => {
-        navigation.goBack()
-    }
-
+ 
     const fetchUserInfoFromStorage = async () => {
         const userInfo = await AsyncStorage.getItem('USER_INFO');
         return userInfo != null ? JSON.parse(userInfo) : null;
@@ -175,33 +200,30 @@ export const AddObservationScreen = ( props ) => {
         )
     }
 
-    const onChange = (event, selectedDate) => {
-        if( event.type === "dismissed" ) {
-            setShow( false )
-        }else {
-            const currentDate = selectedDate || date;
-        if (mode === 'date') {
-            const pickedDate = moment(currentDate).format("MM/DD/YYYY")
-            setDateValue(pickedDate)
-            date = currentDate
-        } else {
-            const pickedTime = moment(currentDate).format("hh:mm a")
-            setTimeValue(pickedTime)
-            date = currentDate
-        }
-        }
+    const onChange = (selectedDate) => {
+        const currentDate = selectedDate || date;
+        const pickedDate = moment(currentDate).format("MM/DD/YYYY")
+        console.log( pickedDate )
+        setDateValue(pickedDate)
+        date = currentDate
+        hideDatePicker()
     };
     
-    const onChangeTime = (event, selectedDate) => {
-        if( event.type === "dismissed" ) {
-            setShowTime( false )
-        }else {
-            const currentDate = selectedDate || date;
-            const pickedTime = moment(currentDate).format("hh:mm a")
-            setTimeValue(pickedTime)
-            date = currentDate
-        }
+    const onChangeTime = (selectedTime) => {
+        const currentDate = selectedTime || date;
+        const pickedTime = moment(currentDate).format("hh:mm a")
+        setTimeValue(pickedTime)
+        date = currentDate
+        hideTimePicker()
     };
+
+    const hideDatePicker = ( ) => {
+        setShow( false )
+    }
+
+    const hideTimePicker = ( ) => {
+        setShowTime( false )
+    }
 
     const showMode = (currentMode) => {
         if( currentMode === 'date' ) {
@@ -485,34 +507,9 @@ export const AddObservationScreen = ( props ) => {
 
     const toggleSwitch = () => setIsEnabled(previousState => !previousState);
 
-    const MyCustomRightComponent = ( ) => {
-        return (
-            <View style={{ alignItems: 'center', flexDirection: 'row'}}>
-                <Icon name= 'incognito' type='material-community' color='white'/>
-                <Switch
-                     trackColor={{ false: "gray", true: "violet" }}
-                     thumbColor={isEnabled ? "blue" : "white"}
-                     ios_backgroundColor='lightgray'
-                     onValueChange={toggleSwitch}
-                     value={isEnabled}
-                     style={{ marginHorizontal: '5%'}}
-                />
-            </View>
-        )
-    }
-
     return (
         <View style={{ flex: 1 }}>
-            <View>
-                <Header
-                    containerStyle={{ height: 56 + STATUS_BAR_HEIGHT }}
-                    statusBarProps={{ barStyle: "light-content", translucent: true, backgroundColor: "transparent" }}
-                    containerStyle={{ backgroundColor: '#1e5873' }}
-                    leftComponent={{ icon: 'arrow-back', type: 'ionicons', color: 'white', onPress: navigatetoBackScreen }}
-                    centerComponent={{ text: 'Add Observation', style: { color: '#fff', fontSize: 16 } }}
-                    rightComponent={<MyCustomRightComponent />}
-                />
-            </View>
+            <HeaderComponent isEnabled={isEnabled} toggleSwitch={toggleSwitch}/>
             <View style={{ flex: 0.9, marginHorizontal: '3%' }}>
                 <ScrollView style={{ flex: 1 }} nestedScrollEnabled={true}  keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
                     <View style={{ flex: 1, marginTop: '3%'}}>
@@ -552,7 +549,8 @@ export const AddObservationScreen = ( props ) => {
                             mode={mode}
                             display="spinner"
                             value={date}
-                            onChange={onChange}
+                            onConfirm={onChange}
+                            onCancel={hideDatePicker}
                         />
                     </View>
                     <View>
@@ -566,7 +564,8 @@ export const AddObservationScreen = ( props ) => {
                             inputValue={timeValue}
                             mode={mode}
                             value={date}
-                            onChange={onChangeTime}
+                            onConfirm={onChangeTime}
+                            onCancel={hideTimePicker}
                         />
                     </View>
                     <View>

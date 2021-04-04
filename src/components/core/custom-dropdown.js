@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { memo } from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 import RNPickerSelect from 'react-native-picker-select'
 import { Icon } from "react-native-elements"
@@ -7,7 +7,7 @@ const defaultIcon = () => {
     return <Icon name="caret-down" color="#1e5873" size={24} type="ionicon" />;
 }
 
-export const CustomDropdown = ( props ) => {
+export const CustomDropdown = memo( ( props ) => {
     const {
         items,
         title,
@@ -25,6 +25,7 @@ export const CustomDropdown = ( props ) => {
     } = props
 
     const Icon = customIcon || defaultIcon
+
 
     const myPickerStyles = {
         ...styles, 
@@ -72,7 +73,9 @@ export const CustomDropdown = ( props ) => {
             }
         </View>
     )
-}
+}, ( prevProps, nextProps ) => {
+    prevProps.value === nextProps.value
+})
 
 
 const styles = StyleSheet.create({

@@ -1,6 +1,6 @@
 import React, { memo } from 'react'
 import { View, Text } from 'react-native'
-import DateTimePicker from '@react-native-community/datetimepicker';
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { Input } from 'react-native-elements'
 import { TouchableOpacity } from 'react-native';
 
@@ -30,7 +30,9 @@ export const CustomDateTimePicker = memo( (props) => {
         customLabelStyle,
         display,
         inputValue,
-        onPress
+        onPress,
+        onConfirm,
+        onCancel
     } = props
 
     const defaultRightIcon = {
@@ -57,17 +59,19 @@ export const CustomDateTimePicker = memo( (props) => {
                 inputStyle={{padding:10, textAlign: 'auto',fontSize:16}}
                 inputContainerStyle={[containerStyle, inputContainerStyle]}
             />
-            {show && (
-                <DateTimePicker
+                <DateTimePickerModal
                     testID="dateTimePicker"
                     value={value}
                     mode={mode}
+                    isVisible={show}
                     minuteInterval={minuteInterval}
                     is24Hour={is24Hour}
                     display={display}
                     onChange={onChange}
+                    onConfirm={onConfirm}
+                    onCancel={onCancel}
                 />
-            )}
+            
         </TouchableOpacity>
     )
 }, ( prevProps, nextProps ) => {
@@ -89,5 +93,7 @@ CustomDateTimePicker.defaultProps = {
     show: false,
     display: 'default',
     onRightIconPress: ( ) => null,
-    inputValue: ''
+    inputValue: '',
+    onConfirm: ( ) => null,
+    onCancel: ( ) => null
 }
