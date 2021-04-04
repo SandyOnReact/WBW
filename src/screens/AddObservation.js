@@ -203,7 +203,6 @@ export const AddObservationScreen = ( props ) => {
     const onChange = (selectedDate) => {
         const currentDate = selectedDate || date;
         const pickedDate = moment(currentDate).format("MM/DD/YYYY")
-        console.log( pickedDate )
         setDateValue(pickedDate)
         date = currentDate
         hideDatePicker()
