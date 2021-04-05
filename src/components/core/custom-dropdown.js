@@ -63,6 +63,7 @@ export const CustomDropdown = memo( ( props ) => {
                 touchableWrapperProps={touchableWrapperProps}
                 onOpen={onOpen}
                 Icon={Icon}
+                fixAndroidTouchableBug={true}
             />
             {
                 error && (
@@ -109,6 +110,5 @@ CustomDropdown.defaultProps = {
     textInputProps: { },
     touchableWrapperProps: { },
     onOpen: ( ) => null,
-    useNativeAndroidPickerStyle: false,
     customTitleStyle: { }
 }

@@ -32,7 +32,8 @@ export const CustomDateTimePicker = memo( (props) => {
         inputValue,
         onPress,
         onConfirm,
-        onCancel
+        onCancel,
+        maximumDate
     } = props
 
     const defaultRightIcon = {
@@ -68,6 +69,7 @@ export const CustomDateTimePicker = memo( (props) => {
                     is24Hour={is24Hour}
                     display={display}
                     onChange={onChange}
+                    maximumDate={maximumDate}
                     onConfirm={onConfirm}
                     onCancel={onCancel}
                 />
