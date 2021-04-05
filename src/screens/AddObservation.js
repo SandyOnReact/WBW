@@ -35,8 +35,8 @@ export const MyCustomRightComponent = memo( ( props ) => {
         <View style={{ alignItems: 'center', flexDirection: 'row'}}>
             <Icon name= 'incognito' type='material-community' color='white'/>
             <Switch
-                 trackColor={{ false: "gray", true: "violet" }}
-                 thumbColor={isEnabled ? "blue" : "white"}
+                 trackColor={{ false: "gray", true: "white" }}
+                 thumbColor={isEnabled ? "#68c151" : "white"}
                  ios_backgroundColor='lightgray'
                  onValueChange={toggleSwitch}
                  value={isEnabled}
@@ -281,7 +281,7 @@ export const AddObservationScreen = ( props ) => {
             <Input
                 label="*  Where did the Observation occur"
                 labelStyle={{ marginBottom: 5 }}
-                placeholder="Search Location"
+                placeholder="Click Here"
                 placeholderTextColor="#9EA0A4"
                 style={{ fontSize: 16 }}
                 value={autoCompleteValue}
@@ -531,7 +531,7 @@ export const AddObservationScreen = ( props ) => {
                             numberOfLines={3}
                             multiline={true}
                             textAlignVertical="top"
-                            placeholder="Type Something"
+                            placeholder="Type Here"
                             inputContainerStyle={{...inputContainerStyle, minHeight: 60, maxHeight: 90 }}
                             placeholderTextColor="#9EA0A4"
                             inputStyle={{padding:10, textAlign: 'auto',fontSize:16}}
@@ -576,7 +576,7 @@ export const AddObservationScreen = ( props ) => {
                             }}>  Follow up needed </Text>
                             <RadioForm style={{ marginLeft: 100 }}
                                 radio_props={radioButtons}
-                                initial={0}
+                                initial={1}
                                 formHorizontal={true}
                                 labelHorizontal={true}
                                 radioStyle={{ paddingRight: 50 }}
@@ -623,7 +623,7 @@ export const AddObservationScreen = ( props ) => {
                             multiline={true}
                             returnKeyLabel="done"
                             textAlignVertical="top"
-                            placeholder="Type Something"
+                            placeholder="Type Here"
                             placeholderTextColor="#9EA0A4"
                             inputStyle={{padding:10, textAlign: 'auto',fontSize:16}}
                             inputContainerStyle={{...inputContainerStyle, minHeight: 60, maxHeight: 90 }}
@@ -659,8 +659,8 @@ export const AddObservationScreen = ( props ) => {
                 </ScrollView>
             </View>
             <View style={{position: 'absolute', bottom: keyboard.keyboardShown ? '15%' : '10%' , right: 10, left: '85%'}}>
-                <Avatar size="medium" rounded icon={{ name: 'camera', type:'SimpleLineIcons'}} containerStyle={{ backgroundColor: '#1e5873'}} onPress={navigateToImagePicker}/>
-                <Avatar size="medium" rounded icon={{ name: 'attachment', type: 'MaterialCommunityIcons'}} containerStyle={{ marginTop: '30%' ,backgroundColor: '#1e5873'}}/>
+                <Avatar size="medium" rounded icon={{ name: 'camera', type:'feather'}} containerStyle={{ backgroundColor: '#1e5873'}} onPress={navigateToImagePicker}/>
+                <Avatar size="medium" rounded icon={{ name: 'file-pdf-o', type: 'font-awesome' }} containerStyle={{ marginTop: '30%',color:'red' ,backgroundColor: '#1e5873'}}/>
             </View>
             <View style={{ flex: 0.1}}>
                 {
