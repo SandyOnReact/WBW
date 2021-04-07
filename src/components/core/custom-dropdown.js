@@ -39,7 +39,6 @@ export const CustomDropdown = memo( ( props ) => {
         color: '#86939e',
         fontWeight: 'bold', 
         fontSize: 16, 
-        paddingLeft: '3%', 
         marginBottom: '1%'
     }
 
