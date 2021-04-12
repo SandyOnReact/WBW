@@ -21,6 +21,8 @@ import Toast from 'react-native-simple-toast';
 import { useKeyboard } from '@react-native-community/hooks'
 import { StackActions } from '@react-navigation/native';
 import { Platform } from 'react-native'
+import DocumentPicker from 'react-native-document-picker';
+
 
 let date = new Date();
 let topicList = []
@@ -506,6 +508,29 @@ export const AddObservationScreen = ( props ) => {
 
     const toggleSwitch = () => setIsEnabled(previousState => !previousState);
 
+    const documentPicker = ( ) => {
+        try {
+            const res = await DocumentPicker.pick({
+              type: [DocumentPicker.types.allFiles],
+            });
+            console.log(
+              res.uri,
+              res.type, 
+              res.name,
+              res.size
+            );
+          } catch (err) {
+            if (DocumentPicker.isCancel(err)) {
+              // User cancelled the picker, exit any dialogs or menus and move on
+              Toast.showWithGravity(err.Message, Toast.LONG, Toast.TOP);
+              return null
+            } else {
+              Toast.showWithGravity(err.Message, Toast.LONG, Toast.TOP);
+              return null
+            }
+          }
+    }
+
     return (
         <View style={{ flex: 1 }}>
             <HeaderComponent isEnabled={isEnabled} toggleSwitch={toggleSwitch}/>
@@ -660,7 +685,7 @@ export const AddObservationScreen = ( props ) => {
             </View>
             <View style={{position: 'absolute', bottom: keyboard.keyboardShown ? '15%' : '10%' , right: 10, left: '85%'}}>
                 <Avatar size="medium" rounded icon={{ name: 'camera', type:'feather'}} containerStyle={{ backgroundColor: '#1e5873'}} onPress={navigateToImagePicker}/>
-                <Avatar size="medium" rounded icon={{ name: 'file-pdf-o', type: 'font-awesome' }} containerStyle={{ marginTop: '30%',color:'red' ,backgroundColor: '#1e5873'}}/>
+                <Avatar size="medium" rounded icon={{ name: 'file-pdf-o', type: 'font-awesome' }} containerStyle={{ marginTop: '30%',color:'red' ,backgroundColor: '#1e5873'}} onPress={documentPicker}/>
             </View>
             <View style={{ flex: 0.1}}>
                 {
