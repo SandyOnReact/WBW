@@ -74,6 +74,34 @@ const imageUpload = async (props) => {
     return result;
 }
 
+const documentUpload = async (props) => {
+    const { image, url } = props
+    const formdata = createFormData( image )
+    
+    var requestOptions = {
+        method: 'POST',
+        body: formdata,
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        },
+        redirect: 'follow'
+      };
+    const apiUrl = `${config.API_URL}/${url}`
+    const result = await fetch(apiUrl, requestOptions)
+        .then((response) => {
+            return response.text()
+        })
+        .then((res) => {
+            Toast.showWithGravity('File Saved Successfully', Toast.LONG, Toast.CENTER);
+            return res;
+        })
+        .catch(error => {
+            Toast.showWithGravity(error.message || 'Something went wrong', Toast.LONG, Toast.CENTER);
+            return null;
+        })
+    return result;
+}
+
 const get = async (props) => {
     const {
         url

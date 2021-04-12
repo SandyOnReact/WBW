@@ -104,8 +104,9 @@ export const AddObservationScreen = ( props ) => {
     const [isButtonAnonymously, setIsButtonAnonymously] = useState( false )
     const [isButtonComeBack, setIsButtonComeBack] = useState( false )
     const [isEnabled, setIsEnabled] = useState( false )
-    const [imagesArray, setImagesArray] = useState( [] )
-    
+    const [imagesObject, setImagesObject] = useState( {} )
+    const [docType,setDocType] = useState( '' )
+    const [documentObject,setDocumentObject] = useState( { } )
     const keyboard = useKeyboard()
 
     const inputContainerStyle = { borderWidth: 1, borderColor: '#1e5873', borderRadius: 6 }
@@ -341,16 +342,16 @@ export const AddObservationScreen = ( props ) => {
                     url: 'api/Observation/SaveAndComeBackObservation',
                     body: payload
                 })
-                if( !isEmpty( result ) && imagesArray.length > 0 ) {
+                if( !isEmpty( result ) && !isEmpty( imagesObject )) {
                     const response = await api.imageUpload({
-                            image: imagesArray[0],
+                            image: imagesObject,
                             url: `api/Observation/Upload?ObservationID=${result}`
                     })
                     if( isEmpty( response ) ) {
                         return null
                     }
                     navigation.navigate( 'Home' )
-                }else if( !isEmpty( result ) && imagesArray.length === 0 ) {
+                }else if( !isEmpty( result ) &&  isEmpty( imagesObject )) {
                     navigation.navigate( 'Home' )
                 }else{
                     return null
@@ -401,16 +402,16 @@ export const AddObservationScreen = ( props ) => {
                     url: 'api/Observation/SaveObservation',
                     body: payload
                 })
-                if( !isEmpty( result ) && imagesArray.length > 0 ) {
+                if( !isEmpty( result ) && !isEmpty( imagesObject ) ) {
                     const response = await api.imageUpload({
-                            image: imagesArray[0],
+                            image: imagesObject,
                             url: `api/Observation/Upload?ObservationID=${result}`
                     })
                     if( isEmpty( response ) ) {
                         return null
                     }
                     navigation.navigate( 'Home' )
-                }else if( !isEmpty( result ) && imagesArray.length === 0 ) {
+                }else if( !isEmpty( result ) && isEmpty( imagesObject ) ) {
                     navigation.navigate( 'Home' )
                 }else{
                     return null
@@ -461,16 +462,22 @@ export const AddObservationScreen = ( props ) => {
                     url: 'api/Observation/SaveAnonymousObservation',
                     body: payload
                 })
-                if( !isEmpty( result ) && imagesArray.length > 0 ) {
+
+                // case 1: result null, and both empty --> return nul
+                // case 2: result present but not images/document --> navigate to Home screen
+                // case 3: result not present, image present --> return null
+                // case 4: result present, image present but not document --> upload image
+                // case 5: all are present --> upload all
+                if( !isEmpty( result ) && !isEmpty( imagesObject ) ) {
                     const response = await api.imageUpload({
-                            image: imagesArray[0],
+                            image: imagesObject,
                             url: `api/Observation/Upload?ObservationID=${result}`
                     })
                     if( isEmpty( response ) ) {
                         return null
                     }
                     navigation.navigate( 'Home' )
-                }else if( !isEmpty( result ) && imagesArray.length === 0 ) {
+                }else if( !isEmpty( result ) && isEmpty( imagesObject ) ) {
                     navigation.navigate( 'Home' )
                 }else{
                     return null
@@ -487,7 +494,7 @@ export const AddObservationScreen = ( props ) => {
 
     const onImageReceive = ( url, imageData ) => {
         const imageObj = { ...imageData, uri: url }
-        setImagesArray( imagesArray => [...imagesArray, imageObj ])
+        setImagesObject( imageObj )
     }
 
     const navigateToImagePicker = ( ) => {
@@ -508,17 +515,13 @@ export const AddObservationScreen = ( props ) => {
 
     const toggleSwitch = () => setIsEnabled(previousState => !previousState);
 
-    const documentPicker = ( ) => {
+    const documentPicker = async ( ) => {
         try {
             const res = await DocumentPicker.pick({
-              type: [DocumentPicker.types.allFiles],
+              type: [DocumentPicker.types.pdf, DocumentPicker.types.doc,DocumentPicker.types.docx,DocumentPicker.types.csv],
             });
-            console.log(
-              res.uri,
-              res.type, 
-              res.name,
-              res.size
-            );
+            setDocumentObject( res )
+            setDocType( res.type )
           } catch (err) {
             if (DocumentPicker.isCancel(err)) {
               // User cancelled the picker, exit any dialogs or menus and move on
@@ -529,6 +532,41 @@ export const AddObservationScreen = ( props ) => {
               return null
             }
           }
+    }
+
+    const renderImage = ( ) => {
+        if( !isEmpty( imagesObject ) ) {
+            return (
+                <View style={{ width: 100, height: 100, marginHorizontal: '5%', flexDirection: 'row'}}>
+                    <Image
+                        source={{ uri: imagesObject.uri }}
+                        style={{
+                            width: 100,
+                            height: 100,
+                            borderRadius: 8,
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                            alignItems: 'center'
+                        }}
+                    />
+                </View>
+            )
+        }else{
+            return null
+        }
+    }
+
+    const renderDocument = ( ) => {
+        if( !isEmpty( documentObject ) ) {
+            return (
+                <View style={{ width: 100, height: 100, justifyContent: 'center' , alignItems: 'center'}}>
+                    <Icon name="document-outline" size={64} type="ionicon" />
+                    <Text>{documentObject?.name}</Text>
+                </View>
+            )
+        }else{
+            return null
+        }
     }
 
     return (
@@ -657,31 +695,10 @@ export const AddObservationScreen = ( props ) => {
                             value={observation}
                         />
                     </View>
-                    <View style={{ flexDirection: 'row' }}>
-                    {
-                        imagesArray.length > 0 &&
-                    imagesArray.map( ( item, index ) => {
-                        if( index >= 2 ) {
-                            return null
-                        }
-                        return (
-                            <View key={index} style={{ width: 100, height: 100, marginHorizontal: '5%', flexDirection: 'row'}}>
-                                <Image
-                                    source={{ uri: item.uri }}
-                                    style={{
-                                        width: 100,
-                                        height: 100,
-                                        borderRadius: 8,
-                                        flexDirection: 'row',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center'
-                                    }}
-                                />
-                            </View>
-                        )
-                    } )
-                        }
-                        </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 15 }}>
+                        {renderImage()}
+                        {renderDocument()}
+                    </View>
                 </ScrollView>
             </View>
             <View style={{position: 'absolute', bottom: keyboard.keyboardShown ? '15%' : '10%' , right: 10, left: '85%'}}>
