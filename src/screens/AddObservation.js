@@ -538,7 +538,7 @@ export const AddObservationScreen = ( props ) => {
                 <ScrollView style={{ flex: 1 }} nestedScrollEnabled={true}  keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
                     <View style={{ flex: 1, marginTop: '3%'}}>
                         <AutoCompleteInput
-                            style={{ color: 'black', borderColor: 'red' }}
+                            style={{ color: 'black', borderColor: 'red', fontSize:'16'}}
                             data={autoCompleteValue.length === 0 && !shouldHideResults ? autoCompleteList : filteredData}
                             renderItem={renderItem}
                             hideResults={shouldHideResults}
@@ -546,6 +546,7 @@ export const AddObservationScreen = ( props ) => {
                             renderTextInput={renderTextInput}
                             keyExtractor={(i) => String( i ) }
                             maxListHeight={400}
+                            fontSize={14}
                             flatListProps={{ nestedScrollEnabled: true }}
                         />
                     </View>
@@ -694,8 +695,8 @@ export const AddObservationScreen = ( props ) => {
                             <Button containerStyle={{ marginHorizontal: '5%'}}  icon={{ name: 'incognito', type:'material-community', color:'white'}} title="Submit as Anonymous" titleStyle={{ fontSize: 14 }} buttonStyle={{ backgroundColor: '#1e5873', width: '100%', padding: 15 }} onPress={submitFormAnonymously} loading={isButtonAnonymously}/>
                         </View>
                     :  <View style={{ flex: 0.8, marginTop: '3%', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center'}}>
-                            <Button icon={{ name: 'save', type: 'FontAwesome',color:'white'}} title="Submit" titleStyle={{ fontSize: 14 }}  buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} containerStyle={{ width: '42%'}} onPress={submitForm} loading={isButtonLoading}/>
-                            <Button icon={{ name: 'content-save-edit', type:'material-community',color:'white' }}  title="Save & Come Back" titleStyle={{ fontSize: 14 }} buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} containerStyle={{ width: '42%'}} onPress={saveAndComeBack} loading={isButtonComeBack}/>
+                            <Button  title="Submit" titleStyle={{ fontSize: 14 ,fontWeight:'bold'}}  buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} containerStyle={{ width: '42%'}} onPress={submitForm} loading={isButtonLoading}/>
+                            <Button  title="Save & Come Back" titleStyle={{ fontSize: 14 , fontWeight:'bold'}} buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} containerStyle={{ width: '42%'}} onPress={saveAndComeBack} loading={isButtonComeBack}/>
                         </View>
                 }
             </View>
