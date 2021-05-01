@@ -39,7 +39,7 @@ function createFormData( media ) {
         data.append( "file", {
             name: filename,
             uri: localUri,
-            type: media.mime || "image/jpeg",
+            type: media.type || media.mime || "image/jpeg",
         } )
     }
 
@@ -75,8 +75,8 @@ const imageUpload = async (props) => {
 }
 
 const documentUpload = async (props) => {
-    const { image, url } = props
-    const formdata = createFormData( image )
+    const { document, url } = props
+    const formdata = createFormData( document )
     
     var requestOptions = {
         method: 'POST',
@@ -101,6 +101,53 @@ const documentUpload = async (props) => {
         })
     return result;
 }
+
+
+function createFormDataForAll( media ) {
+    const data = new FormData()
+    if ( media && media.length > 0 ) {
+        media.map( item => {
+            const localUri = item.uri
+            const filename = localUri.split( "/" ).pop()
+            data.append( "file", {
+                name: filename,
+                uri: localUri,
+                type: item.mime || item.type || "image/jpeg",
+            } )
+        })
+    }
+
+    return data
+}
+
+const uploadAll = async (props) => {
+    const { images, document, url } = props
+    const formdata = createFormDataForAll( [images,document] )
+    
+    var requestOptions = {
+        method: 'POST',
+        body: formdata,
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        },
+        redirect: 'follow'
+      };
+    const apiUrl = `${config.API_URL}/${url}`
+    const result = await fetch(apiUrl, requestOptions)
+        .then((response) => {
+            return response.text()
+        })
+        .then((res) => {
+            Toast.showWithGravity('File Saved Successfully', Toast.LONG, Toast.CENTER);
+            return res;
+        })
+        .catch(error => {
+            Toast.showWithGravity(error.message || 'Something went wrong', Toast.LONG, Toast.CENTER);
+            return null;
+        })
+    return result;
+}
+
 
 const get = async (props) => {
     const {
@@ -128,5 +175,7 @@ const get = async (props) => {
 export const api = {
     get,
     post,
-    imageUpload
+    imageUpload,
+    documentUpload,
+    uploadAll
 }

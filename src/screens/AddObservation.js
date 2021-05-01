@@ -342,16 +342,42 @@ export const AddObservationScreen = ( props ) => {
                     url: 'api/Observation/SaveAndComeBackObservation',
                     body: payload
                 })
-                if( !isEmpty( result ) && !isEmpty( imagesObject )) {
+                // case 1: if not result
+                // case 2: if result but not images and/or document.
+                // case 3: if result and imagesObject but not documentObject
+                // case 4: if result and documentObject but not imagesObject.
+                // case 5: if all are present.
+                if( isEmpty( result ) ) {
+                    return null
+                }else if( !isEmpty( result ) && isEmpty( imagesObject ) && isEmpty( documentObject ) ) {
+                    navigation.navigate( 'Home' )
+                }else if( !isEmpty( result ) && !isEmpty( imagesObject ) && isEmpty( documentObject ) ) {
                     const response = await api.imageUpload({
-                            image: imagesObject,
-                            url: `api/Observation/Upload?ObservationID=${result}`
+                        image: imagesObject,
+                        url: `api/Observation/Upload?ObservationID=${result.ObservationID}`
                     })
                     if( isEmpty( response ) ) {
                         return null
                     }
                     navigation.navigate( 'Home' )
-                }else if( !isEmpty( result ) &&  isEmpty( imagesObject )) {
+                }else if( !isEmpty( result) && !isEmpty( documentObject ) && isEmpty( imagesObject ) ) {
+                    const response = await api.documentUpload({
+                        document: documentObject,
+                        url: `api/Observation/Upload?ObservationID=${result.ObservationID}`
+                    })
+                    if( isEmpty( response ) ) {
+                        return null
+                    }
+                    navigation.navigate( 'Home' )
+                }else if( !isEmpty( result ) && !isEmpty( imagesObject ) && !isEmpty( documentObject ) ) {
+                    const response = await api.uploadAll({
+                        images: imagesObject,
+                        document: documentObject,
+                        url: `api/Observation/Upload?ObservationID=${result.ObservationID}`
+                    })
+                    if( isEmpty( response ) ) {
+                        return null
+                    }
                     navigation.navigate( 'Home' )
                 }else{
                     return null
@@ -402,16 +428,42 @@ export const AddObservationScreen = ( props ) => {
                     url: 'api/Observation/SaveObservation',
                     body: payload
                 })
-                if( !isEmpty( result ) && !isEmpty( imagesObject ) ) {
+                // case 1: if not result
+                // case 2: if result but not images and/or document.
+                // case 3: if result and imagesObject but not documentObject
+                // case 4: if result and documentObject but not imagesObject.
+                // case 5: if all are present.
+                if( isEmpty( result ) ) {
+                    return null
+                }else if( !isEmpty( result ) && isEmpty( imagesObject ) && isEmpty( documentObject ) ) {
+                    navigation.navigate( 'Home' )
+                }else if( !isEmpty( result ) && !isEmpty( imagesObject ) && isEmpty( documentObject ) ) {
                     const response = await api.imageUpload({
-                            image: imagesObject,
-                            url: `api/Observation/Upload?ObservationID=${result}`
+                        image: imagesObject,
+                        url: `api/Observation/Upload?ObservationID=${result.ObservationID}`
                     })
                     if( isEmpty( response ) ) {
                         return null
                     }
                     navigation.navigate( 'Home' )
-                }else if( !isEmpty( result ) && isEmpty( imagesObject ) ) {
+                }else if( !isEmpty( result) && !isEmpty( documentObject ) && isEmpty( imagesObject ) ) {
+                    const response = await api.documentUpload({
+                        document: documentObject,
+                        url: `api/Observation/Upload?ObservationID=${result.ObservationID}`
+                    })
+                    if( isEmpty( response ) ) {
+                        return null
+                    }
+                    navigation.navigate( 'Home' )
+                }else if( !isEmpty( result ) && !isEmpty( imagesObject ) && !isEmpty( documentObject ) ) {
+                    const response = await api.uploadAll({
+                        images: imagesObject,
+                        document: documentObject,
+                        url: `api/Observation/Upload?ObservationID=${result.ObservationID}`
+                    })
+                    if( isEmpty( response ) ) {
+                        return null
+                    }
                     navigation.navigate( 'Home' )
                 }else{
                     return null
@@ -462,26 +514,46 @@ export const AddObservationScreen = ( props ) => {
                     url: 'api/Observation/SaveAnonymousObservation',
                     body: payload
                 })
-
-                // case 1: result null, and both empty --> return nul
-                // case 2: result present but not images/document --> navigate to Home screen
-                // case 3: result not present, image present --> return null
-                // case 4: result present, image present but not document --> upload image
-                // case 5: all are present --> upload all
-                if( !isEmpty( result ) && !isEmpty( imagesObject ) ) {
+                // case 1: if not result
+                // case 2: if result but not images and/or document.
+                // case 3: if result and imagesObject but not documentObject
+                // case 4: if result and documentObject but not imagesObject.
+                // case 5: if all are present.
+                if( isEmpty( result ) ) {
+                    return null
+                }else if( !isEmpty( result ) && isEmpty( imagesObject ) && isEmpty( documentObject ) ) {
+                    navigation.navigate( 'Home' )
+                }else if( !isEmpty( result ) && !isEmpty( imagesObject ) && isEmpty( documentObject ) ) {
                     const response = await api.imageUpload({
-                            image: imagesObject,
-                            url: `api/Observation/Upload?ObservationID=${result}`
+                        image: imagesObject,
+                        url: `api/Observation/Upload?ObservationID=${result.ObservationID}`
                     })
                     if( isEmpty( response ) ) {
                         return null
                     }
                     navigation.navigate( 'Home' )
-                }else if( !isEmpty( result ) && isEmpty( imagesObject ) ) {
+                }else if( !isEmpty( result) && !isEmpty( documentObject ) && isEmpty( imagesObject ) ) {
+                    const response = await api.documentUpload({
+                        document: documentObject,
+                        url: `api/Observation/Upload?ObservationID=${result.ObservationID}`
+                    })
+                    if( isEmpty( response ) ) {
+                        return null
+                    }
+                    navigation.navigate( 'Home' )
+                }else if( !isEmpty( result ) && !isEmpty( imagesObject ) && !isEmpty( documentObject ) ) {
+                    const response = await api.uploadAll({
+                        images: imagesObject,
+                        document: documentObject,
+                        url: `api/Observation/Upload?ObservationID=${result.ObservationID}`
+                    })
+                    if( isEmpty( response ) ) {
+                        return null
+                    }
                     navigation.navigate( 'Home' )
                 }else{
                     return null
-                }
+                }  
             }catch( error ) {
                 Toast.showWithGravity(error.message, Toast.LONG, Toast.CENTER);
                 return null
