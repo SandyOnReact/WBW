@@ -45,12 +45,18 @@ export const HomeScreen = ({ navigation }) => {
     }, [])
 
     const onDashboardPress = (dashboard) => {
-        navigation.navigate('History', {
-            userId: userInfo.UserID,
-            levelId: userInfo.LevelID,
-            category: dashboard.Category,
-            dashboard: dashboard
-        })
+        if( dashboard.Category === "POC" ) {
+            navigation.navigate( 'DynamicControls', {
+                dashboard: dashboard
+            } )
+        }else{         
+            navigation.navigate('History', {
+                userId: userInfo.UserID,
+                levelId: userInfo.LevelID,
+                category: dashboard.Category,
+                dashboard: dashboard
+            })
+        }
     }
 
     const renderItem = ({ item }) => {
