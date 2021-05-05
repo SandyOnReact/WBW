@@ -9,15 +9,33 @@ import { CustomDropdown } from '../components/core/custom-dropdown'
 import { getStatusBarHeight } from 'react-native-status-bar-height'
 import { useNavigation } from "@react-navigation/native"
 
-
-
-
 const inputContainerStyle = { borderWidth: 1, borderColor: '#1e5873', borderRadius: 6 }
+
+const CustomInput = ( value ) => {
+    const [inputValue,setInputValue] = useState( value.value )
+    return (
+        <View>
+            <Input
+                label={value.ControlLabel}
+                labelStyle={{ marginBottom: 5 }}
+                textAlignVertical="top"
+                placeholder="Type Here"
+                placeholderTextColor="#9EA0A4"
+                inputContainerStyle={inputContainerStyle}
+                inputStyle={{padding:10, textAlign: 'auto',fontSize:16}}
+                value={inputValue}
+                onChangeText={(text) => setInputValue( text )}
+                editable={value.isEditable ? value.isEditable : true }
+            />
+        </View>
+    )
+}
 
 export const DynamicControlsScreen = ( props ) => {
     const route = useRoute();
     const STATUS_BAR_HEIGHT = getStatusBarHeight()
     const [dynamicControls,SetDynamicControls] = useState( [] | undefined )
+    const [inputValue,setInputValue] = useState( '' )
     const navigation = useNavigation()
     
     useEffect( ( ) => {
@@ -51,19 +69,7 @@ export const DynamicControlsScreen = ( props ) => {
                         switch( value.ControlType ) {
                             case 'TextBox': {
                                 return (
-                                    <View>
-                                        <Input
-                                            label={value.ControlLabel}
-                                            labelStyle={{ marginBottom: 5 }}
-                                            textAlignVertical="top"
-                                            placeholder="Type Here"
-                                            placeholderTextColor="#9EA0A4"
-                                            inputContainerStyle={inputContainerStyle}
-                                            inputStyle={{padding:10, textAlign: 'auto',fontSize:16}}
-                                            value={value.SelectedValue}
-                                            editable={value.isEditable ? value.isEditable : true }
-                                        />
-                                    </View>
+                                   <CustomInput value={value.SelectedValue} />
                                 )
                             }
                             case 'DropDownList':
@@ -104,7 +110,7 @@ export const DynamicControlsScreen = ( props ) => {
                 leftComponent={{ icon: 'arrow-back', type: 'ionicons', color: 'white', onPress: navigatetoBackScreen }}
                 centerComponent={{ text: 'Dynamic Controls', style: { color: '#fff', fontSize: 16 } }}
             />
-            <View style={{ flex: 0.92 }}>
+            <View style={{ flex: 0.94 }}>
                 <FlatList 
                     data={dynamicControls}
                     renderItem={renderItem}
@@ -113,7 +119,7 @@ export const DynamicControlsScreen = ( props ) => {
                     ItemSeparatorComponent={ItemSeparatorComponent}
                 />
             </View>
-            <View style={{ flex: 0.1, marginVertical: '3%', marginHorizontal: '3%' }}>
+            <View style={{ flex: 0.06, marginVertical: '3%', marginHorizontal: '3%' }}>
                 <Button  title="Submit" titleStyle={{ fontSize: 14 ,fontWeight:'bold'}}  buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} />
             </View>
         </View>
