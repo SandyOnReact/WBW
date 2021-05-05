@@ -11,8 +11,8 @@ import { useNavigation } from "@react-navigation/native"
 
 const inputContainerStyle = { borderWidth: 1, borderColor: '#1e5873', borderRadius: 6 }
 
-const CustomInput = ( value ) => {
-    const [inputValue,setInputValue] = useState( value.value )
+const CustomInput = ( { value } ) => {
+    const [inputValue,setInputValue] = useState( value.SelectedValue )
     return (
         <View>
             <Input
@@ -22,20 +22,40 @@ const CustomInput = ( value ) => {
                 placeholder="Type Here"
                 placeholderTextColor="#9EA0A4"
                 inputContainerStyle={inputContainerStyle}
-                inputStyle={{padding:10, textAlign: 'auto',fontSize:16}}
+                inputStyle={{ padding:10, textAlign: 'auto',fontSize:16 }}
+                containerStyle={{ margin: 0 }}
+                errorStyle={{ margin: -5 }}
                 value={inputValue}
                 onChangeText={(text) => setInputValue( text )}
-                editable={value.isEditable ? value.isEditable : true }
+                editable={value.LinkText === 'Edit' ? true : false }
             />
         </View>
     )
 }
 
+const EditableDropdown = ( { value } ) => {
+    const controlValues = value.ControlValues.map( item => {
+        const control = { label: item.ID, value: item.Value }
+        return control
+    })
+    const [dropdownValue,setDropdownValue] = useState( value.SelectedValue )
+    return (
+        <View>
+            <CustomDropdown
+                title={value.ControlLabel}
+                items={controlValues}
+                value={dropdownValue}
+                onValueChange={(value) => setDropdownValue( value ) }
+            />
+        </View>
+    )
+}
+
+let dropdownValue = ''
 export const DynamicControlsScreen = ( props ) => {
     const route = useRoute();
     const STATUS_BAR_HEIGHT = getStatusBarHeight()
     const [dynamicControls,SetDynamicControls] = useState( [] | undefined )
-    const [inputValue,setInputValue] = useState( '' )
     const navigation = useNavigation()
     
     useEffect( ( ) => {
@@ -49,7 +69,8 @@ export const DynamicControlsScreen = ( props ) => {
         if( isEmpty( result ) ) {
             return null
         }
-        SetDynamicControls( result )
+        const sortedArrayByGroupOrder = _.sortBy(result, [function(o) { return o.GroupOrder; }]);
+        SetDynamicControls( sortedArrayByGroupOrder )
     }
 
     const navigatetoBackScreen = () => {
@@ -69,21 +90,12 @@ export const DynamicControlsScreen = ( props ) => {
                         switch( value.ControlType ) {
                             case 'TextBox': {
                                 return (
-                                   <CustomInput value={value.SelectedValue} />
+                                   <CustomInput value={value} />
                                 )
                             }
-                            case 'DropDownList':
-                                const controlValues = value.ControlValues.map( item => {
-                                const control = { label: item.ID, value: item.Value }
-                                return control
-                            })
+                            case 'DropDownList':                               
                                 return (
-                                    <View>
-                                        <CustomDropdown
-                                            title={value.ControlLabel}
-                                            items={controlValues}
-                                        />
-                                    </View>
+                                   <EditableDropdown value={value} />
                                 )
                             case 'RadioButton':
                                 return null
