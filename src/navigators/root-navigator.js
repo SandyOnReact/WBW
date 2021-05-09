@@ -12,6 +12,8 @@ import { AddObservationScreen } from '../screens/AddObservation'
 import{UploadImageScreen} from '../screens/UploadImage'
 import{CropImageScreen} from '../screens/CropImage'
 import { DynamicControlsScreen } from '../screens/DynamicControlsScreen'
+import { AuditAndInspectionScreen } from '../screens/AuditAndInspectionScreen'
+import { AddInspection } from "../screens/AddInspection"
 
 //TODO: implement Authorization flow and move auth screens to Auth Navigator and Application Navigator.
 export const RootNavigator = ( ) => {
@@ -48,6 +50,8 @@ export const RootNavigator = ( ) => {
                 <Stack.Screen name="Login" component={LoginScreen} />
                 <Stack.Screen name="Home" component={HomeScreen} />
                 <Stack.Screen name="DynamicControls" component={DynamicControlsScreen} />
+                <Stack.Screen name="AuditAndInspectionScreen" component={AuditAndInspectionScreen} />
+                <Stack.Screen name="AddInspection" component={AddInspection} />
                 <Stack.Screen name="History" component={HistoryScreen} />
                 <Stack.Screen name="AddObservation" component={AddObservationScreen} />
                 <Stack.Screen name="UploadImage" component={UploadImageScreen} />

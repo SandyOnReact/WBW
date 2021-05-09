@@ -31,7 +31,7 @@ export const HistoryScreen = ({ route, navigation }) => {
     const fetchHistoryData = async ( page ) => {
         const token = await AsyncStorage.getItem('Token')
         isLoading = true
-                const result = await api.post({
+        const result = await api.post({
             url: 'api/Observation/GetObservationHistory_WithPaging',
             body: {
                 UserID: userId,

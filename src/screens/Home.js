@@ -49,7 +49,13 @@ export const HomeScreen = ({ navigation }) => {
             navigation.navigate( 'DynamicControls', {
                 dashboard: dashboard
             } )
-        }else{         
+        }else if( dashboard.Type === "Audit-originator" ) {
+            navigation.navigate( 'AuditAndInspectionScreen', {
+                dashboard: dashboard,
+                userId: userInfo.UserID
+            } )
+        }
+        else{         
             navigation.navigate('History', {
                 userId: userInfo.UserID,
                 levelId: userInfo.LevelID,
