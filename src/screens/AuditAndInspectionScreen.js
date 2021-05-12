@@ -176,6 +176,7 @@ export const AuditAndInspectionScreen = ({ route, navigation }) => {
     const { dashboard, userId } = route.params
     const [auditList,setAuditList] = useState( [] )
     const [templateDetails,setTemplateDetails] = useState( {} )
+    const [shouldLoad,setShouldLoad] = useState( false )
 
     const STATUS_BAR_HEIGHT = getStatusBarHeight()
 
@@ -186,7 +187,7 @@ export const AuditAndInspectionScreen = ({ route, navigation }) => {
             isLoading = false,
             shouldFetch = true
         }
-    }, [ page ])
+    }, [])
 
     // const fetchAuditData = async ( page ) => {
     //     const token = await AsyncStorage.getItem('Token')
@@ -216,15 +217,16 @@ export const AuditAndInspectionScreen = ({ route, navigation }) => {
     const fetchAuditData = async ( page ) => {
         const token = await AsyncStorage.getItem('Token')
         isLoading = true
+        const body = {
+            UserID: userId,
+            AccessToken: token,
+            CustomFormID: dashboard.CustomFormID,
+            AuditAndInspectionTemplateID: dashboard.AuditandInspectionTemplateID,
+            PageNumber: String( page )
+        }
         const result = await api.post({
             url: 'api/AuditAndInspection/GetHistory',
-            body: {
-                UserID: userId,
-                AccessToken: token,
-                CustomFormID: dashboard.CustomFormID,
-                AuditAndInspectionTemplateID: dashboard.AuditandInspectionTemplateID,
-                PageNumber: String( page )
-            }
+            body: body
         })
         if( isEmpty( result ) || isEmpty( result.AudiAndInspectionListing ) || result.Message === "No Records Found" || result.Message === "Invalid User Token" || result === undefined ) {
             isLoading = false
@@ -232,7 +234,7 @@ export const AuditAndInspectionScreen = ({ route, navigation }) => {
             return null
         }
         setAuditList( auditList => [...auditList, ...result.AudiAndInspectionListing ] )
-        setTemplateDetails( result.TemplateDetails )
+        setTemplateDetails( result.TemplateDetails )    
         shouldFetch = true
         isLoading = false
         return result;
@@ -253,16 +255,16 @@ export const AuditAndInspectionScreen = ({ route, navigation }) => {
     }
 
     const loadMoreResults = ( ) => {
-        console.log( 'loading more -->')
         if( shouldFetch && !onEndReachedCalledDuringMomentum ) {
             page = page + 1
+            setShouldLoad( true )
             fetchAuditData( page )
             onEndReachedCalledDuringMomentum = true
         }
     } 
 
     const ListFooterComponent = ( ) => {
-        if( isLoading ) {
+        if( shouldFetch && !onEndReachedCalledDuringMomentum ) {
             return (
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center'}}>
                 <ActivityIndicator color="red"/>
@@ -294,7 +296,7 @@ export const AuditAndInspectionScreen = ({ route, navigation }) => {
                     <FlatList 
                         data={auditList}
                         contentContainerStyle={{ paddingBottom: 80 }}
-                        keyExtractor={ (item,index) => String( index )}
+                        keyExtractor={ (item,index) => String( index ) }
                         renderItem={renderItem}
                         onEndReached={loadMoreResults}
                         ListEmptyComponent={ListEmptyComponent}
