@@ -201,12 +201,14 @@ export const AuditAndInspectionScreen = ({ route, navigation }) => {
                 PageNumber: String( page )
             }
         })
-        if( isEmpty( result ) || result.Message === "No Records Found" || result.Message === "Invalid User Token" || result === undefined ) {
+        console.log( 'result is ',JSON.stringify( result ) )
+        if( isEmpty( result ) || isEmpty( result.AudiAndInspectionListing ) || result.Message === "No Records Found" || result.Message === "Invalid User Token" || result === undefined ) {
             isLoading = false
             shouldFetch = false
+            setAuditList( [] )
             return null
         }
-        setAuditList( auditList => [...auditList, ...result.AudiAndInspectionListing ] )
+        setAuditList( auditList => [...auditList, result.AudiAndInspectionListing ] )
         setTemplateDetails( result.TemplateDetails )
         shouldFetch = true
         isLoading = false
@@ -246,6 +248,14 @@ export const AuditAndInspectionScreen = ({ route, navigation }) => {
         }
     }
 
+    const ListEmptyComponent = ( ) => {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+                <Text>No audit records found</Text>
+            </View>
+        )
+    }
+
 
     return (
             <View style={{ flex: 1 }}>
@@ -263,6 +273,7 @@ export const AuditAndInspectionScreen = ({ route, navigation }) => {
                         keyExtractor={ (item,index) => String( index )}
                         renderItem={renderItem}
                         onEndReached={()=>loadMoreResults()}
+                        ListEmptyComponent={ListEmptyComponent}
                         onEndReachedThreshold={0.8}
                         onMomentumScrollBegin={() => { onEndReachedCalledDuringMomentum = false; }}
                         ListFooterComponent={ListFooterComponent}

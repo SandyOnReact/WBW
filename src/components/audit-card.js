@@ -41,7 +41,7 @@ export const AuditCard = (props) => {
             <View style={{ borderRadius: 20, borderWidth: 0.5, backgroundColor: 'lightgray' }}>
                 {renderTemplateDetails()}
                 <View style={{ marginTop: '5%', marginBottom: '5%' }}>
-                    {!isEmpty(audit.FullName) && renderAuditCardDetails('FullName: ', audit.FullName)}
+                    {!isEmpty(audit?.FullName) && renderAuditCardDetails('FullName: ', audit?.FullName)}
                     {!isEmpty(audit.RecordNumber) && renderAuditCardDetails('RecordNumber: ', audit.RecordNumber)}
                     {!isEmpty(audit.LastDayOfSchedulePeriod) && renderAuditCardDetails('LastDayOfSchedulePeriod: ', audit.LastDayOfSchedulePeriod)}
                     {!isEmpty(audit.Status) && renderAuditCardDetails('Status: ', audit.Status)}
