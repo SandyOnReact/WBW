@@ -186,8 +186,33 @@ export const AuditAndInspectionScreen = ({ route, navigation }) => {
             isLoading = false,
             shouldFetch = true
         }
-    }, [])
+    }, [ page ])
 
+    // const fetchAuditData = async ( page ) => {
+    //     const token = await AsyncStorage.getItem('Token')
+    //     isLoading = true
+    //     const result = await api.post({
+    //         url: 'api/AuditAndInspection/GetHistory',
+    //         body: {
+    //             UserID: userId,
+    //             AccessToken: token,
+    //             CustomFormID: dashboard.CustomFormID,
+    //             AuditAndInspectionTemplateID: dashboard.AuditAndInspectionTemplateID,
+    //             PageNumber: String( page )
+    //         }
+    //     })
+    //     if( isEmpty( result ) || isEmpty( result.AudiAndInspectionListing ) || result.Message === "No Records Found" || result.Message === "Invalid User Token" || result === undefined ) {
+    //         isLoading = false
+    //         shouldFetch = false
+    //         setAuditList( [] )
+    //         return null
+    //     }
+    //     setAuditList( auditList => [...auditList, result.AudiAndInspectionListing ] )
+    //     setTemplateDetails( result.TemplateDetails )
+    //     shouldFetch = true
+    //     isLoading = false
+    //     return result;
+    // }
     const fetchAuditData = async ( page ) => {
         const token = await AsyncStorage.getItem('Token')
         isLoading = true
@@ -197,22 +222,21 @@ export const AuditAndInspectionScreen = ({ route, navigation }) => {
                 UserID: userId,
                 AccessToken: token,
                 CustomFormID: dashboard.CustomFormID,
-                AuditAndInspectionTemplateID: dashboard.AuditAndInspectionTemplateID,
+                AuditAndInspectionTemplateID: dashboard.AuditandInspectionTemplateID,
                 PageNumber: String( page )
             }
         })
-        console.log( 'result is ',JSON.stringify( result ) )
         if( isEmpty( result ) || isEmpty( result.AudiAndInspectionListing ) || result.Message === "No Records Found" || result.Message === "Invalid User Token" || result === undefined ) {
             isLoading = false
             shouldFetch = false
-            setAuditList( [] )
             return null
         }
-        setAuditList( auditList => [...auditList, result.AudiAndInspectionListing ] )
+        setAuditList( auditList => [...auditList, ...result.AudiAndInspectionListing ] )
         setTemplateDetails( result.TemplateDetails )
         shouldFetch = true
         isLoading = false
         return result;
+
     }
     const navigateToAddInspection = ( ) => {
         navigation.navigate( 'AddInspection' )
@@ -229,6 +253,7 @@ export const AuditAndInspectionScreen = ({ route, navigation }) => {
     }
 
     const loadMoreResults = ( ) => {
+        console.log( 'loading more -->')
         if( shouldFetch && !onEndReachedCalledDuringMomentum ) {
             page = page + 1
             fetchAuditData( page )
@@ -254,8 +279,7 @@ export const AuditAndInspectionScreen = ({ route, navigation }) => {
                 <Text>No audit records found</Text>
             </View>
         )
-    }
-
+    } 
 
     return (
             <View style={{ flex: 1 }}>
@@ -272,9 +296,9 @@ export const AuditAndInspectionScreen = ({ route, navigation }) => {
                         contentContainerStyle={{ paddingBottom: 80 }}
                         keyExtractor={ (item,index) => String( index )}
                         renderItem={renderItem}
-                        onEndReached={()=>loadMoreResults()}
+                        onEndReached={loadMoreResults}
                         ListEmptyComponent={ListEmptyComponent}
-                        onEndReachedThreshold={0.8}
+                        onEndReachedThreshold={0.01}
                         onMomentumScrollBegin={() => { onEndReachedCalledDuringMomentum = false; }}
                         ListFooterComponent={ListFooterComponent}
                     />

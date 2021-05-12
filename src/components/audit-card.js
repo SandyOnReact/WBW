@@ -10,7 +10,7 @@ export const AuditCard = (props) => {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', borderTopLeftRadius: 20, borderTopRightRadius: 20, flexDirection: 'row', backgroundColor: '#1e5873' }}>
                 <View style={{ flex: 0.5, padding: '5%' }}>
-                    <Text style={{ color: 'white', fontSize: 15, fontWeight: 'bold' }}>{templateDetails.AuditAndInspectionFor}</Text>
+                    <Text style={{ color: 'white', fontSize: 15, fontWeight: 'bold' }}>{templateDetails.Type}</Text>
                 </View>
                 <View style={{ flex: 0.5, justifyContent: 'center', height: '100%', padding: '5%', alignItems: 'flex-end' }}>
                     <Text style={{ color: 'white', fontSize: 15 }}>{templateDetails.Title}</Text>
@@ -41,7 +41,7 @@ export const AuditCard = (props) => {
             <View style={{ borderRadius: 20, borderWidth: 0.5, backgroundColor: 'lightgray' }}>
                 {renderTemplateDetails()}
                 <View style={{ marginTop: '5%', marginBottom: '5%' }}>
-                    {!isEmpty(audit?.FullName) && renderAuditCardDetails('FullName: ', audit?.FullName)}
+                    {!isEmpty(audit.FullName) && renderAuditCardDetails('FullName: ', audit?.FullName)}
                     {!isEmpty(audit.RecordNumber) && renderAuditCardDetails('RecordNumber: ', audit.RecordNumber)}
                     {!isEmpty(audit.LastDayOfSchedulePeriod) && renderAuditCardDetails('LastDayOfSchedulePeriod: ', audit.LastDayOfSchedulePeriod)}
                     {!isEmpty(audit.Status) && renderAuditCardDetails('Status: ', audit.Status)}
