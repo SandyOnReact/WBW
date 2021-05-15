@@ -144,7 +144,8 @@ export const AuditAndInspectionScreen = ({ route, navigation }) => {
             CustomFormID: dashboard.CustomFormID,
             AuditAndInspectionTemplateID: dashboard.AuditandInspectionTemplateID,
             Title: templateDetails.Title,
-            userId: userId
+            userId: userId,
+            AuditAndInspectionFor: templateDetails.AuditAndInspectionFor
         } )
     }
 

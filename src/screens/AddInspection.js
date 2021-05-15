@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { View, Text } from 'react-native'
-import { Header, Avatar } from 'react-native-elements'
-import { FlatList } from 'react-native-gesture-handler'
+import { Header, Button } from 'react-native-elements'
 import { getStatusBarHeight } from 'react-native-status-bar-height'
 import { api } from '../utils/api'
-import { AuditCard } from '../components/audit-card'
 import { isEmpty } from 'lodash'
 import { useNavigation, useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage'
@@ -14,10 +12,12 @@ import { CustomDropdown } from '../components/core/custom-dropdown'
 export const AddInspection = () => {
     const route = useRoute()
     const navigation = useNavigation()
-    const { CustomFormID, AuditAndInspectionTemplateID, Title, userId } = route.params
+    const { CustomFormID, AuditAndInspectionTemplateID, Title, userId, AuditAndInspectionFor } = route.params
+    const [data, setData] = useState( [] )
     const [primaryDropdownArray, setPrimaryDropdownArray] = useState( [] )
     const [secondaryDropdownArray, setSecondaryDropdownArray] = useState( [] )
     const [selectedPrimaryDropdownValue,setSelectedPrimaryDropdownvalue] = useState( '' )
+    const [selectedSecondaryDropdownValue,setSelectedSecondaryDropdownvalue] = useState( '' )
     const [isLoading,setIsLoading] = useState( false )
     const STATUS_BAR_HEIGHT = getStatusBarHeight()
 
@@ -42,10 +42,19 @@ export const AddInspection = () => {
         if( isEmpty( result ) ) {
             return null
         }
+        setData( result )
         const primaryArray = result.map(item => {
-            if( item.IsDefault === "True" ) {
+            if( item.IsDefault === "True" && !isEmpty( item.PrimaryUserList ) ) {
                 setSelectedPrimaryDropdownvalue( item.TypeID )
-            }
+                const nestedDropdown = item.PrimaryUserList.map( val => {
+                    const secondaryObject = { label: val.Name, value: val.ID }
+                    return secondaryObject;
+                })
+                setSecondaryDropdownArray( nestedDropdown )
+            }else if( item.IsDefault === "True" ) {
+                setSelectedPrimaryDropdownvalue( item.TypeID )
+            } 
+            
             const primaryObject = { label: item.Name, value: item.TypeID }
             return primaryObject;
         }, [])
@@ -59,6 +68,39 @@ export const AddInspection = () => {
 
     const onPrimaryDropdownValueChange = ( value ) => {
         setSelectedPrimaryDropdownvalue( value )
+        const selectedObject = data.find( item => String( item.TypeID ) === String( value ))
+       if( !isEmpty( selectedObject.PrimaryUserList ) ) {
+         const nestedDropdown = selectedObject.PrimaryUserList.map( val => {
+                const secondaryObject = { label: val.Name, value: val.ID }
+                return secondaryObject;
+            })
+            setSecondaryDropdownArray( nestedDropdown )
+       }
+    }
+
+    const onSecondaryDropdownValueChange = ( value ) => {
+        setSelectedSecondaryDropdownvalue( value )
+    }
+
+    const onSubmit = async ( ) =>  {
+        setIsLoading( true )
+        const token = await AsyncStorage.getItem('Token')
+        const body = {
+            UserID: userId,
+            AccessToken: token,
+            CustomFormID: CustomFormID,
+            AuditAndInspectionTemplateID: AuditAndInspectionTemplateID,
+            TypeID: selectedPrimaryDropdownValue,
+            PrimaryUserID: isEmpty( selectedSecondaryDropdownValue ) ? userId : selectedSecondaryDropdownValue,
+            Type: AuditAndInspectionFor
+        }
+        const result = await api.post({
+            url: 'api/AuditAndInspection/StartAudit',
+            body: body
+        })
+        if( isEmpty( result ) ) {
+            return null
+        } 
     }
 
     if( isLoading ) {
@@ -77,13 +119,27 @@ export const AddInspection = () => {
             <View style={{ marginTop: '3%', marginHorizontal: '3%'}}>
                 <Text style={{ textAlign: 'center', fontSize: 18 }}>Select Area that you want to audit and click start audit button</Text>
             </View>
-            <View style={{ flex: 1, marginTop: '3%'}}>
+            <View style={{ flex: isEmpty( secondaryDropdownArray ) ?  0.15 : 0.3, marginTop: '3%' }}>
                 <CustomDropdown
                     title="Select Area"
                     items={primaryDropdownArray}
                     value={selectedPrimaryDropdownValue}
                     onValueChange={onPrimaryDropdownValueChange}
                 />
+                {
+                    !isEmpty( secondaryDropdownArray )
+                    ?
+                    <CustomDropdown
+                        title="Inspection on behalf of"
+                        items={secondaryDropdownArray}
+                        value={selectedSecondaryDropdownValue}
+                        onValueChange={onSecondaryDropdownValueChange}
+                    />
+                    : null
+                }
+            </View>
+            <View style={{ marginTop: '3%' }}>
+                <Button containerStyle={{ marginHorizontal: '3%'}}  title="Start" titleStyle={{ fontSize: 14 }} buttonStyle={{ backgroundColor: '#1e5873', width: '100%', padding: 15 }} onPress={onSubmit} loading={isLoading}/>
             </View>
         </View>
     )
