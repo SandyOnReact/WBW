@@ -9,11 +9,11 @@ export const AuditCard = (props) => {
     const renderTemplateDetails = () => {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', borderTopLeftRadius: 20, borderTopRightRadius: 20, flexDirection: 'row', backgroundColor: '#1e5873' }}>
-                <View style={{ flex: 0.5, padding: '5%' }}>
-                    <Text style={{ color: 'white', fontSize: 15, fontWeight: 'bold' }}>{templateDetails.Type}</Text>
+                <View style={{ flex: 0.7, padding: '5%' }}>
+                    <Text style={{ color: 'white', fontSize: 15, fontWeight: 'bold' }}>{audit.RecordNumber}</Text>
                 </View>
-                <View style={{ flex: 0.5, justifyContent: 'center', height: '100%', padding: '5%', alignItems: 'flex-end' }}>
-                    <Text style={{ color: 'white', fontSize: 15 }}>{templateDetails.Title}</Text>
+                <View style={{ flex: 0.3, justifyContent: 'center', height: '100%', padding: '5%', alignItems: 'flex-end' }}>
+                    <Text style={{ color: 'white', fontSize: 15 }}>{audit.Status}</Text>
                 </View>
             </View>
         )
@@ -42,9 +42,8 @@ export const AuditCard = (props) => {
                 {renderTemplateDetails()}
                 <View style={{ marginTop: '5%', marginBottom: '5%' }}>
                     {!isEmpty(audit.FullName) && renderAuditCardDetails('FullName: ', audit?.FullName)}
-                    {!isEmpty(audit.RecordNumber) && renderAuditCardDetails('RecordNumber: ', audit.RecordNumber)}
+                    {!isEmpty(templateDetails.Title) && renderAuditCardDetails('Title: ', templateDetails.Title)}
                     {!isEmpty(audit.LastDayOfSchedulePeriod) && renderAuditCardDetails('LastDayOfSchedulePeriod: ', audit.LastDayOfSchedulePeriod)}
-                    {!isEmpty(audit.Status) && renderAuditCardDetails('Status: ', audit.Status)}
                     {!isEmpty(audit.Tasks) && renderAuditCardDetails('Tasks: ', audit.Tasks)}
                     {!isEmpty(audit.IsOutstandingTaskRequired) && renderAuditCardDetails('IsOutstandingTaskRequired: ', audit.IsOutstandingTaskRequired)}
                     {!isEmpty(audit.AuditAndInspectionFor) && renderAuditCardDetails('AuditAndInspectionFor: ', audit.AuditAndInspectionFor)}
