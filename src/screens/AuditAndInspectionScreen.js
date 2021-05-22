@@ -9,92 +9,13 @@ import { api } from '../utils/api'
 import { AuditCard } from '../components/audit-card'
 import { isEmpty } from 'lodash-es'
 import { useRoute } from '@react-navigation/native';
+import { result } from 'lodash'
 
 
 let page = 1
 let isLoading = false
 let shouldFetch = true
 let onEndReachedCalledDuringMomentum = true;
-
-const data = {
-    TemplateDetails: {
-        "AuditAndInspectionFor": "Vehicle",
-        "Title": "Audit For Vehicle"
-    },
-    AudiAndInspectionListing: [
-        {
-            "LinkText": "View",
-            "FullName": "xyz, admin",
-            "RecordNumber": "AFV-V1-2021-0005",
-            "LastDayOfSchedulePeriod": "04/30/2021",
-            "Status": "Complete",
-            "Tasks": "No",
-            "IsOutstandingTaskRequired": "No",
-            "AuditAndInspectionFor": "Vehicle 1",
-            "Work_Site_Name_Value": "",
-            "AuditAndInspectionID": "285",
-            "AddDateTime": "4/30/2021 6:03:35 PM",
-            "CompletedDateTime": "4/30/2021 6:03:37 PM"
-        },
-        {
-            "LinkText": "View",
-            "FullName": "xyz, admin",
-            "RecordNumber": "AFV-V1-2021-0004",
-            "LastDayOfSchedulePeriod": "04/27/2021",
-            "Status": "Complete",
-            "Tasks": "No",
-            "IsOutstandingTaskRequired": "No",
-            "AuditAndInspectionFor": "Vehicle 1",
-            "Work_Site_Name_Value": "",
-            "AuditAndInspectionID": "284",
-            "AddDateTime": "4/27/2021 3:40:50 PM",
-            "CompletedDateTime": "4/27/2021 3:40:52 PM"
-        },
-        {
-            "LinkText": "View",
-            "FullName": "xyz, admin",
-            "RecordNumber": "AFV-V2-2021-0001",
-            "LastDayOfSchedulePeriod": "04/23/2021",
-            "Status": "Complete",
-            "Tasks": "No",
-            "IsOutstandingTaskRequired": "No",
-            "AuditAndInspectionFor": "Vehicle 2",
-            "Work_Site_Name_Value": "",
-            "AuditAndInspectionID": "283",
-            "AddDateTime": "4/23/2021 3:03:26 PM",
-            "CompletedDateTime": "4/23/2021 3:03:27 PM"
-        },
-        {
-            "LinkText": "View",
-            "FullName": "xyz, admin",
-            "RecordNumber": "AFV-V1-2021-0002",
-            "LastDayOfSchedulePeriod": "04/22/2021",
-            "Status": "Complete",
-            "Tasks": "No",
-            "IsOutstandingTaskRequired": "No",
-            "AuditAndInspectionFor": "Vehicle 1",
-            "Work_Site_Name_Value": "",
-            "AuditAndInspectionID": "282",
-            "AddDateTime": "4/22/2021 1:14:50 PM",
-            "CompletedDateTime": "4/22/2021 1:14:52 PM"
-        },
-        {
-            "LinkText": "Edit",
-            "FullName": "xyz, admin",
-            "RecordNumber": "AFV-V1-2021-0001",
-            "LastDayOfSchedulePeriod": "04/21/2021",
-            "Status": "In Process",
-            "Tasks": "No",
-            "IsOutstandingTaskRequired": "No",
-            "AuditAndInspectionFor": "Vehicle 1",
-            "Work_Site_Name_Value": "",
-            "AuditAndInspectionID": "281",
-            "AddDateTime": "4/21/2021 3:33:42 PM",
-            "CompletedDateTime": ""
-        }
-    ]
-}
-
 
 export const AuditAndInspectionScreen = ({ route, navigation }) => {
     const { dashboard, userId } = route.params
@@ -145,7 +66,8 @@ export const AuditAndInspectionScreen = ({ route, navigation }) => {
             AuditAndInspectionTemplateID: dashboard.AuditandInspectionTemplateID,
             Title: templateDetails.Title,
             userId: userId,
-            AuditAndInspectionFor: templateDetails.AuditAndInspectionFor
+            AuditAndInspectionFor: templateDetails.AuditAndInspectionFor,
+            Type: templateDetails.Type
         } )
     }
 

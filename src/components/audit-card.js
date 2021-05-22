@@ -41,16 +41,12 @@ export const AuditCard = (props) => {
             <View style={{ borderRadius: 20, borderWidth: 0.5, backgroundColor: 'lightgray' }}>
                 {renderTemplateDetails()}
                 <View style={{ marginTop: '5%', marginBottom: '5%' }}>
-                    {!isEmpty(audit.FullName) && renderAuditCardDetails('FullName: ', audit?.FullName)}
-                    {!isEmpty(templateDetails.Title) && renderAuditCardDetails('Title: ', templateDetails.Title)}
-                    {!isEmpty(audit.LastDayOfSchedulePeriod) && renderAuditCardDetails('LastDayOfSchedulePeriod: ', audit.LastDayOfSchedulePeriod)}
-                    {!isEmpty(audit.Tasks) && renderAuditCardDetails('Tasks: ', audit.Tasks)}
-                    {!isEmpty(audit.IsOutstandingTaskRequired) && renderAuditCardDetails('IsOutstandingTaskRequired: ', audit.IsOutstandingTaskRequired)}
-                    {!isEmpty(audit.AuditAndInspectionFor) && renderAuditCardDetails('AuditAndInspectionFor: ', audit.AuditAndInspectionFor)}
-                    {!isEmpty(audit.Work_Site_Name_Value) && renderAuditCardDetails('Work_Site_Name_Value: ', audit.Work_Site_Name_Value)}
-                    {!isEmpty(audit.AuditAndInspectionID) && renderAuditCardDetails('AuditAndInspectionID: ', audit.AuditAndInspectionID)}
-                    {!isEmpty(audit.AddDateTime) && renderAuditCardDetails('AddDateTime: ', audit.AddDateTime)}
-                    {!isEmpty(audit.CompletedDateTime) && renderAuditCardDetails('CompletedDateTime: ', audit.CompletedDateTime)}
+                    {!isEmpty(audit.FullName) && renderAuditCardDetails('Full Name: ', audit.FullName)}
+                    {!isEmpty(audit.LastDayOfSchedulePeriod) && renderAuditCardDetails('Last Day Of Schedule Period: ', audit.LastDayOfSchedulePeriod)}
+                    {!isEmpty(audit.Tasks) && renderAuditCardDetails('Task(s)?: ', audit.Tasks)}
+                    {!isEmpty(audit.IsOutstandingTaskRequired) && renderAuditCardDetails('Outstanding Task(s)?: ', audit.IsOutstandingTaskRequired)}
+                    {!isEmpty(audit.AuditAndInspectionFor) && renderAuditCardDetails('Audit And Inspection For: ', audit.AuditAndInspectionFor)}
+                    {!isEmpty(audit.Work_Site_Name_Value) && renderAuditCardDetails('Work Site Name Value: ', audit.Work_Site_Name_Value)}
                 </View>
             </View>
         </View>

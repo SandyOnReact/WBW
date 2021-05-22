@@ -3,11 +3,13 @@ import React, { useEffect, useState } from 'react'
 import { View, Text, FlatList } from 'react-native'
 import { api } from '../utils/api'
 import { useRoute } from '@react-navigation/native';
-import { Input, Header, Button } from "react-native-elements"
+import { Input, Header, Button, CheckBox } from "react-native-elements"
 import _ from "lodash"
 import { CustomDropdown } from '../components/core/custom-dropdown'
 import { getStatusBarHeight } from 'react-native-status-bar-height'
 import { useNavigation } from "@react-navigation/native"
+import { CustomDateTimePicker } from '../components/datetimepicker'
+import moment from 'moment';
 
 const inputContainerStyle = { borderWidth: 1, borderColor: '#1e5873', borderRadius: 6 }
 
@@ -35,17 +37,86 @@ const CustomInput = ( { value } ) => {
 
 const EditableDropdown = ( { value } ) => {
     const controlValues = value.ControlValues.map( item => {
-        const control = { label: item.ID, value: item.Value }
+        const control = { label: item.Value, value: item.Id }
         return control
     })
-    const [dropdownValue,setDropdownValue] = useState( value.SelectedValue )
+    const onValueChange = ( value ) => {
+        setDropdownValue( value )
+    }
+    const [dropdownValue,setDropdownValue] = useState( '' )
     return (
         <View>
             <CustomDropdown
                 title={value.ControlLabel}
                 items={controlValues}
                 value={dropdownValue}
-                onValueChange={(value) => setDropdownValue( value ) }
+                onValueChange={onValueChange}
+            />
+        </View>
+    )
+}
+
+let date = new Date();
+const CustomCalendar = ( { value } ) => {
+    const [mode, setMode] = useState('date');
+    const [show, setShow] = useState(false);
+    const [dateValue, setDateValue] = useState('');
+
+    const showMode = (currentMode) => {
+        if( currentMode === 'date' ) {
+            setShow(true);
+        }else{
+            setShowTime( true )
+        }
+        setMode(currentMode);
+    };
+
+    const showDatepicker = () => {
+        showMode('date');
+    };
+
+    const hideDatePicker = ( ) => {
+        setShow( false )
+    }
+
+    const onChange = (selectedDate) => {
+        const currentDate = selectedDate || date;
+        const pickedDate = moment(currentDate).format("MM/DD/YYYY")
+        setDateValue(pickedDate)
+        date = currentDate
+        hideDatePicker()
+    };
+    
+    return (
+        <View>
+            <CustomDateTimePicker
+                label={value.ControlLabel}
+                onPress={showDatepicker}
+                show={show}
+                inputValue={dateValue}
+                mode={mode}
+                display="spinner"
+                value={date}
+                maximumDate={new Date()}
+                onConfirm={onChange}
+                onCancel={hideDatePicker}
+            />
+        </View>
+    )
+}
+
+const CustomCheckBox = ( { value } ) => {
+    const [checkboxValue, setCheckboxValue] = useState( false )
+
+    const toggleCheckBoxValue = ( ) => {
+        setCheckboxValue( checkboxValue => !checkboxValue )
+    }
+    return (
+        <View style={{ backgroundColor: 'transparent'}}>
+            <CheckBox
+                title={value.ControlLabel}
+                checked={checkboxValue}
+                onPress={toggleCheckBoxValue}
             />
         </View>
     )
@@ -80,15 +151,15 @@ export const DynamicControlsScreen = ( props ) => {
     const renderItem = ( { item } ) => {
         const sortedArrayByDisplayOrder = _.sortBy(item.DynamicControls, [function(o) { return o.DisplayOrder; }]);
         return (
-            <View style={{ flex: 1, marginTop: '5%' }}>
-                <View style={{ backgroundColor: '#1e5873', height: '15%', marginVertical: '3%', borderRadius: 20, alignItems: 'center', justifyContent: 'center', marginHorizontal: '3%' }}>
+            <View style={{ flex: 1 }}>
+                <View style={{ backgroundColor: '#1e5873', height: 50, marginVertical: '3%', borderRadius: 10, alignItems: 'center', justifyContent: 'center', marginHorizontal: '5%' }}>
                     <Text style={{ textAlign: 'center', color: 'white'}}>{item.GroupName}</Text>
                 </View>
                 <View style={{ flex: 1, marginHorizontal: '3%' }}>
                 {
                     sortedArrayByDisplayOrder.map( value => {
                         switch( value.ControlType ) {
-                            case 'TextBox': {
+                            case 'Textbox': {
                                 return (
                                    <CustomInput value={value} />
                                 )
@@ -96,6 +167,14 @@ export const DynamicControlsScreen = ( props ) => {
                             case 'DropDownList':                               
                                 return (
                                    <EditableDropdown value={value} />
+                                )
+                            case 'Calendar':
+                                return (
+                                    <CustomCalendar value={value}/>
+                                )
+                            case 'Checkbox':
+                                return (
+                                    <CustomCheckBox value={value}/>
                                 )
                             case 'RadioButton':
                                 return null

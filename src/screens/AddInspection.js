@@ -12,7 +12,7 @@ import { CustomDropdown } from '../components/core/custom-dropdown'
 export const AddInspection = () => {
     const route = useRoute()
     const navigation = useNavigation()
-    const { CustomFormID, AuditAndInspectionTemplateID, Title, userId, AuditAndInspectionFor } = route.params
+    const { CustomFormID, AuditAndInspectionTemplateID, Title, userId, AuditAndInspectionFor, Type } = route.params
     const [data, setData] = useState( [] )
     const [primaryDropdownArray, setPrimaryDropdownArray] = useState( [] )
     const [secondaryDropdownArray, setSecondaryDropdownArray] = useState( [] )
@@ -75,6 +75,8 @@ export const AddInspection = () => {
                 return secondaryObject;
             })
             setSecondaryDropdownArray( nestedDropdown )
+       }else{
+           setSecondaryDropdownArray( [] )
        }
     }
 
@@ -92,7 +94,7 @@ export const AddInspection = () => {
             AuditAndInspectionTemplateID: AuditAndInspectionTemplateID,
             TypeID: selectedPrimaryDropdownValue,
             PrimaryUserID: isEmpty( selectedSecondaryDropdownValue ) ? userId : selectedSecondaryDropdownValue,
-            Type: AuditAndInspectionFor
+            Type: Type
         }
         const result = await api.post({
             url: 'api/AuditAndInspection/StartAudit',
@@ -117,11 +119,11 @@ export const AddInspection = () => {
                 centerComponent={{ text: Title, style: { color: '#fff' ,fontWeight:'bold', fontSize:16} }}
             />
             <View style={{ marginTop: '3%', marginHorizontal: '3%'}}>
-                <Text style={{ textAlign: 'center', fontSize: 18 }}>Select Area that you want to audit and click start audit button</Text>
+                <Text style={{ textAlign: 'center', fontSize: 18 }}>{`Select ${Type} that you want to audit and click start audit button`}</Text>
             </View>
             <View style={{ flex: isEmpty( secondaryDropdownArray ) ?  0.15 : 0.3, marginTop: '3%' }}>
                 <CustomDropdown
-                    title="Select Area"
+                    title={`Select ${Type}`}
                     items={primaryDropdownArray}
                     value={selectedPrimaryDropdownValue}
                     onValueChange={onPrimaryDropdownValueChange}
@@ -139,7 +141,7 @@ export const AddInspection = () => {
                 }
             </View>
             <View style={{ marginTop: '3%' }}>
-                <Button containerStyle={{ marginHorizontal: '3%'}}  title="Start" titleStyle={{ fontSize: 14 }} buttonStyle={{ backgroundColor: '#1e5873', width: '100%', padding: 15 }} onPress={onSubmit} loading={isLoading}/>
+                <Button containerStyle={{ marginHorizontal: '3%'}}  title="Start" titleStyle={{ fontSize: 18 }} buttonStyle={{ backgroundColor: '#1e5873', width: '100%', padding: 15 }} onPress={onSubmit} loading={isLoading}/>
             </View>
         </View>
     )
