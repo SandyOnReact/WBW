@@ -4,12 +4,14 @@ import { View, Text, FlatList } from 'react-native'
 import { api } from '../utils/api'
 import { useRoute } from '@react-navigation/native';
 import { Input, Header, Button, CheckBox } from "react-native-elements"
-import _ from "lodash"
+import _, { filter, findIndex, findLastIndex } from "lodash"
 import { CustomDropdown } from '../components/core/custom-dropdown'
 import { getStatusBarHeight } from 'react-native-status-bar-height'
 import { useNavigation } from "@react-navigation/native"
 import { CustomDateTimePicker } from '../components/datetimepicker'
 import moment from 'moment';
+import RadioForm from 'react-native-simple-radio-button';
+
 
 const inputContainerStyle = { borderWidth: 1, borderColor: '#1e5873', borderRadius: 6 }
 
@@ -122,7 +124,93 @@ const CustomCheckBox = ( { value } ) => {
     )
 }
 
-let dropdownValue = ''
+const CustomMultiSelectCheckbox = ( { value } ) => {
+    const [selectedCheckbox, setSelectedCheckbox] = useState( [] )
+
+    const toggleCheckBox = async ( item ) => {
+       if( selectedCheckbox.includes( item.Id ) ) {
+           setSelectedCheckbox( prevState => prevState.filter( value => value !== item.Id ))
+        }else if( !item.checked && !selectedCheckbox.includes( item.Id )){
+           setSelectedCheckbox( prevState => [...prevState, item.Id ] )
+       }  
+    }
+
+    return (
+        <View style={{ backgroundColor: 'transparent'}}>
+            <Text style={{
+                color: '#86939e',
+                fontWeight: 'bold', fontSize: 20, paddingLeft: '3%', marginBottom: '2%'
+            }}> Checkbox </Text>
+            {
+                value.ControlValues.map( item => {
+                    return (
+                        <View key={item.Id}>
+                            <CheckBox
+                            title={item.Value}
+                            checked={selectedCheckbox.includes( item.Id )}
+                            onPress={()=>toggleCheckBox( item )}
+                        />
+                        </View>
+                    )
+                })
+            }
+        </View>
+    )
+}
+
+const CustomRadioButtonList = ( { value } ) => {
+    const radioButtonList = value.ControlValues.map( item => {
+        const radio = {
+            label: item.Value,
+            value: item.Id
+        }
+        return radio
+    })
+    const [radioValue,setRadioValue] = useState( '' )
+
+    return (
+        <View style={{ marginBottom: 10 }}>
+            <Text style={{
+                color: '#86939e',
+                fontWeight: 'bold', fontSize: 20, paddingLeft: '3%', marginBottom: '3%'
+            }}> Radio Buttons </Text>
+            <RadioForm style={{ width: '100%', paddingHorizontal: 30 }}
+                radio_props={radioButtonList}
+                initial={-1}
+                radioStyle={{ paddingBottom: 5 }}
+                buttonSize={15}
+                buttonColor={'#86939e'}
+                selectedButtonColor={'#1e5873'}
+                labelStyle={{ fontSize: 20 }}
+                animation={true}
+                onPress={(value) => setRadioValue(value)}
+            />
+        </View>
+    )
+}
+
+const CustomTextAreaInput = ( { value } ) => {
+    const [inputValue,setInputValue] = useState( value?.SelectedValue )
+    return (
+        <View>
+            <Input
+                label={value.ControlLabel}
+                labelStyle={{ marginBottom: 5 }}
+                textAlignVertical="top"
+                placeholder="Type Here"
+                placeholderTextColor="#9EA0A4"
+                inputStyle={{padding:10, textAlign: 'auto',fontSize:16}}
+                inputContainerStyle={{...inputContainerStyle, minHeight: 60, maxHeight: 90 }}
+                containerStyle={{ margin: 0 }}
+                errorStyle={{ margin: -5 }}
+                value={inputValue}
+                onChangeText={(text) => setInputValue( text )}
+                editable={value.LinkText === 'Edit' ? true : false }
+            />
+        </View>
+    )
+}
+
 export const DynamicControlsScreen = ( props ) => {
     const route = useRoute();
     const STATUS_BAR_HEIGHT = getStatusBarHeight()
@@ -176,8 +264,18 @@ export const DynamicControlsScreen = ( props ) => {
                                 return (
                                     <CustomCheckBox value={value}/>
                                 )
-                            case 'RadioButton':
-                                return null
+                            case 'CheckBoxList':
+                                return (
+                                    <CustomMultiSelectCheckbox value={value} />
+                                )
+                            case 'RadioButtonList':
+                                return (
+                                    <CustomRadioButtonList value={value} />
+                                )
+                            case 'TextArea':
+                                return (
+                                    <CustomTextAreaInput value={value}/>
+                                )
                         }
                     })
                 }
