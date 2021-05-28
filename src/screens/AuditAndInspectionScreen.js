@@ -60,8 +60,8 @@ export const AuditAndInspectionScreen = ({ route, navigation }) => {
         return result;
 
     }
-    const navigateToAddInspection = ( ) => {
-        navigation.navigate( 'AddInspection', {
+    const navigateToStartInspection = ( ) => {
+        navigation.navigate( 'StartInspection', {
             CustomFormID: dashboard.CustomFormID,
             AuditAndInspectionTemplateID: dashboard.AuditandInspectionTemplateID,
             Title: templateDetails.Title,
@@ -132,7 +132,7 @@ export const AuditAndInspectionScreen = ({ route, navigation }) => {
                         ListFooterComponent={ListFooterComponent}
                     />
                     <View style={{position: 'absolute', bottom: "15%", right: 10, top: '90%', left: '85%'}}>
-                        <Avatar size="medium" onPress={navigateToAddInspection} rounded icon={{ name: 'add'}} containerStyle={{ backgroundColor: '#1e5873'}}/>
+                        <Avatar size="medium" onPress={navigateToStartInspection} rounded icon={{ name: 'add'}} containerStyle={{ backgroundColor: '#1e5873'}}/>
                     </View>
                 </View>
             </View>

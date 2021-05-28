@@ -11,11 +11,12 @@ import { useNavigation } from "@react-navigation/native"
 import { CustomDateTimePicker } from '../components/datetimepicker'
 import moment from 'moment';
 import RadioForm from 'react-native-simple-radio-button';
+import { useKeyboard } from '@react-native-community/hooks';
 
 
 const inputContainerStyle = { borderWidth: 1, borderColor: '#1e5873', borderRadius: 6 }
 
-const CustomInput = ( { value } ) => {
+export const CustomInput = ( { value } ) => {
     const [inputValue,setInputValue] = useState( value.SelectedValue )
     return (
         <View>
@@ -31,13 +32,12 @@ const CustomInput = ( { value } ) => {
                 errorStyle={{ margin: -5 }}
                 value={inputValue}
                 onChangeText={(text) => setInputValue( text )}
-                editable={value.LinkText === 'Edit' ? true : false }
             />
         </View>
     )
 }
 
-const EditableDropdown = ( { value } ) => {
+export const EditableDropdown = ( { value } ) => {
     const controlValues = value.ControlValues.map( item => {
         const control = { label: item.Value, value: item.Id }
         return control
@@ -59,7 +59,7 @@ const EditableDropdown = ( { value } ) => {
 }
 
 let date = new Date();
-const CustomCalendar = ( { value } ) => {
+export const CustomCalendar = ( { value } ) => {
     const [mode, setMode] = useState('date');
     const [show, setShow] = useState(false);
     const [dateValue, setDateValue] = useState('');
@@ -107,7 +107,7 @@ const CustomCalendar = ( { value } ) => {
     )
 }
 
-const CustomCheckBox = ( { value } ) => {
+export const CustomCheckBox = ( { value } ) => {
     const [checkboxValue, setCheckboxValue] = useState( false )
 
     const toggleCheckBoxValue = ( ) => {
@@ -124,7 +124,7 @@ const CustomCheckBox = ( { value } ) => {
     )
 }
 
-const CustomMultiSelectCheckbox = ( { value } ) => {
+export const CustomMultiSelectCheckbox = ( { value } ) => {
     const [selectedCheckbox, setSelectedCheckbox] = useState( [] )
 
     const toggleCheckBox = async ( item ) => {
@@ -139,8 +139,8 @@ const CustomMultiSelectCheckbox = ( { value } ) => {
         <View style={{ backgroundColor: 'transparent'}}>
             <Text style={{
                 color: '#86939e',
-                fontWeight: 'bold', fontSize: 20, paddingLeft: '3%', marginBottom: '2%'
-            }}> Checkbox </Text>
+                fontWeight: 'bold', fontSize: 16, paddingLeft: '3%', marginBottom: '2%'
+            }}>{value.ControlLabel}</Text>
             {
                 value.ControlValues.map( item => {
                     return (
@@ -158,7 +158,7 @@ const CustomMultiSelectCheckbox = ( { value } ) => {
     )
 }
 
-const CustomRadioButtonList = ( { value } ) => {
+export const CustomRadioButtonList = ( { value } ) => {
     const radioButtonList = value.ControlValues.map( item => {
         const radio = {
             label: item.Value,
@@ -172,8 +172,8 @@ const CustomRadioButtonList = ( { value } ) => {
         <View style={{ marginBottom: 10 }}>
             <Text style={{
                 color: '#86939e',
-                fontWeight: 'bold', fontSize: 20, paddingLeft: '3%', marginBottom: '3%'
-            }}> Radio Buttons </Text>
+                fontWeight: 'bold', fontSize: 16, paddingLeft: '3%', marginBottom: '3%'
+            }}>{value.ControlLabel}</Text>
             <RadioForm style={{ width: '100%', paddingHorizontal: 30 }}
                 radio_props={radioButtonList}
                 initial={-1}
@@ -205,7 +205,6 @@ const CustomTextAreaInput = ( { value } ) => {
                 errorStyle={{ margin: -5 }}
                 value={inputValue}
                 onChangeText={(text) => setInputValue( text )}
-                editable={value.LinkText === 'Edit' ? true : false }
             />
         </View>
     )
@@ -216,6 +215,7 @@ export const DynamicControlsScreen = ( props ) => {
     const STATUS_BAR_HEIGHT = getStatusBarHeight()
     const [dynamicControls,SetDynamicControls] = useState( [] | undefined )
     const navigation = useNavigation()
+    const keyboard = useKeyboard()
     
     useEffect( ( ) => {
         fetchDynamicControls()
@@ -299,16 +299,16 @@ export const DynamicControlsScreen = ( props ) => {
                 leftComponent={{ icon: 'arrow-back', type: 'ionicons', color: 'white', onPress: navigatetoBackScreen }}
                 centerComponent={{ text: 'Dynamic Controls', style: { color: '#fff', fontSize: 16 } }}
             />
-            <View style={{ flex: 0.94 }}>
+            <View style={{ flex: keyboard.keyboardShown ? 0.92 : 0.94 }}>
                 <FlatList 
                     data={dynamicControls}
                     renderItem={renderItem}
                     keyExtractor={(item, index) => String( index )}
-                    contentContainerStyle={{ paddingBottom: 30 }}
+                    contentContainerStyle={{ paddingBottom: 50 }}
                     ItemSeparatorComponent={ItemSeparatorComponent}
                 />
             </View>
-            <View style={{ flex: 0.06, marginVertical: '3%', marginHorizontal: '3%' }}>
+            <View style={{ flex: keyboard.keyboardShown ? 0.08 : 0.06, marginVertical: '5%', marginHorizontal: '3%' }}>
                 <Button  title="Submit" titleStyle={{ fontSize: 14 ,fontWeight:'bold'}}  buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} />
             </View>
         </View>

@@ -7,13 +7,16 @@ import { isEmpty } from 'lodash'
 import { useNavigation, useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { CustomDropdown } from '../components/core/custom-dropdown'
+import { ActivityIndicator } from 'react-native'
+import { useFocusEffect } from '@react-navigation/native';
 
 
-export const AddInspection = () => {
+export const StartInspection = () => {
     const route = useRoute()
     const navigation = useNavigation()
     const { CustomFormID, AuditAndInspectionTemplateID, Title, userId, AuditAndInspectionFor, Type } = route.params
     const [data, setData] = useState( [] )
+    const [dropdownObject, setDropdownObject] = useState( {} )
     const [primaryDropdownArray, setPrimaryDropdownArray] = useState( [] )
     const [secondaryDropdownArray, setSecondaryDropdownArray] = useState( [] )
     const [selectedPrimaryDropdownValue,setSelectedPrimaryDropdownvalue] = useState( '' )
@@ -22,9 +25,11 @@ export const AddInspection = () => {
     const STATUS_BAR_HEIGHT = getStatusBarHeight()
 
 
-    useEffect( ( ) => {
-        fetchTypes()
-    }, [] )
+    useFocusEffect(
+        React.useCallback(() => {
+            fetchTypes()
+        }, [])
+      );
 
     const fetchTypes = async ( ) => {
         setIsLoading( true )
@@ -44,6 +49,7 @@ export const AddInspection = () => {
         }
         setData( result )
         const primaryArray = result.map(item => {
+            setDropdownObject( item )
             if( item.IsDefault === "True" && !isEmpty( item.PrimaryUserList ) ) {
                 setSelectedPrimaryDropdownvalue( item.TypeID )
                 const nestedDropdown = item.PrimaryUserList.map( val => {
@@ -84,6 +90,15 @@ export const AddInspection = () => {
         setSelectedSecondaryDropdownvalue( value )
     }
 
+    const navigateToAuditDetails = ( auditDetails ) => {
+        navigation.navigate( 'AuditDetails', {
+            auditDetails: auditDetails,
+            Type: Type,
+            selectedDropdownValue: isEmpty( selectedSecondaryDropdownValue ) ? userId : selectedSecondaryDropdownValue,
+            dropdownObject: dropdownObject
+        } )
+    }
+
     const onSubmit = async ( ) =>  {
         setIsLoading( true )
         const token = await AsyncStorage.getItem('Token')
@@ -93,7 +108,7 @@ export const AddInspection = () => {
             CustomFormID: CustomFormID,
             AuditAndInspectionTemplateID: AuditAndInspectionTemplateID,
             TypeID: selectedPrimaryDropdownValue,
-            PrimaryUserID: isEmpty( selectedSecondaryDropdownValue ) ? userId : selectedSecondaryDropdownValue,
+            PrimaryUserID: isEmpty( selectedSecondaryDropdownValue ) ? selectedPrimaryDropdownValue : selectedSecondaryDropdownValue,
             Type: Type
         }
         const result = await api.post({
@@ -101,12 +116,18 @@ export const AddInspection = () => {
             body: body
         })
         if( isEmpty( result ) ) {
+            Toast.showWithGravity('Something went wrong', Toast.LONG, Toast.CENTER);
             return null
         } 
+        navigateToAuditDetails( result )
     }
 
     if( isLoading ) {
-        return null
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+                <ActivityIndicator color="red" size={32} />
+            </View>
+        )
     }
 
     return (
