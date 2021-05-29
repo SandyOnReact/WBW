@@ -108,13 +108,14 @@ export const StartInspection = () => {
             CustomFormID: CustomFormID,
             AuditAndInspectionTemplateID: AuditAndInspectionTemplateID,
             TypeID: selectedPrimaryDropdownValue,
-            PrimaryUserID: isEmpty( selectedSecondaryDropdownValue ) ? selectedPrimaryDropdownValue : selectedSecondaryDropdownValue,
+            PrimaryUserID: isEmpty( selectedSecondaryDropdownValue ) ? userId : selectedSecondaryDropdownValue,
             Type: Type
         }
         const result = await api.post({
             url: 'api/AuditAndInspection/StartAudit',
             body: body
         })
+        console.log( 'result is ',JSON.stringify( result ) )
         if( isEmpty( result ) ) {
             Toast.showWithGravity('Something went wrong', Toast.LONG, Toast.CENTER);
             return null
