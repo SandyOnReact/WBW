@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { View, Text, ScrollView } from 'react-native'
-import { useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { CheckBox, Header, Input, Button } from "react-native-elements"
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getStatusBarHeight } from 'react-native-status-bar-height'
@@ -9,32 +9,7 @@ import { useKeyboard } from '@react-native-community/hooks';
 import { FlatList } from 'react-native';
 import { CustomCalendar, EditableDropdown, CustomInput, CustomCheckBox, CustomMultiSelectCheckbox, CustomRadioButtonList, CustomTextAreaInput } from "./DynamicControlsScreen"
 import _ from "lodash"
-
-
-
-
-
-/**
- * 
- * @returns Record Number:VAT-V1-2021-0008
-
-Select Passing Values for Incomplete Tasks:
-
-Action Taken By:demo, admin
-
-* Select Vehicle:
-
-     
-
-Notes:
-
-* Last Day of Schedule Period:      
-
-Schedule Frequency: One Time Occurs Daily
- */
-
-
-
+import { DynamicGroupsCard } from "../components/dynamic-card"
 
 const inputContainerStyle = { borderWidth: 1, borderColor: '#1e5873', borderRadius: 6 }
 export const AuditDetailsScreen = () => {
@@ -46,6 +21,7 @@ export const AuditDetailsScreen = () => {
     const [userInfo,setUserInfo] = useState( {} )
     const STATUS_BAR_HEIGHT = getStatusBarHeight()
     const keyboard = useKeyboard()
+    const navigation = useNavigation()
 
     useEffect( ( ) => {
         getUserdetails()
@@ -59,6 +35,7 @@ export const AuditDetailsScreen = () => {
 
     const getUserdetails = async () => {
         const user = await fetchUserInfoFromStorage()
+        console.log( JSON.stringify( user ) )
         setUserInfo( user )
     }
 
@@ -75,9 +52,9 @@ export const AuditDetailsScreen = () => {
     }
 
     const renderCustomDropdown = ( ) => {
-        const data = auditDetails.GroupsAndAttributes?.HazardList.map( item => {
-            const currentAudit = { label: item.Value, value: item.ID }
-            return currentAudit
+        const data = auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates.map( item => {
+            const currentReportingPeriod = { label: item.Value, value: item.ID }
+            return currentReportingPeriod
         })
         return (
             <CustomDropdown
@@ -153,13 +130,28 @@ export const AuditDetailsScreen = () => {
         ) 
     }
 
+    const renderDynamicGroupsAndAttributes = ( ) => {
+        const sortedGroupsData = _.sortBy( auditDetails.GroupsAndAttributes?.Groups, ( item ) => item.GroupOrder )
+        const shouldShowHazardDetails = auditDetails.AuditAndInspectionDetails?.IsDisplayHazardList
+        const shouldShowSourceDetails = auditDetails.AuditAndInspectionDetails?.IsDisplaySource
+        return sortedGroupsData.map( item => {
+            return (
+                <DynamicGroupsCard 
+                    dynamicGroups={item}  
+                    sourceList={shouldShowSourceDetails ? auditDetails.GroupsAndAttributes.SourceList : [] } 
+                    hazardList={shouldShowHazardDetails ? auditDetails.GroupsAndAttributes.HazardList : [] }
+                />
+            )
+        })
+    }
+
     const onSubmit = async ( ) =>  {
         //
     }
 
     return (
         <View style={{ flex: 1 }}>
-        <View style={{ flex: keyboard.keyboardShown ? 0.85 : 0.9 }}>
+        <View style={{ flex: 1 }}>
             <ScrollView contentContainerStyle={{ paddingBottom: 30 }}>
             <Header
                 containerStyle={{ height: 56 + STATUS_BAR_HEIGHT }}
@@ -182,7 +174,7 @@ export const AuditDetailsScreen = () => {
                 />
             </View>
             {
-                renderAuditDetailsRow( 'Action Taken By:', `${userInfo?.CompanyName}, ${userInfo?.FirstName}` )
+                renderAuditDetailsRow( 'Action Taken By:', `${userInfo?.FullName}` )
             }
             {
                 renderAuditDetailsRow( `Select ${Type} :`, `${dropdownObject?.Name}` )
@@ -211,13 +203,18 @@ export const AuditDetailsScreen = () => {
                     renderDynamicFields()
                 }
             </View>
+            <View>
+                {
+                    renderDynamicGroupsAndAttributes()
+                }
+            </View>
             </ScrollView>
         </View>
-            <View flex={ keyboard.keyboardShown ? 0.15 : 0.1}>
+            {/* <View flex={ keyboard.keyboardShown ? 0.15 : 0.1}>
                 <View style={{ marginTop: '3%', marginHorizontal: '4%' }}>
                     <Button containerStyle={{ marginHorizontal: '3%'}}  title="Next" titleStyle={{ fontSize: 18 }} buttonStyle={{ backgroundColor: '#1e5873', width: '100%', padding: 15 }} onPress={onSubmit} />
                 </View>
-            </View>
+            </View> */}
         </View>
     )
 }

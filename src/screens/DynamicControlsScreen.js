@@ -189,7 +189,7 @@ export const CustomRadioButtonList = ( { value } ) => {
     )
 }
 
-const CustomTextAreaInput = ( { value } ) => {
+export const CustomTextAreaInput = ( { value } ) => {
     const [inputValue,setInputValue] = useState( value?.SelectedValue )
     return (
         <View>
