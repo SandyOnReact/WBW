@@ -99,7 +99,7 @@ const DynamicGroups = ( props ) => {
     }
 
     const renderGroupsByAuditAndInspectionId = ( item ) => {
-        if( item.AuditAndInspectionId === '6' ) {
+        if( item.AuditAndInspectionScoreID === '6' ) {
             return null
         }
         return (
