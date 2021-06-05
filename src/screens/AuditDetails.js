@@ -134,12 +134,14 @@ export const AuditDetailsScreen = () => {
         const sortedGroupsData = _.sortBy( auditDetails.GroupsAndAttributes?.Groups, ( item ) => item.GroupOrder )
         const shouldShowHazardDetails = auditDetails.AuditAndInspectionDetails?.IsDisplayHazardList
         const shouldShowSourceDetails = auditDetails.AuditAndInspectionDetails?.IsDisplaySource
+        const scoreLabel = auditDetails.AuditAndInspectionDetails?.scoreLabel
         return sortedGroupsData.map( item => {
             return (
                 <DynamicGroupsCard 
                     dynamicGroups={item}  
                     sourceList={shouldShowSourceDetails ? auditDetails.GroupsAndAttributes.SourceList : [] } 
                     hazardList={shouldShowHazardDetails ? auditDetails.GroupsAndAttributes.HazardList : [] }
+                    scoreLabel={scoreLabel}
                 />
             )
         })
@@ -152,7 +154,6 @@ export const AuditDetailsScreen = () => {
     return (
         <View style={{ flex: 1 }}>
         <View style={{ flex: 1 }}>
-            <ScrollView contentContainerStyle={{ paddingBottom: 30 }}>
             <Header
                 containerStyle={{ height: 56 + STATUS_BAR_HEIGHT }}
                 statusBarProps={{ barStyle: "light-content", translucent: true, backgroundColor: "transparent" }}
@@ -160,6 +161,7 @@ export const AuditDetailsScreen = () => {
                 leftComponent={{ icon: 'arrow-back', type: 'ionicons', color: 'white', onPress: navigatetoBackScreen }}
                 centerComponent={{ text: 'Inspection Details', style: { color: '#fff', fontSize: 16 } }}
             />
+            <ScrollView contentContainerStyle={{ paddingBottom: 30 }}>
             {
                 renderAuditDetailsRow( 'Record Number:', `${auditDetails.AuditAndInspectionDetails?.AuditAndInspectionNumber}`  )
             }

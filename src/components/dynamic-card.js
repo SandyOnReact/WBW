@@ -7,7 +7,7 @@ import { Input } from "react-native-elements"
 
 const inputContainerStyle = { borderWidth: 1, borderColor: '#1e5873', borderRadius: 6 }
 
-export const ScoreDropdown = ( { item } ) => {
+export const ScoreDropdown = ( { item, scoreLabel } ) => {
     const [scoreValue,setScoreValue] = useState( '' )
     const scoreData = item.ScoreList.map( item => {
         const score = { label: item.Value, value: item.ID }
@@ -15,7 +15,7 @@ export const ScoreDropdown = ( { item } ) => {
     })
     return (
         <CustomDropdown
-            title="Score"
+            title={scoreLabel}
             items={scoreData}
             value={scoreValue}
             onValueChange={(value) => setScoreValue(value)}
@@ -77,7 +77,8 @@ const DynamicGroups = ( props ) => {
     const {
         dynamicGroups,
         sourceList,
-        hazardList 
+        hazardList,
+        scoreLabel 
     } = props
     const sortedDynamicGroup = _.sortBy( dynamicGroups?.Attributes, ( item ) => item.AttributeOrder )
 
@@ -85,7 +86,7 @@ const DynamicGroups = ( props ) => {
         if( isEmpty( sourceList ) ) {
             return null
         }else{
-            if( item.DoNotShowHazard ) {
+            if( item.DoNotShowHazard === "True" ) {
                 return null
             }else{
                 return (
@@ -97,26 +98,39 @@ const DynamicGroups = ( props ) => {
         }
     }
 
+    const renderGroupsByAuditAndInspectionId = ( item ) => {
+        if( item.AuditAndInspectionId === '6' ) {
+            return null
+        }
+        return (
+            <View>
+                    <View>
+                        <ScoreDropdown item={item} scoreLabel={scoreLabel} />
+                    </View>
+                    {
+                        isEmpty( sourceList ) 
+                        ? null 
+                        : (
+                            <View>
+                                <SourceDropdown sourceList={sourceList} />
+                            </View>  
+                        )
+                    }
+                    {
+                        renderHazardDropdown( item )
+                    }
+            </View>
+        )
+    }
+
     const renderItem = ( { item } ) => {
         return (
             <View style={{ flex: 1, marginHorizontal: '3%', marginVertical: '2%'}}>
                 <View style={{ marginHorizontal: '3%'}}>
                     <Text style={{ fontSize: 16, fontWeight: 'bold' }}>{item.AttributeOrder} {item.Title}</Text>
                 </View>
-                <View>
-                    <ScoreDropdown item={item} />
-                </View>
-                {
-                    isEmpty( sourceList ) 
-                    ? null 
-                    : (
-                        <View>
-                            <SourceDropdown sourceList={sourceList} />
-                        </View>  
-                    )
-                }
-                {
-                    renderHazardDropdown( item )
+                { 
+                    renderGroupsByAuditAndInspectionId( item )
                 }
                 <View style={{ marginTop: '3%' }}>
                     <CommentInput item={item} />
