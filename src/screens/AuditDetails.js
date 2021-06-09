@@ -52,6 +52,7 @@ export const AuditDetailsScreen = () => {
     }
 
     const renderCustomDropdown = ( ) => {
+        console.log(auditDetails.AuditAndInspectionDetails)
         const data = auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates.map( item => {
             const currentReportingPeriod = { label: item.Value, value: item.ID }
             return currentReportingPeriod
@@ -134,7 +135,7 @@ export const AuditDetailsScreen = () => {
         const sortedGroupsData = _.sortBy( auditDetails.GroupsAndAttributes?.Groups, ( item ) => item.GroupOrder )
         const shouldShowHazardDetails = auditDetails.AuditAndInspectionDetails?.IsDisplayHazardList
         const shouldShowSourceDetails = auditDetails.AuditAndInspectionDetails?.IsDisplaySource
-        const scoreLabel = auditDetails.AuditAndInspectionDetails?.scoreLabel
+        const scoreLabel = auditDetails.AuditAndInspectionDetails?.ScoringLable
         return sortedGroupsData.map( item => {
             return (
                 <DynamicGroupsCard 
@@ -171,7 +172,7 @@ export const AuditDetailsScreen = () => {
                     checked={checkboxValue}
                     onPress={toggleCheckBoxValue}
                     iconRight={true}
-                    textStyle={{ fontSize: 16 }}
+                    textStyle={{ fontSize: 16 ,fontWeight:'500'}}
                     containerStyle={{ paddingLeft: 0 }}
                 />
             </View>
