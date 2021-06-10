@@ -35,7 +35,6 @@ export const AuditDetailsScreen = () => {
 
     const getUserdetails = async () => {
         const user = await fetchUserInfoFromStorage()
-        console.log( JSON.stringify( user ) )
         setUserInfo( user )
     }
 
@@ -134,7 +133,7 @@ export const AuditDetailsScreen = () => {
         const sortedGroupsData = _.sortBy( auditDetails.GroupsAndAttributes?.Groups, ( item ) => item.GroupOrder )
         const shouldShowHazardDetails = auditDetails.AuditAndInspectionDetails?.IsDisplayHazardList
         const shouldShowSourceDetails = auditDetails.AuditAndInspectionDetails?.IsDisplaySource
-        const scoreLabel = auditDetails.AuditAndInspectionDetails?.scoreLabel
+        const scoreLabel = auditDetails.AuditAndInspectionDetails?.ScoringLable
         return sortedGroupsData.map( item => {
             return (
                 <DynamicGroupsCard 

@@ -115,7 +115,6 @@ export const StartInspection = () => {
             url: 'api/AuditAndInspection/StartAudit',
             body: body
         })
-        console.log( 'result is ',JSON.stringify( result ) )
         if( isEmpty( result ) ) {
             Toast.showWithGravity('Something went wrong', Toast.LONG, Toast.CENTER);
             return null
