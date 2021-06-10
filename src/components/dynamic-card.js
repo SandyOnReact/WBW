@@ -2,11 +2,8 @@ import React, { useState } from 'react'
 import { View, Text } from 'react-native'
 import _, { isEmpty } from "lodash"
 import { FlatList } from 'react-native'
-import { CustomDropdown } from '../components/core/custom-dropdown'
-import { Input } from "react-native-elements"
 import { DynamicAttribute } from "./dynamic-attributes"
 
-const inputContainerStyle = { borderWidth: 1, borderColor: '#1e5873', borderRadius: 6 }
 
 /**
  * 
