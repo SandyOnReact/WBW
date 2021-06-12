@@ -51,7 +51,6 @@ export const AuditDetailsScreen = () => {
     }
 
     const renderCustomDropdown = ( ) => {
-        console.log(auditDetails.AuditAndInspectionDetails)
         const data = auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates.map( item => {
             const currentReportingPeriod = { label: item.Value, value: item.ID }
             return currentReportingPeriod

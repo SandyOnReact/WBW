@@ -45,7 +45,7 @@ export const SourceDropdown = ( { sourceList } ) => {
     )
 }
 
-export const HazardDropdown = ( { hazardList } ) => {
+export const HazardDropdown = ( { hazardList, item } ) => {
     const navigation = useNavigation()
     const [hazardValue,setHazardValue] = useState( '' )
     const hazardData = hazardList.map( item => {
@@ -55,7 +55,11 @@ export const HazardDropdown = ( { hazardList } ) => {
 
     const onHazardValueChange = ( value ) => {
         setHazardValue( value )
-        navigation.navigate( 'CompleteOrAssignTask' )
+        navigation.navigate( 'CompleteOrAssignTask', {
+            selectedHazardValue: value,
+            hazardData: hazardData,
+            item: item
+        } )
     }
 
     return (
@@ -79,7 +83,10 @@ const renderHazardDropdown = ( item, sourceValue, sourceList, hazardList ) => {
         }else{
             return (
                 <View>
-                    <HazardDropdown hazardList={hazardList} />
+                    <HazardDropdown 
+                        hazardList={hazardList}
+                        item={item} 
+                    />
                 </View>  
             )
         }
