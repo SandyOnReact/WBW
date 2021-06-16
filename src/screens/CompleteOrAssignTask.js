@@ -1,10 +1,13 @@
 import React, { useState } from 'react'
-import { View , Text, Image } from 'react-native'
+import { View , Text, Image, ScrollView } from 'react-native'
 import { getStatusBarHeight } from 'react-native-status-bar-height'
-import { Header, Input, Button } from "react-native-elements"
+import { Header, Input, Button, Icon } from "react-native-elements"
 import RadioForm from 'react-native-simple-radio-button';
 import { useNavigation, useRoute } from "@react-navigation/native"
 import { isEmpty } from "lodash"
+import { CustomDropdown } from '../components/core/custom-dropdown'
+import { CustomDateTimePicker } from '../components/datetimepicker'
+import { AutoCompleteInput } from '../components/autocomplete-input/autocomplete.input'
 
 const radioButtons = [
     { label: 'Complete Task', value: "Complete Task" },
@@ -12,15 +15,15 @@ const radioButtons = [
 ]
 
 const inputContainerStyle = { borderWidth: 1, borderColor: '#1e5873', borderRadius: 6 }
-export const CustomInput = ( { value } ) => {
+export const CustomInput = ( { value, label } ) => {
     const [inputValue,setInputValue] = useState( value )  
     return (
         <View>
             <Input
-                label="Task Title"
+                label={label}
                 labelStyle={{ marginBottom: 5 }}
                 textAlignVertical="top"
-                placeholder="Task Title"
+                placeholder={label}
                 placeholderTextColor="#9EA0A4"
                 inputContainerStyle={inputContainerStyle}
                 inputStyle={{ padding:10, textAlign: 'auto',fontSize:16 }}
@@ -33,15 +36,15 @@ export const CustomInput = ( { value } ) => {
     )
 }
 
-export const CustomTextAreaInput = ( { value } ) => {
+export const CustomTextAreaInput = ( { value, label } ) => {
     const [inputValue,setInputValue] = useState( value )
     return (
         <View>
             <Input
-                label="Comments"
+                label={label}
                 labelStyle={{ marginBottom: 5 }}
                 textAlignVertical="top"
-                placeholder="Comments"
+                placeholder={label}
                 placeholderTextColor="#9EA0A4"
                 inputStyle={{padding:10, textAlign: 'auto',fontSize:16}}
                 inputContainerStyle={{...inputContainerStyle, minHeight: 60, maxHeight: 90 }}
@@ -117,7 +120,7 @@ export const CompleteTask = ( props ) => {
                <CustomInput value={item.Title} />
            </View>
            <View>
-               <CustomTextAreaInput value="" />
+               <CustomTextAreaInput value="" label="Comments" />
            </View>
             <View style={{ marginTop: '5%'}}>
                     <Input
@@ -146,9 +149,272 @@ export const CompleteTask = ( props ) => {
     )
 }
 
-export const AssignTask = () => {
+let date = new Date();
+export const CustomCalendar = ( { value } ) => {
+    const [mode, setMode] = useState('date');
+    const [show, setShow] = useState(false);
+    const [dateValue, setDateValue] = useState('');
+
+    const showMode = (currentMode) => {
+        if( currentMode === 'date' ) {
+            setShow(true);
+        }else{
+            setShowTime( true )
+        }
+        setMode(currentMode);
+    };
+
+    const showDatepicker = () => {
+        showMode('date');
+    };
+
+    const hideDatePicker = ( ) => {
+        setShow( false )
+    }
+
+    const onChange = (selectedDate) => {
+        const currentDate = selectedDate || date;
+        const pickedDate = moment(currentDate).format("MM/DD/YYYY")
+        setDateValue(pickedDate)
+        date = currentDate
+        hideDatePicker()
+    };
+    
     return (
-        <Text>Assign Task</Text>
+        <View style={{ flex: 1 }}>
+            <CustomDateTimePicker
+                label="Due Date"
+                onPress={showDatepicker}
+                show={show}
+                inputValue={dateValue}
+                mode={mode}
+                display="spinner"
+                value={date}
+                maximumDate={new Date()}
+                onConfirm={onChange}
+                onCancel={hideDatePicker}
+            />
+        </View>
+    )
+}
+
+export const EditableDropdown = ( { value, label } ) => {
+    const controlValues = value.ControlValues.map( item => {
+        const control = { label: item.Value, value: item.Id }
+        return control
+    })
+    const onValueChange = ( value ) => {
+        setDropdownValue( value )
+    }
+    const [dropdownValue,setDropdownValue] = useState( '' )
+    return (
+        <View>
+            <CustomDropdown
+                title={label}
+                items={controlValues}
+                value={dropdownValue}
+                onValueChange={onValueChange}
+            />
+        </View>
+    )
+}
+
+
+export const AssignTask = ( props ) => {
+    const {
+        selectedHazardValue,
+        hazardData,
+        item
+    } = props
+    const [hazardImageValue,setHazardImageValue] = useState( '' )
+    const [severityRating,setSeverityRating] = useState( '' )
+    const [probabilityRating,setProbabilityRating] = useState( '' )
+    const [autoCompleteValue,setAutoCompleteValue] = useState( '' )
+    const [shouldHideResults,setShouldHideResults] = useState( true )
+    const [imagesObject, setImagesObject ] = useState( {} )
+    const [selectedValue, setSelectedValue ] = useState( '' )
+    const [filteredData, setFilteredData ] = useState( [] )
+    const [autoCompleteList, setAutoCompleteList] = useState([]);
+    const navigation = useNavigation()
+    const selectedHazard = hazardData.find( item => item.value === selectedHazardValue )
+
+    const onImageReceive = ( url, imageData ) => {
+        const imageObj = { ...imageData, uri: url }
+        setImagesObject( imageObj )
+    }
+
+    const navigateToImagePicker = ( ) => {
+        navigation.navigate( 'UploadImage', {
+            callback: ( url, imageData ) => onImageReceive( url, imageData )
+        } )
+    }
+
+    const renderImage = ( ) => {
+        if( !isEmpty( imagesObject ) ) {
+            return (
+                <View style={{ width: 100, height: 100, marginHorizontal: '5%', flexDirection: 'row'}}>
+                    <Image
+                        source={{ uri: imagesObject.uri }}
+                        style={{
+                            width: 100,
+                            height: 100,
+                            borderRadius: 8,
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                            alignItems: 'center'
+                        }}
+                    />
+                </View>
+            )
+        }else{
+            return null
+        }
+    }
+
+    const onCompleteTask = ( ) => {
+        //
+    }
+
+    const navigateToBackScreen = ( ) => {
+        navigation.goBack()
+    }
+
+    const onSeverityRatingChange = ( ) => {
+        //
+    }
+
+    const onProbabilityRatingChange = ( ) => {
+        //
+    }
+
+    const showDatepicker = () => {
+        showMode('date');
+    };
+
+    const renderItem = ({ item }) => {
+        return (
+            <View>
+                <Text onPress={() => {
+                    setSelectedValue(item.value);
+                    setFilteredData([]);
+                    setAutoCompleteValue(item.label)
+                }} style={styles.itemText}>
+                    {item.label}
+                </Text>
+            </View>
+        )
+    }
+
+    const searchFilterFunction = (text) => {
+        // Check if searched text is not blank
+        if (text) {
+            const newData = autoCompleteList.filter(function (item) {
+                const itemData = item.label
+                    ? item.label.toUpperCase()
+                    : ''.toUpperCase();
+                const textData = text.toUpperCase();
+                return itemData.indexOf(textData) > -1;
+            });
+            setFilteredData(newData);
+            setAutoCompleteValue(text);
+        } else {
+            setFilteredData([]);
+            setSelectedValue('')
+            setAutoCompleteValue(text);
+        }
+    };
+
+    const renderTextInput = () => {
+        return (
+            <Input
+                label="Select User"
+                labelStyle={{ marginBottom: 5 }}
+                placeholder="Select user"
+                placeholderTextColor="#9EA0A4"
+                style={{ fontSize: 16 }}
+                value={autoCompleteValue}
+                onFocus={()=>setShouldHideResults( false )}
+                onEndEditing={()=>setShouldHideResults( true )}
+                inputStyle={{padding:10, textAlign: 'auto', color: 'black', fontSize: 12}}
+                inputContainerStyle={inputContainerStyle}
+                rightIcon={<Icon name="caret-down" color="#1e5873" size={24} type="ionicon" /> }
+                onChangeText={(text) => searchFilterFunction(text)}
+            />
+        )
+    }
+
+    return (
+       <View style={{ flex: 1, marginHorizontal: '3%', marginVertical: '3%' }}>
+           <ScrollView>
+           <View style={{ flexDirection: 'row', marginHorizontal: '3%', alignItems: 'center' }}>
+                <Text style={{ fontSize: 16, fontWeight: 'bold'}}>Selected Hazard: </Text>
+                <Text style={{ marginHorizontal: '5%', fontSize: 16 }}>{selectedHazard?.label}</Text>
+           </View>
+           <View style={{ marginVertical: '5%'}}>
+               <CustomInput value={item.Title} />
+           </View>
+           <View>
+               <CustomTextAreaInput value="" label="Description" />
+           </View>
+           <View style={{ flex: 9, marginVertical: '3%' }}>
+                <CustomDropdown
+                    title="Severity Rating"
+                    items={[]}
+                    value={severityRating}
+                    onValueChange={onSeverityRatingChange}
+                />
+                 <CustomDropdown
+                    title="Probability Rating"
+                    items={[]}
+                    value={probabilityRating}
+                    onValueChange={onProbabilityRatingChange}
+                />
+           </View>
+           <View>
+               <CustomInput value={item.Title} label="Risk Rating"/>
+            </View>
+            <View>
+                <CustomCalendar />
+            </View>
+            <View style={{ flex: 1, marginTop: '3%'}}>
+                <AutoCompleteInput
+                    style={{ color: 'black', borderColor: 'red', fontSize:'16'}}
+                    data={autoCompleteValue.length === 0 && !shouldHideResults ? autoCompleteList : filteredData}
+                    renderItem={renderItem}
+                    hideResults={shouldHideResults}
+                    containerStyle={{flex:1, zIndex: 1}}
+                    renderTextInput={renderTextInput}
+                    keyExtractor={(i) => String( i ) }
+                    maxListHeight={400}
+                    fontSize={14}
+                    flatListProps={{ nestedScrollEnabled: true }}
+                />
+            </View>
+            <View>
+                    <Input
+                        label="Upload Hazard Image"
+                        labelStyle={{ marginBottom: 5 }}
+                        textAlignVertical="top"
+                        placeholder="Select Image"
+                        placeholderTextColor="#9EA0A4"
+                        inputContainerStyle={inputContainerStyle}
+                        inputStyle={{ padding:10, textAlign: 'auto',fontSize:16 }}
+                        containerStyle={{ margin: 0 }}
+                        rightIcon={{ name: 'camera', type:'feather', style: { marginRight: 10 }, onPress: navigateToImagePicker }}
+                        errorStyle={{ margin: -5 }}
+                        value={hazardImageValue}
+                        onChangeText={(text) => setHazardImageValue( text )}
+                        />
+                </View>
+                <View>
+                    {renderImage()}
+                </View>
+                <View style={{ marginTop: '3%', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center'}}>
+                    <Button  title="Assign Task" titleStyle={{ fontSize: 14 ,fontWeight:'bold'}}  buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} containerStyle={{ width: '42%'}} onPress={onCompleteTask} />
+                    <Button  title="Cancel" titleStyle={{ fontSize: 14 , fontWeight:'bold'}} buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} containerStyle={{ width: '42%'}} onPress={navigateToBackScreen}/>
+                </View>
+            </ScrollView>
+       </View>
     )
 }
 
@@ -178,7 +444,11 @@ export const CompleteOrAssignTask = ( props ) => {
             )
         }else{
             return (
-                <AssignTask />
+                <AssignTask 
+                    selectedHazardValue={selectedHazardValue}
+                    hazardData={hazardData}
+                    item={item}
+                />
             )
         }
     }
