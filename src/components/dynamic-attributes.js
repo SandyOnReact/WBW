@@ -75,10 +75,11 @@ export const HazardDropdown = ( { hazardList, item } ) => {
 
 
 const renderHazardDropdown = ( item, sourceValue, sourceList, hazardList ) => {
+    const shouldCheckForTruthyValues = item.CorrectAnswerValue === "True" || item.CorrectAnswerValue === "False" || item.CorrectAnswerValue === "Not Applicable"
     if( isEmpty( sourceList ) ) {
         return null
     }else{
-        if( item.DoNotShowHazard === "True" || Number( sourceValue ) >= Number( item.CorrectAnswerID ) ) {
+        if( item.DoNotShowHazard === "True" || shouldCheckForTruthyValues ? Number(sourceValue) === Number(item.CorrectAnswerID) : Number( sourceValue ) >= Number( item.CorrectAnswerID ) ) {
             return null
         }else{
             return (
