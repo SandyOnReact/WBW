@@ -141,6 +141,7 @@ export const AuditDetailsScreen = () => {
                     sourceList={shouldShowSourceDetails ? auditDetails.GroupsAndAttributes.SourceList : [] } 
                     hazardList={shouldShowHazardDetails ? auditDetails.GroupsAndAttributes.HazardList : [] }
                     scoreLabel={scoreLabel}
+                    auditAndInspectionId={auditDetails.AuditAndInspectionDetails?.AuditAndInspectionID}
                 />
             )
         })

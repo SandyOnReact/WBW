@@ -45,7 +45,7 @@ export const SourceDropdown = ( { sourceList } ) => {
     )
 }
 
-export const HazardDropdown = ( { hazardList, item } ) => {
+export const HazardDropdown = ( { hazardList, item, auditAndInspectionId } ) => {
     const navigation = useNavigation()
     const [hazardValue,setHazardValue] = useState( '' )
     const hazardData = hazardList.map( item => {
@@ -58,7 +58,8 @@ export const HazardDropdown = ( { hazardList, item } ) => {
         navigation.navigate( 'CompleteOrAssignTask', {
             selectedHazardValue: value,
             hazardData: hazardData,
-            item: item
+            item: item,
+            auditAndInspectionId: auditAndInspectionId
         } )
     }
 
@@ -74,7 +75,7 @@ export const HazardDropdown = ( { hazardList, item } ) => {
 
 
 
-const renderHazardDropdown = ( item, sourceValue, sourceList, hazardList ) => {
+const renderHazardDropdown = ( item, sourceValue, sourceList, hazardList, auditAndInspectionId ) => {
     const shouldCheckForTruthyValues = item.CorrectAnswerValue === "True" || item.CorrectAnswerValue === "False" || item.CorrectAnswerValue === "Not Applicable"
     if( isEmpty( sourceList ) ) {
         return null
@@ -87,6 +88,7 @@ const renderHazardDropdown = ( item, sourceValue, sourceList, hazardList ) => {
                     <HazardDropdown 
                         hazardList={hazardList}
                         item={item} 
+                        auditAndInspectionId={auditAndInspectionId}
                     />
                 </View>  
             )
@@ -96,7 +98,7 @@ const renderHazardDropdown = ( item, sourceValue, sourceList, hazardList ) => {
 
 
 export const GroupAttributes = ( props ) => {
-    const { item, scoreLabel, sourceList, hazardList } = props
+    const { item, scoreLabel, sourceList, hazardList, auditAndInspectionId } = props
     const [scoreValue,setScoreValue] = useState( '' )
     const scoreData = item.ScoreList.map( item => {
         const score = { label: item.Value, value: item.ID }
@@ -127,14 +129,14 @@ export const GroupAttributes = ( props ) => {
             {
                  isEmpty( scoreValue ) 
                  ? null 
-                 : renderHazardDropdown( item, scoreValue, sourceList, hazardList )         
+                 : renderHazardDropdown( item, scoreValue, sourceList, hazardList, auditAndInspectionId )         
             }
         </View>
     )
 }
 
 export const DynamicAttribute = ( props ) => {
-    const { item, scoreLabel, sourceList, hazardList } = props
+    const { item, scoreLabel, sourceList, hazardList, auditAndInspectionId } = props
     return (
         <View style={{ flex: 1, marginHorizontal: '3%', marginVertical: '2%'}}>
             <View style={{ marginHorizontal: '3%'}}>
@@ -150,6 +152,7 @@ export const DynamicAttribute = ( props ) => {
                             sourceList={sourceList}
                             scoreLabel={scoreLabel}
                             hazardList={hazardList}
+                            auditAndInspectionId={auditAndInspectionId}
                        />
                     </View>
                 )

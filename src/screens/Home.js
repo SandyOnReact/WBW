@@ -22,6 +22,7 @@ export const HomeScreen = ({ navigation }) => {
 
         const user = await fetchUserInfoFromStorage()
         setUserInfo(user)
+        console.log( user )
         const token = await AsyncStorage.getItem('Token')
         console.log( token )
         const result = await api.post({

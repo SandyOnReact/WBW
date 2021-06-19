@@ -16,7 +16,8 @@ const DynamicGroups = ( props ) => {
         dynamicGroups,
         sourceList,
         hazardList,
-        scoreLabel 
+        scoreLabel,
+        auditAndInspectionId
     } = props
     const sortedDynamicGroup = _.sortBy( dynamicGroups?.Attributes, ( item ) => item.AttributeOrder )
     
@@ -27,6 +28,7 @@ const DynamicGroups = ( props ) => {
                 scoreLabel={scoreLabel}
                 sourceList={sourceList}
                 hazardList={hazardList}
+                auditAndInspectionId={auditAndInspectionId}
             />
         )
     }
