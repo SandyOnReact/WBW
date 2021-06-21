@@ -53,13 +53,18 @@ export const HazardDropdown = ( { hazardList, item, auditAndInspectionId } ) => 
         return hazard
     })
 
+    const onClear = ( ) => {
+        setHazardValue( '' )
+    }
+
     const onHazardValueChange = ( value ) => {
         setHazardValue( value )
         navigation.navigate( 'CompleteOrAssignTask', {
             selectedHazardValue: value,
             hazardData: hazardData,
             item: item,
-            auditAndInspectionId: auditAndInspectionId
+            auditAndInspectionId: auditAndInspectionId,
+            clear: ( ) => onClear()
         } )
     }
 

@@ -11,6 +11,8 @@ import { AutoCompleteInput } from '../components/autocomplete-input/autocomplete
 import { Async } from 'react-async';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from '../utils/api'
+import Toast from 'react-native-simple-toast'
+import moment from "moment"
 
 
 const radioButtons = [
@@ -40,7 +42,7 @@ export const CustomInput = ( { value, label } ) => {
     )
 }
 
-export const CustomTextAreaInput = ( { value, label, onChangeText } ) => {
+export const CustomTextAreaInput = ( { value, label, onChangeText, multiline = false, numberOfLines = 1  } ) => {
     return (
         <View>
             <Input
@@ -49,11 +51,13 @@ export const CustomTextAreaInput = ( { value, label, onChangeText } ) => {
                 textAlignVertical="top"
                 placeholder={label}
                 placeholderTextColor="#9EA0A4"
-                inputStyle={{padding:10, textAlign: 'auto',fontSize:16}}
+                inputStyle={{paddingHorizontal: 10, paddingVertical: 5, textAlign: 'auto',fontSize:16}}
                 inputContainerStyle={{...inputContainerStyle, minHeight: 60, maxHeight: 90 }}
                 containerStyle={{ margin: 0 }}
                 errorStyle={{ margin: -5 }}
                 value={value}
+                multiline={multiline}
+                numberOfLines={numberOfLines}
                 onChangeText={onChangeText}
             />
         </View>
@@ -65,12 +69,14 @@ export const CompleteTask = ( props ) => {
         selectedHazardValue,
         hazardData,
         item,
-        auditAndInspectionId
+        auditAndInspectionId,
+        onCancel
     } = props
     const [hazardImageValue,setHazardImageValue] = useState( '' )
     const [imagesObject, setImagesObject ] = useState( {} )
     const [commentsValue, setCommentsValue] = useState( '' )
     const [isButtonLoading, setIsButtonLoading] = useState( false )
+    const [taskTitle, setTaskTitle] = useState( item.Title )
     const navigation = useNavigation()
 
     const fetchUserInfoFromStorage = async () => {
@@ -147,7 +153,9 @@ export const CompleteTask = ( props ) => {
                 // case 2: if result, but not images
                 else if( !isEmpty( result ) && isEmpty( imagesObject ) ) {
                     Toast.showWithGravity( 'Task Completed Successfully', Toast.LONG, Toast.CENTER);
-                    navigation.navigate( 'Home' )
+                    setTimeout(() => {
+                        navigateToBackScreen()
+                    }, 2000);
                 }
                 // case 3: if both present
                 else{
@@ -158,7 +166,9 @@ export const CompleteTask = ( props ) => {
                     if( isEmpty( response ) ) {
                         return null
                     }
-                    navigation.navigate( 'Home' )
+                    setTimeout(() => {
+                        navigateToBackScreen()
+                    }, 2000);
                 }
             } catch( error ) {
                 Toast.showWithGravity(error.message, Toast.LONG, Toast.CENTER);
@@ -175,12 +185,13 @@ export const CompleteTask = ( props ) => {
 
     return (
        <View style={{ flex: 1, marginHorizontal: '3%', marginVertical: '3%' }}>
+           <ScrollView showsVerticalScrollIndicator={false}>
            <View style={{ flexDirection: 'row', marginHorizontal: '3%', alignItems: 'center' }}>
                 <Text style={{ fontSize: 16, fontWeight: 'bold'}}>Selected Hazard: </Text>
                 <Text style={{ marginHorizontal: '5%', fontSize: 16 }}>{selectedHazard?.label}</Text>
            </View>
            <View style={{ marginVertical: '5%'}}>
-               <CustomInput value={item.Title} />
+               <CustomTextAreaInput onChangeText={(text)=>setTaskTitle( text )} multiline={true} numberOfLines={0} value={taskTitle} label="Task Title" />
            </View>
            <View>
                <CustomTextAreaInput onChangeText={(text)=>setCommentsValue( text )} value={commentsValue} label="Comments" />
@@ -206,14 +217,15 @@ export const CompleteTask = ( props ) => {
                 </View>
                 <View style={{ marginTop: '3%', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center'}}>
                     <Button  title="Complete Task" titleStyle={{ fontSize: 14 ,fontWeight:'bold'}} loading={isButtonLoading}  buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} containerStyle={{ width: '42%'}} onPress={onCompleteTask} />
-                    <Button  title="Cancel" titleStyle={{ fontSize: 14 , fontWeight:'bold'}} buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} containerStyle={{ width: '42%'}} onPress={navigateToBackScreen}/>
+                    <Button  title="Cancel" titleStyle={{ fontSize: 14 , fontWeight:'bold'}} buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} containerStyle={{ width: '42%'}} onPress={onCancel}/>
                 </View>
+                </ScrollView>
        </View>
     )
 }
 
 let date = new Date();
-export const CustomCalendar = ( { value } ) => {
+export const CustomCalendar = ( { value, onDateChange } ) => {
     const [mode, setMode] = useState('date');
     const [show, setShow] = useState(false);
     const [dateValue, setDateValue] = useState( value );
@@ -239,6 +251,7 @@ export const CustomCalendar = ( { value } ) => {
         const currentDate = selectedDate || date;
         const pickedDate = moment(currentDate).format("MM/DD/YYYY")
         setDateValue(pickedDate)
+        onDateChange( datevalue )
         date = currentDate
         hideDatePicker()
     };
@@ -306,7 +319,9 @@ export const AssignTask = ( props ) => {
     const [imagesObject, setImagesObject ] = useState( {} )
     const [selectedValue, setSelectedValue ] = useState( '' )
     const [filteredData, setFilteredData ] = useState( [] )
+    const [taskTitle,setTaskTitle] = useState( item.Title )
     const navigation = useNavigation()
+    const [isFetching,setIsFetching] = useState( false )
     const selectedHazard = hazardData.find( item => item.value === selectedHazardValue )
 
     const fetchUserInfoFromStorage = async () => {
@@ -425,7 +440,10 @@ export const AssignTask = ( props ) => {
                 } 
                 // case 2: if result but not images
                 else if( !isEmpty( result ) && isEmpty( imagesObject ) ) {
-                    navigation.navigate( 'Home' )
+                    Toast.showWithGravity( 'Task Assigned Successfully', Toast.LONG, Toast.CENTER);
+                    setTimeout(() => {
+                        navigateToBackScreen()
+                    }, 2000);
                 }
                 // case 3: if result and images
                 else {
@@ -436,7 +454,9 @@ export const AssignTask = ( props ) => {
                     if( isEmpty( response ) ) {
                         return null
                     }
-                    navigation.navigate( 'Home' )
+                    setTimeout(() => {
+                        navigateToBackScreen()
+                    }, 2000);
                 }
 
             } catch( error ) {
@@ -457,7 +477,10 @@ export const AssignTask = ( props ) => {
     }
 
     const fetchRiskRatingAndDueDate = async ( ) => {
-        const user = await fetchUserInfoFromStorage()
+        setIsFetching( true )
+        setShouldShowRiskRating( false )
+        try {
+            const user = await fetchUserInfoFromStorage()
         const token = await AsyncStorage.getItem('Token')
         const body = {
             UserID: user.UserID,
@@ -476,6 +499,12 @@ export const AssignTask = ( props ) => {
         setRiskRatingValue( result.RiskRating )
         setDueDateValue( result.DueDate )
         showRiskRating()
+        } catch( error ) {
+            Toast.showWithGravity(error.message, Toast.LONG, Toast.CENTER);
+            return null
+        } finally {
+            setIsFetching( false )    
+        }
     }
 
     const checkShowRiskRating = ( ) => {
@@ -486,11 +515,15 @@ export const AssignTask = ( props ) => {
 
     const onSeverityRatingChange = ( value ) => {
         setSeverityRating( value )
+        setProbabilityRating( '' )
+        setRiskRatingValue( '' )
+        setShouldShowRiskRating( false )
         checkShowRiskRating()
     }
 
     const onProbabilityRatingChange = ( value ) => {
         setProbabilityRating( value )
+        setShouldShowRiskRating( false )
         checkShowRiskRating()
     }
 
@@ -550,6 +583,14 @@ export const AssignTask = ( props ) => {
         )
     }
 
+    if( isFetching ) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <ActivityIndicator color='red' />
+            </View>
+        )
+    }
+
     return (
        <View style={{ flex: 1, marginHorizontal: '3%', marginVertical: '3%' }}>
            <Async promiseFn={fetchTaskRatingDetails}>
@@ -573,7 +614,13 @@ export const AssignTask = ( props ) => {
                                 <Text style={{ marginHorizontal: '5%', fontSize: 16 }}>{selectedHazard?.label}</Text>
                         </View>
                         <View style={{ marginVertical: '5%'}}>
-                            <CustomInput value={item.Title} />
+                            <CustomTextAreaInput 
+                                value={taskTitle} 
+                                onChangeText={(text)=> setTaskTitle( text )} 
+                                label="Task Title"
+                                multiline={true}
+                                numberOfLines={0}
+                            />
                         </View>
                         <View>
                             <CustomTextAreaInput 
@@ -604,7 +651,7 @@ export const AssignTask = ( props ) => {
                                         <CustomInput value={riskRatingValue} label="* Risk Rating"/>
                                     </View>
                                     <View>
-                                        <CustomCalendar value={dueDateValue} />
+                                        <CustomCalendar value={dueDateValue} onDateChange={ ( value ) => setDueDateValue( value ) } />
                                     </View>
                                 </View>
                             )
@@ -684,13 +731,15 @@ export const CompleteOrAssignTask = ( props ) => {
         selectedHazardValue,
         hazardData,
         item,
-        auditAndInspectionId
+        auditAndInspectionId,
+        clear
     } = route.params
     const STATUS_BAR_HEIGHT = getStatusBarHeight()
     const navigation = useNavigation()
     const [radioValue,setRadioValue] = useState( 'Complete Task' )
 
     const navigatetoBackScreen = () => {
+        clear()
         navigation.goBack()
     }
 
@@ -702,6 +751,7 @@ export const CompleteOrAssignTask = ( props ) => {
                     hazardData={hazardData}
                     item={item}
                     auditAndInspectionId={auditAndInspectionId}
+                    onCancel={navigatetoBackScreen}
                 />
             )
         }else{

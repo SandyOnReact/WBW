@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { View, Text, ScrollView } from 'react-native'
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { View, Text, ScrollView, Alert, BackHandler } from 'react-native'
+import { useNavigation, useRoute, useFocusEffect, useCallback } from '@react-navigation/native';
 import { CheckBox, Header, Input, Button } from "react-native-elements"
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getStatusBarHeight } from 'react-native-status-bar-height'
@@ -19,6 +19,7 @@ export const AuditDetailsScreen = () => {
     const [inputValue,setInputValue] = useState( '' )
     const [dropdownvalue,setDropdownValue] = useState( '' )
     const [userInfo,setUserInfo] = useState( {} )
+    const [isReset,setIsReset] = useState( false )
     const STATUS_BAR_HEIGHT = getStatusBarHeight()
     const keyboard = useKeyboard()
     const navigation = useNavigation()
@@ -27,6 +28,7 @@ export const AuditDetailsScreen = () => {
         getUserdetails()
     }, [] )
 
+    
     const fetchUserInfoFromStorage = async () => {
         const userInfo = await AsyncStorage.getItem('USER_INFO');
         return userInfo != null ? JSON.parse(userInfo) : null;
@@ -42,9 +44,31 @@ export const AuditDetailsScreen = () => {
         setCheckboxValue( checkboxValue => !checkboxValue )
     }
 
-    const navigatetoBackScreen = () => {
-        navigation.goBack()
-    }
+    useEffect(() => {
+        const backHandler = BackHandler.addEventListener(
+            "hardwareBackPress",
+            _handleBackPress
+        );
+        return () => backHandler.remove();
+    }, [])
+
+    const _handleBackPress = ( ) => {
+        // Works on both iOS and Android
+        Alert.alert(
+          "Discard changes?",
+          "Are u sure u want to go back",
+          [
+            {
+              text: "No",
+              onPress: () => console.log("No, continue editing")
+            },
+            {
+              text: "Yes",
+              onPress: ( ) => navigation.goBack()
+            }
+          ],
+        );
+      }
 
     const onChangeDropdownValue = ( value ) => {
         setDropdownValue( value )
@@ -158,7 +182,7 @@ export const AuditDetailsScreen = () => {
                 containerStyle={{ height: 56 + STATUS_BAR_HEIGHT }}
                 statusBarProps={{ barStyle: "light-content", translucent: true, backgroundColor: "transparent" }}
                 containerStyle={{ backgroundColor: '#1e5873' }}
-                leftComponent={{ icon: 'arrow-back', type: 'ionicons', color: 'white', onPress: navigatetoBackScreen }}
+                leftComponent={{ icon: 'arrow-back', type: 'ionicons', color: 'white', onPress: _handleBackPress }}
                 centerComponent={{ text: 'Inspection Details', style: { color: '#fff', fontSize: 16 } }}
             />
             <ScrollView contentContainerStyle={{ paddingBottom: 30 }}>
