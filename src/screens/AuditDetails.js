@@ -7,7 +7,7 @@ import { getStatusBarHeight } from 'react-native-status-bar-height'
 import { CustomDropdown } from '../components/core/custom-dropdown'
 import { useKeyboard } from '@react-native-community/hooks';
 import { FlatList } from 'react-native';
-import { CustomCalendar, EditableDropdown, CustomInput, CustomCheckBox, CustomMultiSelectCheckbox, CustomRadioButtonList, CustomTextAreaInput } from "./DynamicControlsScreen"
+import { CustomCalendar, EditableDropdown, CustomCheckBox, CustomMultiSelectCheckbox, CustomRadioButtonList, CustomTextAreaInput } from "./DynamicControlsScreen"
 import _ from "lodash"
 import { DynamicGroupsCard } from "../components/dynamic-card"
 
@@ -20,6 +20,7 @@ export const AuditDetailsScreen = () => {
     const [dropdownvalue,setDropdownValue] = useState( '' )
     const [userInfo,setUserInfo] = useState( {} )
     const [isReset,setIsReset] = useState( false )
+    const [shouldShowWarningMessage,setShouldShowWarningMessage] = useState( false )
     const STATUS_BAR_HEIGHT = getStatusBarHeight()
     const keyboard = useKeyboard()
     const navigation = useNavigation()
@@ -100,6 +101,8 @@ export const AuditDetailsScreen = () => {
         )
     }
 
+
+
     const renderItem = ( { item } ) => {
         switch( item.ControlType ) {
             case 'TextBox': {
@@ -154,6 +157,7 @@ export const AuditDetailsScreen = () => {
     }
 
     const renderDynamicGroupsAndAttributes = ( ) => {
+        console.log( JSON.stringify( auditDetails ) )
         const sortedGroupsData = _.sortBy( auditDetails.GroupsAndAttributes?.Groups, ( item ) => item.GroupOrder )
         const shouldShowHazardDetails = auditDetails.AuditAndInspectionDetails?.IsDisplayHazardList
         const shouldShowSourceDetails = auditDetails.AuditAndInspectionDetails?.IsDisplaySource
@@ -175,6 +179,17 @@ export const AuditDetailsScreen = () => {
         //
     }
 
+    const renderLastDayOfScheduledPeriod = ( ) => {
+        if( auditDetails.AuditAndInspectionDetails?.IsSchedulerRequired === "True" && auditDetails.AuditAndInspectionDetails?.ReportingPeriodDueDates === null ) {
+            setShouldShowWarningMessage( true )
+            return null
+        }else if( auditDetails.AuditAndInspectionDetails?.IsSchedulerRequired === "True" ) {
+            return renderCustomDropdown()
+        }else{
+            return null
+        }
+    }
+
     return (
         <View style={{ flex: 1 }}>
         <View style={{ flex: 1 }}>
@@ -186,6 +201,15 @@ export const AuditDetailsScreen = () => {
                 centerComponent={{ text: 'Inspection Details', style: { color: '#fff', fontSize: 16 } }}
             />
             <ScrollView contentContainerStyle={{ paddingBottom: 30 }}>
+            {
+                shouldShowWarningMessage 
+                ? (
+                    <View>
+                       <Text>{auditDetails.AuditAndInspectionDetails?.AdhocWarnigMessage}</Text>
+                    </View>
+                )
+                : null
+            }
             {
                 renderAuditDetailsRow( 'Record Number:', `${auditDetails.AuditAndInspectionDetails?.AuditAndInspectionNumber}`  )
             }
@@ -219,10 +243,14 @@ export const AuditDetailsScreen = () => {
                 />
             </View>
             <View flex={0.5} style={{ marginHorizontal: '2.2%', marginBottom: '3%'}}>
-                {renderCustomDropdown()}
+                {
+                   renderLastDayOfScheduledPeriod()
+                }
             </View>
             {
-                renderAuditDetailsRow( 'Schedule Frequency:', `One Time Occurs Daily` )
+                !_.isEmpty( auditDetails.AuditAndInspectionDetails.ScheduleFrequency ) 
+                ? renderAuditDetailsRow( 'Schedule Frequency:', `${auditDetails.AuditAndInspectionDetails.ScheduleFrequency}` )
+                : null
             }
             <View style={{ marginVertical: '3%', marginHorizontal: '2%'}}>
                 {
