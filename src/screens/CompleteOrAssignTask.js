@@ -217,7 +217,7 @@ export const CompleteTask = ( props ) => {
                 </View>
                 <View style={{ marginTop: '3%', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center'}}>
                     <Button  title="Complete Task" titleStyle={{ fontSize: 14 ,fontWeight:'bold'}} loading={isButtonLoading}  buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} containerStyle={{ width: '42%'}} onPress={onCompleteTask} />
-                    <Button  title="Cancel" titleStyle={{ fontSize: 14 , fontWeight:'bold'}} buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} containerStyle={{ width: '42%'}} onPress={onCancel}/>
+                    <Button  title="Cancel" titleStyle={{ fontSize: 14 , fontWeight:'bold'}} buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} containerStyle={{ width: '42%'}} onPress={()=>navigation.goBack()}/>
                 </View>
                 </ScrollView>
        </View>
