@@ -8,12 +8,45 @@ import { useNavigation } from '@react-navigation/core'
 
 const inputContainerStyle = { borderWidth: 1, borderColor: '#1e5873', borderRadius: 6 }
 
-export const CommentInput = ( { item } ) => {
+export const CommentInput = ( { item, isMandatoryType } ) => {
+    let commentLabel = ''
     const [inputValue,setInputValue] = useState( item?.Comments )
+
+    switch( isMandatoryType ) {
+        case 'Mandatory': {
+            commentLabel = 'Comments *'
+            break;
+        }
+        case 'Mandatory for Passing Score': {
+            commentLabel = 'Comments'
+            break;
+        }
+        case 'Mandatory for Failing Score': {
+            commentLabel = 'Comments'
+            break;
+        }
+        case 'Not Mandatory': {
+            commentLabel = 'Comments'
+            break;
+        }
+        case 'Mandatory for N/A': {
+            commentLabel = 'Comments'
+            break;
+        }
+        case 'Mandatory for Passing Score and N/A': {
+            commentLabel = 'Comments'
+            break;
+        }
+        case 'Mandatory for Failing Score and N/A': {
+            commentLabel = 'Comments'
+            break;
+        }
+    }
+
     return (
         <View>
             <Input
-                label="Comments"
+                label={commentLabel}
                 labelStyle={{ marginBottom: 5 }}
                 textAlignVertical="top"
                 placeholder="Type Here"
@@ -116,12 +149,18 @@ export const GroupAttributes = ( props ) => {
     
     return (
         <View style={{ flex: 1 }}>
-            <CustomDropdown
-                title={scoreLabel}
-                items={scoreData}
-                value={scoreValue}
-                onValueChange={onScoreValueChange}
-            />
+            {
+                item.AuditAndInspectionScore === "Do Not Show Score"
+                ? null
+                : (
+                    <CustomDropdown
+                        title={scoreLabel}
+                        items={scoreData}
+                        value={scoreValue}
+                        onValueChange={onScoreValueChange}
+                    />
+                )
+            }
             {
                 isEmpty( sourceList ) 
                 ? null 
@@ -163,7 +202,7 @@ export const DynamicAttribute = ( props ) => {
                 )
             }
             <View style={{ marginTop: '3%' }}>
-                <CommentInput item={item} />
+                <CommentInput item={item} isMandatoryType={item.IsCommentsMandatory} />
             </View>
     </View>
     )

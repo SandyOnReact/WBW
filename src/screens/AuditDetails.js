@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, memo } from 'react'
 import { View, Text, ScrollView, Alert, BackHandler } from 'react-native'
 import { useNavigation, useRoute, useFocusEffect, useCallback } from '@react-navigation/native';
 import { CheckBox, Header, Input, Button } from "react-native-elements"
@@ -7,11 +7,175 @@ import { getStatusBarHeight } from 'react-native-status-bar-height'
 import { CustomDropdown } from '../components/core/custom-dropdown'
 import { useKeyboard } from '@react-native-community/hooks';
 import { FlatList } from 'react-native';
-import { CustomCalendar, EditableDropdown, CustomCheckBox, CustomInput, CustomMultiSelectCheckbox, CustomRadioButtonList, CustomTextAreaInput } from "./DynamicControlsScreen"
-import _ from "lodash"
+import { CustomMultiSelectCheckbox } from "./DynamicControlsScreen"
+import _, { isEmpty } from "lodash"
 import { DynamicGroupsCard } from "../components/dynamic-card"
 
 const inputContainerStyle = { borderWidth: 1, borderColor: '#1e5873', borderRadius: 6 }
+
+export const CustomInput = ( { value, isRequired } ) => {
+    const [inputValue,setInputValue] = useState( value.SelectedValue )
+    return (
+        <View>
+            <Input
+                label={ isRequired ? `${value.ControlLabel} *` : value.ControlLabel}
+                labelStyle={{ marginBottom: 5 }}
+                textAlignVertical="top"
+                placeholder="Type Here"
+                placeholderTextColor="#9EA0A4"
+                inputContainerStyle={inputContainerStyle}
+                inputStyle={{ padding:10, textAlign: 'auto',fontSize:16 }}
+                containerStyle={{ margin: 0 }}
+                errorStyle={{ margin: -5 }}
+                value={inputValue}
+                onChangeText={(text) => setInputValue( text )}
+            />
+        </View>
+    )
+}
+
+export const EditableDropdown = ( { value, isRequired } ) => {
+    const controlValues = value.ControlValues.map( item => {
+        const control = { label: item.Value, value: item.Id }
+        return control
+    })
+    const onValueChange = ( value ) => {
+        setDropdownValue( value )
+    }
+    const [dropdownValue,setDropdownValue] = useState( '' )
+    return (
+        <View>
+            <CustomDropdown
+                title={ isRequired ? `${value.ControlLabel} *` : value.ControlLabel}
+                items={controlValues}
+                value={dropdownValue}
+                onValueChange={onValueChange}
+            />
+        </View>
+    )
+}
+
+let date = new Date();
+export const CustomCalendar = ( { value, isRequired } ) => {
+    const [mode, setMode] = useState('date');
+    const [show, setShow] = useState(false);
+    const [dateValue, setDateValue] = useState('');
+
+    const showMode = (currentMode) => {
+        if( currentMode === 'date' ) {
+            setShow(true);
+        }else{
+            setShowTime( true )
+        }
+        setMode(currentMode);
+    };
+
+    const showDatepicker = () => {
+        showMode('date');
+    };
+
+    const hideDatePicker = ( ) => {
+        setShow( false )
+    }
+
+    const onChange = (selectedDate) => {
+        const currentDate = selectedDate || date;
+        const pickedDate = moment(currentDate).format("MM/DD/YYYY")
+        setDateValue(pickedDate)
+        date = currentDate
+        hideDatePicker()
+    };
+    
+    return (
+        <View>
+            <CustomDateTimePicker
+                label={ isRequired ? `${value.ControlLabel} *` : value.ControlLabel}
+                onPress={showDatepicker}
+                show={show}
+                inputValue={dateValue}
+                mode={mode}
+                display="spinner"
+                value={date}
+                maximumDate={new Date()}
+                onConfirm={onChange}
+                onCancel={hideDatePicker}
+            />
+        </View>
+    )
+}
+
+export const CustomCheckBox = ( { value, isRequired } ) => {
+    const [checkboxValue, setCheckboxValue] = useState( false )
+
+    const toggleCheckBoxValue = ( ) => {
+        setCheckboxValue( checkboxValue => !checkboxValue )
+    }
+    return (
+        <View style={{ backgroundColor: 'transparent'}}>
+            <CheckBox
+                title={isRequired ? `${value.ControlLabel} *` : value.ControlLabel}
+                checked={checkboxValue}
+                onPress={toggleCheckBoxValue}
+            />
+        </View>
+    )
+}
+
+export const CustomRadioButtonList = ( { value, isRequired } ) => {
+    const radioButtonList = value.ControlValues.map( item => {
+        const radio = {
+            label: item.Value,
+            value: item.Id
+        }
+        return radio
+    })
+    const [radioValue,setRadioValue] = useState( '' )
+
+    return (
+        <View style={{ marginBottom: 10 }}>
+            <Text style={{
+                color: '#86939e',
+                fontWeight: 'bold', fontSize: 16, paddingLeft: '3%', marginBottom: '3%'
+            }}>{isRequired ? `${value.ControlLabel} *` : value.ControlLabel}</Text>
+            <RadioForm style={{ width: '100%', paddingHorizontal: 30 }}
+                radio_props={radioButtonList}
+                initial={-1}
+                radioStyle={{ paddingBottom: 5 }}
+                buttonSize={15}
+                buttonColor={'#86939e'}
+                selectedButtonColor={'#1e5873'}
+                labelStyle={{ fontSize: 20 }}
+                animation={true}
+                onPress={(value) => setRadioValue(value)}
+            />
+        </View>
+    )
+}
+
+export const CustomTextAreaInput = ( { value, isRequired } ) => {
+    const [inputValue,setInputValue] = useState( value?.SelectedValue )
+    return (
+        <View>
+            <Input
+                label={!isEmpty(isRequired) && isRequired ? `${value.ControlLabel} *` : value.ControlLabel}
+                labelStyle={{ marginBottom: 5 }}
+                textAlignVertical="top"
+                placeholder="Type Here"
+                placeholderTextColor="#9EA0A4"
+                inputStyle={{padding:10, textAlign: 'auto',fontSize:16}}
+                inputContainerStyle={{...inputContainerStyle, minHeight: 60, maxHeight: 90 }}
+                containerStyle={{ margin: 0 }}
+                errorStyle={{ margin: -5 }}
+                value={inputValue}
+                onChangeText={(text) => setInputValue( text )}
+            />
+        </View>
+    )
+}
+
+
+
+
 export const AuditDetailsScreen = () => {
     const route = useRoute()
     const { auditDetails, Type, selectedDropdownValue, dropdownObject } = route.params
@@ -107,20 +271,20 @@ export const AuditDetailsScreen = () => {
         switch( item.ControlType ) {
             case 'TextBox': {
                 return (
-                   <CustomInput value={item} />
+                   <CustomInput value={item} isRequired={item.IsMandatory === "True" ? true : false }/>
                 )
             }
             case 'DropDownList':                               
                 return (
-                   <EditableDropdown value={item} />
+                   <EditableDropdown value={item} isRequired={item.IsMandatory === "True" ? true : false }/>
                 )
             case 'Calendar':
                 return (
-                    <CustomCalendar value={item}/>
+                    <CustomCalendar value={item} isRequired={item.IsMandatory === "True" ? true : false }/>
                 )
             case 'Checkbox':
                 return (
-                    <CustomCheckBox value={item}/>
+                    <CustomCheckBox value={item} isRequired={item.IsMandatory === "True" ? true : false }/>
                 )
             case 'CheckBoxList':
                 return (
@@ -128,11 +292,11 @@ export const AuditDetailsScreen = () => {
                 )
             case 'RadioButtonList':
                 return (
-                    <CustomRadioButtonList value={item} />
+                    <CustomRadioButtonList value={item} isRequired={item.IsMandatory === "True" ? true : false } />
                 )
             case 'TextArea':
                 return (
-                    <CustomTextAreaInput value={item}/>
+                    <CustomTextAreaInput value={item} isRequired={item.IsMandatory === "True" ? true : false }/>
                 )
         }
     }
@@ -157,7 +321,6 @@ export const AuditDetailsScreen = () => {
     }
 
     const renderDynamicGroupsAndAttributes = ( ) => {
-        console.log( JSON.stringify( auditDetails ) )
         const sortedGroupsData = _.sortBy( auditDetails.GroupsAndAttributes?.Groups, ( item ) => item.GroupOrder )
         const shouldShowHazardDetails = auditDetails.AuditAndInspectionDetails?.IsDisplayHazardList
         const shouldShowSourceDetails = auditDetails.AuditAndInspectionDetails?.IsDisplaySource
