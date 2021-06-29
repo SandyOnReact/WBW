@@ -8,9 +8,16 @@ import { useNavigation } from '@react-navigation/core'
 
 const inputContainerStyle = { borderWidth: 1, borderColor: '#1e5873', borderRadius: 6 }
 
-export const CommentInput = ( { item, isMandatoryType } ) => {
-    let commentLabel = ''
+export const CommentInput = ( { item, selectedScoreValue, isMandatoryType } ) => {
+    const shouldCheckForNonApplicableValues = item.ScoreList.find( item => {
+        if( item.Value === "Not Applicable" && item.ID === selectedScoreValue ) {
+            return true
+        }else{
+            return false
+        }
+    })
     const [inputValue,setInputValue] = useState( item?.Comments )
+    let commentLabel = ''
 
     switch( isMandatoryType ) {
         case 'Mandatory': {
@@ -18,28 +25,58 @@ export const CommentInput = ( { item, isMandatoryType } ) => {
             break;
         }
         case 'Mandatory for Passing Score': {
-            commentLabel = 'Comments'
-            break;
+            if( shouldCheckForNonApplicableValues ) {
+                commentLabel = 'Comments'
+                break;
+            }
+            else if( Number( selectedScoreValue ) >= Number( item.CorrectAnswerID ) ) {
+                commentLabel = 'Comments *'
+                break;
+            }else{
+                commentLabel = 'Comments'
+                break;
+            }
         }
         case 'Mandatory for Failing Score': {
-            commentLabel = 'Comments'
-            break;
+            if( Number( selectedScoreValue ) < Number( item.CorrectAnswerID ) ) {
+                commentLabel = 'Comments *'
+                break;
+            }else{
+                commentLabel = 'Comments'
+            }
+            
         }
         case 'Not Mandatory': {
             commentLabel = 'Comments'
             break;
         }
         case 'Mandatory for N/A': {
-            commentLabel = 'Comments'
-            break;
+            if( shouldCheckForNonApplicableValues ) {
+                commentLabel = 'Comments *'
+                break;
+            }else{
+                commentLabel = 'Comments'
+                break;
+            }
+            
         }
         case 'Mandatory for Passing Score and N/A': {
-            commentLabel = 'Comments'
-            break;
+            if( Number( selectedScoreValue ) >= Number( item.CorrectAnswerID ) || shouldCheckForNonApplicableValues ) {
+                commentLabel = 'Comments *'
+                break;
+            }else{
+                commentLabel = 'Comments'
+                break;
+            }
         }
         case 'Mandatory for Failing Score and N/A': {
-            commentLabel = 'Comments'
-            break;
+            if( Number( selectedScoreValue ) < Number( item.CorrectAnswerID ) || shouldCheckForNonApplicableValues ) {
+                commentLabel = 'Comments *'
+                break;
+            }else{
+                commentLabel = 'Comments'
+                break;
+            }
         }
     }
 
@@ -136,7 +173,7 @@ const renderHazardDropdown = ( item, sourceValue, sourceList, hazardList, auditA
 
 
 export const GroupAttributes = ( props ) => {
-    const { item, scoreLabel, sourceList, hazardList, auditAndInspectionId } = props
+    const { item, scoreLabel, sourceList, hazardList, auditAndInspectionId, currentScoreValue } = props
     const [scoreValue,setScoreValue] = useState( '' )
     const scoreData = item.ScoreList.map( item => {
         const score = { label: item.Value, value: item.ID }
@@ -144,7 +181,8 @@ export const GroupAttributes = ( props ) => {
     })
 
     const onScoreValueChange = ( value ) => {
-        setScoreValue( value )
+        setScoreValue( value ),
+        currentScoreValue( value )
     }
     
     return (
@@ -181,6 +219,12 @@ export const GroupAttributes = ( props ) => {
 
 export const DynamicAttribute = ( props ) => {
     const { item, scoreLabel, sourceList, hazardList, auditAndInspectionId } = props
+    const [selectedScoreValue, setSelectedScoreValue] = useState( '' )
+
+    const onChangeCurrentScoreValue = ( value ) => {
+        setSelectedScoreValue( value )
+    }
+
     return (
         <View style={{ flex: 1, marginHorizontal: '3%', marginVertical: '2%'}}>
             <View style={{ marginHorizontal: '3%'}}>
@@ -197,12 +241,13 @@ export const DynamicAttribute = ( props ) => {
                             scoreLabel={scoreLabel}
                             hazardList={hazardList}
                             auditAndInspectionId={auditAndInspectionId}
+                            currentScoreValue={(value)=> onChangeCurrentScoreValue( value )}
                        />
                     </View>
                 )
             }
             <View style={{ marginTop: '3%' }}>
-                <CommentInput item={item} isMandatoryType={item.IsCommentsMandatory} />
+                <CommentInput item={item} selectedScoreValue={selectedScoreValue} isMandatoryType={item.IsCommentsMandatory} />
             </View>
     </View>
     )

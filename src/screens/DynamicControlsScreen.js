@@ -225,6 +225,7 @@ export const DynamicControlsScreen = ( props ) => {
         const result = await api.get( {
             url: 'api/POC/GetDynamicControls'
         } )
+        const res = JSON.parse( result ) 
         if( isEmpty( result ) ) {
             return null
         }
