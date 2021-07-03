@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { View, Text } from 'react-native'
 import { Input } from 'react-native-elements'
 import { CustomDropdown } from './core/custom-dropdown'
@@ -173,8 +173,35 @@ const renderHazardDropdown = ( item, sourceValue, sourceList, hazardList, auditA
 
 
 export const GroupAttributes = ( props ) => {
-    const { item, scoreLabel, sourceList, hazardList, auditAndInspectionId, currentScoreValue } = props
+    const { item, scoreLabel, sourceList, hazardList, auditAndInspectionId, currentScoreValue, updateScoreArray } = props
     const [scoreValue,setScoreValue] = useState( '' )
+    const shouldCheckForNonApplicableValues = item.ScoreList.find( item => {
+        if( item.Value === "Not Applicable" && item.ID === scoreValue ) {
+            return true
+        }else{
+            return false
+        }
+    })
+
+    useEffect( ( ) => {
+        checkIfValid()
+    }, [scoreValue] )
+
+    const checkForValidScore = ( ) => {
+        if( item.AuditAndInspectionScore === "Do Not Show Score" && scoreValue === "" ) {
+            return true
+        }else if( scoreValue === item.CorrectAnswerID || shouldCheckForNonApplicableValues ) {
+            return true
+        }else {
+            return false
+        }
+    }
+
+    const checkIfValid = ( ) => {
+        const validScore = checkForValidScore()
+        updateScoreArray( validScore, item.AuditAndInspectionScoreID )
+    }
+
     const scoreData = item.ScoreList.map( item => {
         const score = { label: item.Value, value: item.ID }
         return score
@@ -200,7 +227,7 @@ export const GroupAttributes = ( props ) => {
                 )
             }
             {
-                isEmpty( sourceList ) 
+                item.AuditAndInspectionScore === "Do Not Show Score" || isEmpty( sourceList ) 
                 ? null 
                 : (
                     <View>
@@ -218,11 +245,17 @@ export const GroupAttributes = ( props ) => {
 }
 
 export const DynamicAttribute = ( props ) => {
-    const { item, scoreLabel, sourceList, hazardList, auditAndInspectionId } = props
-    const [selectedScoreValue, setSelectedScoreValue] = useState( '' )
+    const { item, scoreLabel, sourceList, hazardList, auditAndInspectionId, updateScoreArray } = props
+    const [scoreValue, setScoreValue] = useState( '' )
 
     const onChangeCurrentScoreValue = ( value ) => {
-        setSelectedScoreValue( value )
+        setScoreValue( value )
+    }
+
+    const onChangeScoreValueUpdateScoreArray = ( val, id ) => {
+        console.log('calling beofre1')
+        updateScoreArray( val, id )
+        console.log('calling after')
     }
 
     return (
@@ -241,14 +274,15 @@ export const DynamicAttribute = ( props ) => {
                             scoreLabel={scoreLabel}
                             hazardList={hazardList}
                             auditAndInspectionId={auditAndInspectionId}
-                            currentScoreValue={(value)=> onChangeCurrentScoreValue( value )}
+                            currentScoreValue={(value )=> onChangeCurrentScoreValue( value )}
+                            updateScoreArray={(val, id )=>onChangeScoreValueUpdateScoreArray(val, id )}
                        />
                     </View>
                 )
             }
-            <View style={{ marginTop: '3%' }}>
-                <CommentInput item={item} selectedScoreValue={selectedScoreValue} isMandatoryType={item.IsCommentsMandatory} />
-            </View>
+            {/* <View style={{ marginTop: '3%' }}>
+                <CommentInput item={item} selectedScoreValue={currentScoreValue} isMandatoryType={item.IsCommentsMandatory} />
+            </View> */}
     </View>
     )
 }
