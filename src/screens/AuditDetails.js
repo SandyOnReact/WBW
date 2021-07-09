@@ -1,7 +1,7 @@
 import React, { useEffect, useState, memo } from 'react'
-import { View, Text, ScrollView, Alert, BackHandler } from 'react-native'
+import { View, Text, ScrollView, Alert, BackHandler, Image } from 'react-native'
 import { useNavigation, useRoute, useFocusEffect, useCallback } from '@react-navigation/native';
-import { CheckBox, Header, Input, Button } from "react-native-elements"
+import { CheckBox, Header, Input, Button, Avatar } from "react-native-elements"
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getStatusBarHeight } from 'react-native-status-bar-height'
 import { CustomDropdown } from '../components/core/custom-dropdown'
@@ -185,6 +185,7 @@ export const AuditDetailsScreen = () => {
     const [userInfo,setUserInfo] = useState( {} )
     const [isReset,setIsReset] = useState( false )
     const [shouldShowWarningMessage,setShouldShowWarningMessage] = useState( false )
+    const [imagesObject,setImagesObject] = useState( {} )
     const STATUS_BAR_HEIGHT = getStatusBarHeight()
     const keyboard = useKeyboard()
     const navigation = useNavigation()
@@ -256,9 +257,9 @@ export const AuditDetailsScreen = () => {
 
     const renderAuditDetailsRow = ( title, value ) => {
         return (
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: '2%', paddingVertical: '1%', backgroundColor: 'transparent' }}>
-                    <Text style={{ paddingHorizontal: '5%', color: 'black', fontSize: 16 }}>{title}</Text>
-                    <View style={{ marginHorizontal: '5%' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: '2%', backgroundColor: 'transparent' }}>
+                    <Text style={{ paddingLeft: '5%', paddingRight: '2%', color: 'black', fontSize: 16 }}>{title}</Text>
+                    <View style={{ marginHorizontal: '1%' }}>
                         <Text>{value}</Text>
                     </View>      
             </View>
@@ -320,7 +321,7 @@ export const AuditDetailsScreen = () => {
         ) 
     }
 
-    const renderDynamicGroupsAndAttributes = ( ) => {
+    const renderDynamicGroupsAndAttributes = ( checkboxValue ) => {
         const sortedGroupsData = _.sortBy( auditDetails.GroupsAndAttributes?.Groups, ( item ) => item.GroupOrder )
         const shouldShowHazardDetails = auditDetails.AuditAndInspectionDetails?.IsDisplayHazardList
         const shouldShowSourceDetails = auditDetails.AuditAndInspectionDetails?.IsDisplaySource
@@ -333,6 +334,7 @@ export const AuditDetailsScreen = () => {
                     hazardList={shouldShowHazardDetails ? auditDetails.GroupsAndAttributes.HazardList : [] }
                     scoreLabel={scoreLabel}
                     auditAndInspectionId={auditDetails.AuditAndInspectionDetails?.AuditAndInspectionID}
+                    checkboxValue={checkboxValue}
                 />
             )
         })
@@ -340,6 +342,17 @@ export const AuditDetailsScreen = () => {
 
     const onSubmit = async ( ) =>  {
         //
+    }
+
+    const onImageReceive = ( url, imageData ) => {
+        const imageObj = { ...imageData, uri: url }
+        setImagesObject( imageObj )
+    }
+
+    const navigateToImagePicker = ( ) => {
+        navigation.navigate( 'UploadImage', {
+            callback: ( url, imageData ) => onImageReceive( url, imageData )
+        } )
     }
 
     const renderLastDayOfScheduledPeriod = ( ) => {
@@ -353,9 +366,31 @@ export const AuditDetailsScreen = () => {
         }
     }
 
+    const renderImage = ( ) => {
+        if( !isEmpty( imagesObject ) ) {
+            return (
+                <View style={{ width: 100, height: 100, marginHorizontal: '5%', flexDirection: 'row'}}>
+                    <Image
+                        source={{ uri: imagesObject.uri }}
+                        style={{
+                            width: 100,
+                            height: 100,
+                            borderRadius: 8,
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                            alignItems: 'center'
+                        }}
+                    />
+                </View>
+            )
+        }else{
+            return null
+        }
+    }
+
     return (
-        <View style={{ flex: 1 }}>
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, backgroundColor: 'white' }}>
+        <View style={{ flex: 0.9 }}>
             <Header
                 containerStyle={{ height: 56 + STATUS_BAR_HEIGHT }}
                 statusBarProps={{ barStyle: "light-content", translucent: true, backgroundColor: "transparent" }}
@@ -376,14 +411,14 @@ export const AuditDetailsScreen = () => {
             {
                 renderAuditDetailsRow( 'Record Number:', `${auditDetails.AuditAndInspectionDetails?.AuditAndInspectionNumber}`  )
             }
-            <View style={{ backgroundColor: 'transparent'}}>
+            <View>
                 <CheckBox
                     title="Select Passing Values for Incomplete Tasks:"
                     checked={checkboxValue}
                     onPress={toggleCheckBoxValue}
                     iconRight={true}
-                    textStyle={{ fontSize: 16 ,fontWeight:'500'}}
-                    containerStyle={{ paddingLeft: 0 }}
+                    textStyle={{ fontSize: 16 ,color: 'black', fontWeight: '600'}}
+                    containerStyle={{ padding: 0, backgroundColor: 'white', borderWidth: 0 }}
                 />
             </View>
             {
@@ -422,16 +457,23 @@ export const AuditDetailsScreen = () => {
             </View>
             <View>
                 {
-                    renderDynamicGroupsAndAttributes()
+                    renderDynamicGroupsAndAttributes( checkboxValue )
                 }
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 15 }}>
+                {renderImage()}
             </View>
             </ScrollView>
         </View>
-            {/* <View flex={ keyboard.keyboardShown ? 0.15 : 0.1}>
-                <View style={{ marginTop: '3%', marginHorizontal: '4%' }}>
-                    <Button containerStyle={{ marginHorizontal: '3%'}}  title="Next" titleStyle={{ fontSize: 18 }} buttonStyle={{ backgroundColor: '#1e5873', width: '100%', padding: 15 }} onPress={onSubmit} />
-                </View>
-            </View> */}
+        <View style={{position: 'absolute', bottom: keyboard.keyboardShown ? '15%' : '10%' , right: 10, left: '85%'}}>
+            <Avatar size="medium" rounded icon={{ name: 'camera', type:'feather'}} containerStyle={{ backgroundColor: '#1e5873'}} onPress={navigateToImagePicker}/>
+        </View>
+        <View style={{ flex: 0.1 }}>
+            <View style={{ flex: 0.8, marginTop: '3%', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center'}}>
+                <Button  title="Submit" titleStyle={{ fontSize: 14 ,fontWeight:'bold'}}  buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} containerStyle={{ width: '42%'}} />
+                <Button  title="Save & Come Back" titleStyle={{ fontSize: 14 , fontWeight:'bold'}} buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} containerStyle={{ width: '42%'}} />
+            </View>
+        </View>
         </View>
     )
 }

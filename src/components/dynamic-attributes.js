@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { View, Text } from 'react-native'
 import { Input } from 'react-native-elements'
 import { CustomDropdown } from './core/custom-dropdown'
@@ -173,12 +173,18 @@ const renderHazardDropdown = ( item, sourceValue, sourceList, hazardList, auditA
 
 
 export const GroupAttributes = ( props ) => {
-    const { item, scoreLabel, sourceList, hazardList, auditAndInspectionId, currentScoreValue } = props
+    const { item, scoreLabel, sourceList, hazardList, auditAndInspectionId, currentScoreValue, checkboxValue } = props
     const [scoreValue,setScoreValue] = useState( '' )
     const scoreData = item.ScoreList.map( item => {
         const score = { label: item.Value, value: item.ID }
         return score
     })
+
+    useEffect(() => {
+        if( !checkboxValue ) {
+            setScoreValue( '' )
+        }
+    }, [checkboxValue])
 
     const onScoreValueChange = ( value ) => {
         setScoreValue( value ),
@@ -194,13 +200,13 @@ export const GroupAttributes = ( props ) => {
                     <CustomDropdown
                         title={scoreLabel}
                         items={scoreData}
-                        value={scoreValue}
+                        value={checkboxValue && isEmpty( scoreValue ) ? item.CorrectAnswerID : scoreValue}
                         onValueChange={onScoreValueChange}
                     />
                 )
             }
             {
-                isEmpty( sourceList ) 
+                isEmpty( sourceList ) || item.AuditAndInspectionScore === "Do Not Show Score"
                 ? null 
                 : (
                     <View>
@@ -218,7 +224,7 @@ export const GroupAttributes = ( props ) => {
 }
 
 export const DynamicAttribute = ( props ) => {
-    const { item, scoreLabel, sourceList, hazardList, auditAndInspectionId } = props
+    const { item, scoreLabel, sourceList, hazardList, auditAndInspectionId, checkboxValue } = props
     const [selectedScoreValue, setSelectedScoreValue] = useState( '' )
 
     const onChangeCurrentScoreValue = ( value ) => {
@@ -242,6 +248,7 @@ export const DynamicAttribute = ( props ) => {
                             hazardList={hazardList}
                             auditAndInspectionId={auditAndInspectionId}
                             currentScoreValue={(value)=> onChangeCurrentScoreValue( value )}
+                            checkboxValue={checkboxValue}
                        />
                     </View>
                 )

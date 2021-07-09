@@ -8,7 +8,7 @@ import { DynamicAttribute } from "./dynamic-attributes"
 /**
  * 
  * if selected value of score is same as correctAnswer value/ID, do not hazard dropdown
- * fot all other condition keep same logic.
+ * for all other condition keep same logic.
  */
 
 const DynamicGroups = ( props ) => {
@@ -17,7 +17,8 @@ const DynamicGroups = ( props ) => {
         sourceList,
         hazardList,
         scoreLabel,
-        auditAndInspectionId
+        auditAndInspectionId,
+        checkboxValue
     } = props
     const sortedDynamicGroup = _.sortBy( dynamicGroups?.Attributes, ( item ) => item.AttributeOrder )
     
@@ -29,6 +30,7 @@ const DynamicGroups = ( props ) => {
                 sourceList={sourceList}
                 hazardList={hazardList}
                 auditAndInspectionId={auditAndInspectionId}
+                checkboxValue={checkboxValue}
             />
         )
     }
