@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { View , Text, Image, ScrollView, ActivityIndicator, StyleSheet } from 'react-native'
 import { getStatusBarHeight } from 'react-native-status-bar-height'
 import { Header, Input, Button, Icon } from "react-native-elements"
@@ -291,6 +291,102 @@ export const EditableDropdown = ( { value, label } ) => {
                 value={dropdownValue}
                 onValueChange={onValueChange}
             />
+        </View>
+    )
+}
+
+export const ShowTaskDetails = ( props ) => {
+    const {
+        taskDetails,
+        selectedHazardValue,
+        hazardData,
+        onDelete
+    } = props
+    const [isButtonLoading,setIsButtonLoading] = useState( false )
+    const [isDeleteButtonLoading,setIsDeleteButtonLoading] = useState( false )
+    const navigation = useNavigation()
+
+    const fetchUserInfoFromStorage = async () => {
+        const userInfo = await AsyncStorage.getItem('USER_INFO');
+        return userInfo != null ? JSON.parse(userInfo) : null;
+    }
+    const newHazard = hazardData.find( item => item.value === selectedHazardValue )
+
+    const onUpdateHazard = async ( ) => {
+        try {
+            setIsButtonLoading( true )
+            const user = await fetchUserInfoFromStorage()
+            const token = await AsyncStorage.getItem('Token')
+            const payload = {
+                UserID: "bd8f8d80-e07e-4f40-823d-0bee91fb9b8c",
+                AccessToken: "82D0142EA21D4698BE560CC1884834A948B84ED0C2324302B9B93434754FBA24",
+                HazardsID: "1",
+                CustomFormResultID: "2963"
+            }
+            const result = await api.post({
+                url: `api/AuditAndInspection/UpdateHazard`,
+                body: payload
+            })
+            setIsButtonLoading( false )
+            if( result && result?.Message === "Hazard Updated" ) {
+                navigation.goBack()
+                return null
+            }      
+        } catch( error ) {
+            setIsButtonLoading( false )
+            Toast.showWithGravity(error.message, Toast.LONG, Toast.CENTER);
+            return null
+        }
+    }
+    const onDeleteTask = async ( ) => {
+        try {
+            setIsDeleteButtonLoading( true )
+            const user = await fetchUserInfoFromStorage()
+            const token = await AsyncStorage.getItem('Token')
+            const payload = {
+                UserID: "bd8f8d80-e07e-4f40-823d-0bee91fb9b8c",
+                AccessToken: "82D0142EA21D4698BE560CC1884834A948B84ED0C2324302B9B93434754FBA24",
+                AuditAndInspectionTaskID: "1",
+                CustomFormResultID: "2963"
+            }
+            const result = await api.post({
+                url: `api/AuditAndInspection/DeleteTask`,
+                body: payload
+            })
+            console.log( 'result after deleting',JSON.stringify( result ) )
+            setIsDeleteButtonLoading( false )
+            if( result && result?.Message === "Task Deleted" ) {
+                Toast.showWithGravity("Task Deleted", Toast.LONG, Toast.CENTER);
+                onDelete()
+                return null
+            }      
+        } catch( error ) {
+            setIsDeleteButtonLoading( false )
+            Toast.showWithGravity(error.message, Toast.LONG, Toast.CENTER);
+            return null
+        }
+    }
+
+    return (
+        <View style={{ flex: 1 }}>
+           <View style={{ margin: '3%'}}>
+                <Text style={{ fontSize: 18, color: 'black' }}>Instructions</Text>
+                <Text style={{ fontSize: 16, fontWeight: '500'}}>{taskDetails?.Instructions}</Text>
+           </View>
+           <View style={{ flexDirection: 'row', margin: '3%'}}>
+               <Text style={{ fontSize: 16, fontWeight: 'bold'}}>Previous Hazards: </Text>
+               <Text>{taskDetails?.PreviousHazard}</Text>
+           </View>
+           <View style={{ flexDirection: 'row', margin: '3%', alignItems: 'center' }}>
+               <Text style={{ fontSize: 16, fontWeight: 'bold'}}>New Hazards: </Text>
+               <Text style={{ fontSize: 14, marginLeft: '5%'}}>{newHazard?.label}</Text>
+           </View>
+           <View style={{ flex: 0.3 }}>
+                <View style={{ flex: 0.8, marginTop: '3%', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center'}}>
+                    <Button  title="Update Hazard" titleStyle={{ fontSize: 14 ,fontWeight:'bold'}}  buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} containerStyle={{ width: '42%'}} onPress={onUpdateHazard} loading={isButtonLoading}/>
+                    <Button  title="Delete Task" titleStyle={{ fontSize: 14 , fontWeight:'bold'}} buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} containerStyle={{ width: '42%'}} onPress={onDeleteTask} loading={isDeleteButtonLoading}/>
+                </View>
+           </View>
         </View>
     )
 }
@@ -737,6 +833,47 @@ export const CompleteOrAssignTask = ( props ) => {
     const STATUS_BAR_HEIGHT = getStatusBarHeight()
     const navigation = useNavigation()
     const [radioValue,setRadioValue] = useState( 'Complete Task' )
+    const [shouldShowTaskDetails,setShouldShowTaskDetails] = useState( false )
+    const [isDataLoading,setIsDataLoading] = useState( false )
+    const [taskDetails,setTaskDetails] = useState( {} )
+
+    useEffect( ( ) => {
+        getTasks()
+    }, [] )
+
+
+    const fetchUserInfoFromStorage = async () => {
+        const userInfo = await AsyncStorage.getItem('USER_INFO');
+        return userInfo != null ? JSON.parse(userInfo) : null;
+    }
+
+    const getTasks = async ( ) => {
+        try {
+            setIsDataLoading( true )
+            const user = await fetchUserInfoFromStorage()
+            const token = await AsyncStorage.getItem('Token')
+            const payload = {
+                UserID: "bd8f8d80-e07e-4f40-823d-0bee91fb9b8c",
+                AccessToken: "82D0142EA21D4698BE560CC1884834A948B84ED0C2324302B9B93434754FBA24",
+                AuditAndInspectionID: "2343",
+                AttributeID: "1261E5C0-41D7-4814-9ECC-F7E22451A28E",
+                CustomFormResultID: "2963"
+            }
+            const result = await api.post({
+                url: `api/AuditAndInspection/GetTask`,
+                body: payload
+            })
+            setIsDataLoading( false )
+            if( result && result.Message !== "No Task Found" ) {
+                setShouldShowTaskDetails( true )
+                setTaskDetails( result )
+            } 
+        } catch( error ) {
+            setIsDataLoading( false )
+            Toast.showWithGravity(error.message, Toast.LONG, Toast.CENTER);
+            return null
+        }
+    }
 
     const navigatetoBackScreen = () => {
         clear()
@@ -766,6 +903,19 @@ export const CompleteOrAssignTask = ( props ) => {
         }
     }
 
+    const onDelete = ( ) => {
+        console.log( 'ondelete afetr deleting task' )
+        setShouldShowTaskDetails( false )
+    }
+
+    if( isDataLoading ) { 
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <ActivityIndicator color="red" size="large"/>
+            </View>
+        )
+    }
+
     return (
         <View style={{ flex: 1 }}>
             <Header
@@ -775,28 +925,39 @@ export const CompleteOrAssignTask = ( props ) => {
                 leftComponent={{ icon: 'arrow-back', type: 'ionicons', color: 'white', onPress: navigatetoBackScreen }}
                 centerComponent={{ text: 'Complete or Assign Task', style: { color: '#fff', fontSize: 16 } }}
             />
-            <View style={{ flex: 1 }}>
-                <View style={{ marginVertical: 15 }}>
-                    <Text style={{
-                        color: '#86939e',
-                        fontWeight: 'bold', fontSize: 16, paddingLeft: '3%', marginBottom: '1%'
-                    }}>Please Select</Text>
-                    <RadioForm style={{ marginLeft: 100 }}
-                        radio_props={radioButtons}
-                        initial={0}
-                        formHorizontal={true}
-                        labelHorizontal={true}
-                        radioStyle={{ paddingRight: 50 }}
-                        buttonColor={'#86939e'}
-                        selectedButtonColor={'#1e5873'}
-                        labelStyle={{ fontSize: 16 }}
-                        animation={true}
-                        style={{ paddingHorizontal: 15 }}
-                        onPress={(value) => setRadioValue(value)}
-                    />
-                </View>
-                {renderFormBasedOnRadioValue()}
-            </View>        
+            {
+                shouldShowTaskDetails 
+                ? <ShowTaskDetails 
+                    taskDetails={taskDetails}
+                    selectedHazardValue={selectedHazardValue}
+                    hazardData={hazardData}
+                    onDelete={onDelete}
+                 />
+                : (
+                    <View style={{ flex: 1 }}>
+                        <View style={{ marginVertical: 15 }}>
+                            <Text style={{
+                                color: '#86939e',
+                                fontWeight: 'bold', fontSize: 16, paddingLeft: '3%', marginBottom: '1%'
+                            }}>Please Select</Text>
+                            <RadioForm style={{ marginLeft: 100 }}
+                                radio_props={radioButtons}
+                                initial={0}
+                                formHorizontal={true}
+                                labelHorizontal={true}
+                                radioStyle={{ paddingRight: 50 }}
+                                buttonColor={'#86939e'}
+                                selectedButtonColor={'#1e5873'}
+                                labelStyle={{ fontSize: 16 }}
+                                animation={true}
+                                style={{ paddingHorizontal: 15 }}
+                                onPress={(value) => setRadioValue(value)}
+                            />
+                        </View>
+                        {renderFormBasedOnRadioValue()}
+                    </View>
+                )
+            }        
         </View>
     )
 }
