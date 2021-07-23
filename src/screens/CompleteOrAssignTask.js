@@ -140,7 +140,9 @@ export const CompleteTask = ( props ) => {
                     AuditAndInspectionID: auditAndInspectionId,
                     TaskTitle: item.Title,
                     Comments: commentsValue,
-                    AttributeID: item.AttributeID
+                    AttributeID: item.AttributeIDm,
+                    HazardsID: selectedHazardValue, 
+                    CustomFormResultID: item.CustomFormResultID
                 }
                 const result = await api.post({
                     url: `api/AuditAndInspection/CompleteTask`,
@@ -318,10 +320,10 @@ export const ShowTaskDetails = ( props ) => {
             const user = await fetchUserInfoFromStorage()
             const token = await AsyncStorage.getItem('Token')
             const payload = {
-                UserID: "bd8f8d80-e07e-4f40-823d-0bee91fb9b8c",
-                AccessToken: "82D0142EA21D4698BE560CC1884834A948B84ED0C2324302B9B93434754FBA24",
-                HazardsID: "1",
-                CustomFormResultID: "2963"
+                UserID: user.UserID,
+                AccessToken: token,
+                HazardsID: selectedHazardValue,
+                CustomFormResultID: item.CustomFormResultID
             }
             const result = await api.post({
                 url: `api/AuditAndInspection/UpdateHazard`,
@@ -344,16 +346,15 @@ export const ShowTaskDetails = ( props ) => {
             const user = await fetchUserInfoFromStorage()
             const token = await AsyncStorage.getItem('Token')
             const payload = {
-                UserID: "bd8f8d80-e07e-4f40-823d-0bee91fb9b8c",
-                AccessToken: "82D0142EA21D4698BE560CC1884834A948B84ED0C2324302B9B93434754FBA24",
+                UserID: user.UserID,
+                AccessToken: token,
                 AuditAndInspectionTaskID: "1",
-                CustomFormResultID: "2963"
+                CustomFormResultID: item.CustomFormResultID
             }
             const result = await api.post({
                 url: `api/AuditAndInspection/DeleteTask`,
                 body: payload
             })
-            console.log( 'result after deleting',JSON.stringify( result ) )
             setIsDeleteButtonLoading( false )
             if( result && result?.Message === "Task Deleted" ) {
                 Toast.showWithGravity("Task Deleted", Toast.LONG, Toast.CENTER);
@@ -524,7 +525,9 @@ export const AssignTask = ( props ) => {
                     DueDate: dueDateValue,
                     SeverityRating: severityRating,
                     ProbabilityRating: probabilityRating,
-                    RiskRating: riskRatingValue
+                    RiskRating: riskRatingValue,
+                    HazardsID: selectedHazardValue, 
+                    CustomFormResultID: item.CustomFormResultID
                 }
                 const result = await api.post({
                     url: 'api/AuditAndInspection/AssignTask',
@@ -853,16 +856,18 @@ export const CompleteOrAssignTask = ( props ) => {
             const user = await fetchUserInfoFromStorage()
             const token = await AsyncStorage.getItem('Token')
             const payload = {
-                UserID: "bd8f8d80-e07e-4f40-823d-0bee91fb9b8c",
-                AccessToken: "82D0142EA21D4698BE560CC1884834A948B84ED0C2324302B9B93434754FBA24",
-                AuditAndInspectionID: "2343",
-                AttributeID: "1261E5C0-41D7-4814-9ECC-F7E22451A28E",
-                CustomFormResultID: "2963"
+                UserID: user.UserID,
+                AccessToken: token,
+                AuditAndInspectionID: auditAndInspectionId,
+                AttributeID: item.AttributeID,
+                CustomFormResultID: item.CustomFormResultID
             }
+            console.log( 'payload for getting tasks', JSON.stringify( payload ) )
             const result = await api.post({
                 url: `api/AuditAndInspection/GetTask`,
                 body: payload
             })
+            console.log( 'result after getting task ',JSON.stringify(result) )
             setIsDataLoading( false )
             if( result && result.Message !== "No Task Found" ) {
                 setShouldShowTaskDetails( true )
@@ -904,7 +909,6 @@ export const CompleteOrAssignTask = ( props ) => {
     }
 
     const onDelete = ( ) => {
-        console.log( 'ondelete afetr deleting task' )
         setShouldShowTaskDetails( false )
     }
 

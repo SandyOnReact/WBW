@@ -123,18 +123,16 @@ export const HazardDropdown = ( { hazardList, item, auditAndInspectionId } ) => 
         return hazard
     })
 
-    const onClear = ( ) => {
-        setHazardValue( '' )
-    }
-
     const onHazardValueChange = ( value ) => {
+        if( value === null ) {
+            return null
+        }
         setHazardValue( value )
         navigation.navigate( 'CompleteOrAssignTask', {
             selectedHazardValue: value,
             hazardData: hazardData,
             item: item,
-            auditAndInspectionId: auditAndInspectionId,
-            clear: ( ) => onClear()
+            auditAndInspectionId: auditAndInspectionId
         } )
     }
 
@@ -226,7 +224,6 @@ export const GroupAttributes = ( props ) => {
 export const DynamicAttribute = ( props ) => {
     const { item, scoreLabel, sourceList, hazardList, auditAndInspectionId, checkboxValue } = props
     const [selectedScoreValue, setSelectedScoreValue] = useState( '' )
-
     const onChangeCurrentScoreValue = ( value ) => {
         setSelectedScoreValue( value )
     }
