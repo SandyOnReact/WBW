@@ -11,6 +11,7 @@ import { CustomMultiSelectCheckbox } from "./DynamicControlsScreen"
 import _, { clone, isEmpty } from "lodash"
 import { DynamicGroupsCard } from "../components/dynamic-card"
 import lodash from "lodash"
+import Toast from "react-native-simple-toast"
 
 const inputContainerStyle = { borderWidth: 1, borderColor: '#1e5873', borderRadius: 6 }
 
@@ -289,26 +290,13 @@ export const AuditDetailsScreen = () => {
       }
 
     const onChangeDropdownValue = ( value ) => {
-        let data = lodash.sortBy(auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates, [function(o) { return o.label; }])
-        let currentSelectedIndex = lodash.findIndex(data, function(o) { return o.ID === value });
-        console.log( currentSelectedIndex, data )
-        for( let i=0;i<data[currentSelectedIndex];i++) {
-            remainingDropdownArray.push( data[i] )
-            console.log( 'rem-->', remainingDropdownArray )
-        }
-        // remainingDropdownArray = []
-        // auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates.map( (item, index) => {
-        //     console.log( 'item --> ',item.ID, value, index )
-        //     if( item.ID === value ) {
-        //         if( index === 0 ) {
-        //             remainingDropdownArray = []
-        //         }
-        //     }else{
-        //         remainingDropdownArray.push( item )
-        //     }
-        //     return item
-        // })
-        // console.log( 'remaing --> ', remainingDropdownArray )
+        let data = [...auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates]
+        let reversedData = data.reverse()
+        let currentSelectedIndex = lodash.findIndex(reversedData, function(o) { return o.ID === value });
+        remainingDropdownArray = []
+        for( let i=0;i<currentSelectedIndex;i++) {
+            remainingDropdownArray.push( reversedData[i].Value )
+        }        
         setDropdownValue( value )
     }
 
@@ -319,7 +307,7 @@ export const AuditDetailsScreen = () => {
         })
         return (
             <CustomDropdown
-                title="Last Day of Schedule Period"
+                title="Last Day of Schedule Period *"
                 value={dropdownvalue}
                 onValueChange={onChangeDropdownValue}
                 items={data}
@@ -406,7 +394,6 @@ export const AuditDetailsScreen = () => {
     }
 
     const currentSelectedScoreValue = ( value, id  ) => {
-        console.log( 'vaue is ', value, id )
         if( value === null ) {
             return null
         }
@@ -446,7 +433,6 @@ export const AuditDetailsScreen = () => {
         setGroupsArray( clonedGroupsArray )
     }
     const onHazardValueSelected = ( value, id  ) => {
-        console.log( 'value is', value, id )
         if( value === null ) {
             return null
         }
@@ -511,8 +497,38 @@ export const AuditDetailsScreen = () => {
         })
     }
 
+    const checkForValidPayload = ( ) => {
+        console.log( shouldShowWarningMessage )
+        if( auditDetails.AuditAndInspectionDetails?.ReportingPeriodDueDates === null && shouldShowWarningMessage === false ) {
+            return true
+        }else{
+            const isValidSchedulePeriod = shouldShowWarningMessage ? dropdownvalue === ''  : !lodash.isEmpty(dropdownvalue)
+            if( isValidSchedulePeriod && !shouldShowWarningMessage ) {
+                let result = false
+                if( remainingDropdownArray.length === 0 ) {
+                    result = true
+                }
+                else if( skipReasonValue !== '' ) {
+                    result = true
+                }else{
+                    result = false
+                }
+                return result
+            }else{
+                console.log( 'ELSE BLOCK' )
+                return false
+            }
+        }
+    }
+
     const onSubmit = async ( ) =>  {
         try {
+            console.log( 'Inside onSubmit' )
+            const isValid = checkForValidPayload()
+            if( !isValid ) {
+                Toast.showWithGravity('Please Enter Valid Schedule period or valid reason for skipping schedule period', Toast.LONG, Toast.CENTER);
+                return null
+            }
             const reportingPeriodDueDate = auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates.find( item => item.ID === dropdownvalue)
             const token = await AsyncStorage.getItem('Token')
             const payload = {
@@ -536,10 +552,10 @@ export const AuditDetailsScreen = () => {
                     Groups: groupsArray
                 }
             }
-            const result = await api.post({
-                url: `api/AuditAndInspection/SaveAudit`,
-                body: payload
-            })
+            // const result = await api.post({
+            //     url: `api/AuditAndInspection/SaveAudit`,
+            //     body: payload
+            // })
 
         } catch ( error ) {
 
@@ -560,6 +576,9 @@ export const AuditDetailsScreen = () => {
             callback: ( url, imageData ) => onImageReceive( url, imageData )
         } )
     }
+
+    console.log( 'is scheduler required-->',auditDetails.AuditAndInspectionDetails?.IsSchedulerRequired)
+    console.log( 'reporting period due date-->',auditDetails.AuditAndInspectionDetails?.ReportingPeriodDueDates)
 
     const renderLastDayOfScheduledPeriod = ( ) => {
         if( auditDetails.AuditAndInspectionDetails?.IsSchedulerRequired === "True" && auditDetails.AuditAndInspectionDetails?.ReportingPeriodDueDates === null ) {
@@ -651,22 +670,34 @@ export const AuditDetailsScreen = () => {
                    renderLastDayOfScheduledPeriod()
                 }
             </View>
-            <View>
-                <Text numberOfLines={0} style={{ color: '#9EA0A4', fontWeight: 'bold', marginHorizontal: '5%' }}>By doing this, following period(s) will be skipped: 07-09-2021</Text>
-            </View>
-            <View style={{ marginTop: '3%', marginHorizontal: '2.2%' }}>
-                <Input
-                    label="Reason for Skipping the Last Day of Schedule Period:"
-                    labelStyle={{ marginBottom: 5, fontWeight: 'bold' }}
-                    textAlignVertical="top"
-                    placeholder="Type Here"
-                    placeholderTextColor="#9EA0A4"
-                    inputStyle={{padding:10, textAlign: 'auto',fontSize:16}}
-                    inputContainerStyle={{...inputContainerStyle, minHeight: 60, maxHeight: 90 }}
-                    value={skipReasonValue}
-                    onChangeText={(text) => setSkipReasonValue( text )}
-                />
-            </View>
+            {
+                remainingDropdownArray && remainingDropdownArray.length > 0
+                ? (
+                    <View>
+                        <View>
+                            <Text numberOfLines={0} style={{ color: '#9EA0A4', fontWeight: 'bold', marginHorizontal: '5%' }}>
+                                {
+                                    `By doing this, following period(s) will be skipped: ${remainingDropdownArray}`
+                                }
+                            </Text>
+                        </View>
+                        <View style={{ marginTop: '3%', marginHorizontal: '2.2%' }}>
+                            <Input
+                                label="Reason for Skipping the Last Day of Schedule Period *"
+                                labelStyle={{ marginBottom: 5, fontWeight: 'bold' }}
+                                textAlignVertical="top"
+                                placeholder="Type Here"
+                                placeholderTextColor="#9EA0A4"
+                                inputStyle={{padding:10, textAlign: 'auto',fontSize:16}}
+                                inputContainerStyle={{...inputContainerStyle, minHeight: 60, maxHeight: 90 }}
+                                value={skipReasonValue}
+                                onChangeText={(text) => setSkipReasonValue( text )}
+                            />
+                        </View>
+                    </View>
+                )
+                : null
+            }
             {
                 !_.isEmpty( auditDetails.AuditAndInspectionDetails.ScheduleFrequency ) 
                 ? renderAuditDetailsRow( 'Schedule Frequency:', `${auditDetails.AuditAndInspectionDetails.ScheduleFrequency}` )
