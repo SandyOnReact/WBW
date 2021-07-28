@@ -1,4 +1,4 @@
-import React, { useEffect, useState, memo } from 'react'
+import React, { useEffect, useState } from 'react'
 import { View, Text, ScrollView, Alert, BackHandler, Image } from 'react-native'
 import { useNavigation, useRoute, useFocusEffect, useCallback } from '@react-navigation/native';
 import { CheckBox, Header, Input, Button, Avatar } from "react-native-elements"
@@ -8,13 +8,20 @@ import { CustomDropdown } from '../components/core/custom-dropdown'
 import { useKeyboard } from '@react-native-community/hooks';
 import { FlatList } from 'react-native';
 import { CustomMultiSelectCheckbox } from "./DynamicControlsScreen"
-import _, { isEmpty } from "lodash"
+import _, { clone, isEmpty } from "lodash"
 import { DynamicGroupsCard } from "../components/dynamic-card"
+import lodash from "lodash"
 
 const inputContainerStyle = { borderWidth: 1, borderColor: '#1e5873', borderRadius: 6 }
 
-export const CustomInput = ( { value, isRequired } ) => {
+export const CustomInput = ( { value, isRequired, onInputValueChange } ) => {
     const [inputValue,setInputValue] = useState( value.SelectedValue )
+
+    const onChangeText = ( value ) => {
+        setInputValue( value )
+        onInputValueChange( value )
+    }
+
     return (
         <View>
             <Input
@@ -28,19 +35,20 @@ export const CustomInput = ( { value, isRequired } ) => {
                 containerStyle={{ margin: 0 }}
                 errorStyle={{ margin: -5 }}
                 value={inputValue}
-                onChangeText={(text) => setInputValue( text )}
+                onChangeText={onChangeText}
             />
         </View>
     )
 }
 
-export const EditableDropdown = ( { value, isRequired } ) => {
+export const EditableDropdown = ( { value, isRequired, onInputValueChange } ) => {
     const controlValues = value.ControlValues.map( item => {
         const control = { label: item.Value, value: item.Id }
         return control
     })
     const onValueChange = ( value ) => {
         setDropdownValue( value )
+        onInputValueChange( value )
     }
     const [dropdownValue,setDropdownValue] = useState( '' )
     return (
@@ -175,20 +183,64 @@ export const CustomTextAreaInput = ( { value, isRequired } ) => {
 
 
 
-
+let remainingDropdownArray = []
 export const AuditDetailsScreen = () => {
     const route = useRoute()
-    const { auditDetails, Type, selectedDropdownValue, dropdownObject } = route.params
+    const { auditDetails, Type, selectedDropdownValue, dropdownObject, PrimaryUserID, AuditAndInspectionTemplateID } = route.params
     const [checkboxValue,setCheckboxValue] = useState( false )
     const [inputValue,setInputValue] = useState( '' )
+    const [skipReasonValue,setSkipReasonValue] = useState( '' )
     const [dropdownvalue,setDropdownValue] = useState( '' )
     const [userInfo,setUserInfo] = useState( {} )
     const [isReset,setIsReset] = useState( false )
     const [shouldShowWarningMessage,setShouldShowWarningMessage] = useState( false )
     const [imagesObject,setImagesObject] = useState( {} )
+    const [systemFieldsArray,setSystemFieldsArray] = useState( [] )
+    const [groupsArray,setGroupsArray] = useState( [] )
     const STATUS_BAR_HEIGHT = getStatusBarHeight()
     const keyboard = useKeyboard()
     const navigation = useNavigation()
+
+    useEffect( ( ) => {
+        setDefaultSystemFieldsArray()
+    }, [] )
+
+    useEffect( ( ) => {
+        setupGroupsArray()
+    }, [] )
+
+    const setupGroupsArray = ( ) => {
+        const data = auditDetails.GroupsAndAttributes.Groups.map( item => {
+            const attributesArray = item.Attributes.map( val => {
+                const attribute = {
+                    CustomFormResultID: val.CustomFormResultID,
+                    GivenAnswerID: val.GivenAnswerID,
+                    SourceID: val.SourceID,
+                    HazardsID: val.HazardsID,
+                    Comments: val.Comments,
+                    AttributeID: val.AttributeID
+                }
+                return attribute
+            })
+
+            const finalGroupData = {
+                Attributes: attributesArray
+            }
+            return finalGroupData
+        })
+        setGroupsArray( data )
+    }
+
+    const setDefaultSystemFieldsArray = ( ) => {
+        const data = auditDetails.SystemFields.SystemFields.map( item => {
+            const systemFieldrow = {
+                ControlID: item.ControlID,
+                SelectedValue: item.SelectedValue
+            }
+            return systemFieldrow
+        })
+        setSystemFieldsArray( data )
+    }
 
     useEffect( ( ) => {
         getUserdetails()
@@ -237,11 +289,31 @@ export const AuditDetailsScreen = () => {
       }
 
     const onChangeDropdownValue = ( value ) => {
+        let data = lodash.sortBy(auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates, [function(o) { return o.label; }])
+        let currentSelectedIndex = lodash.findIndex(data, function(o) { return o.ID === value });
+        console.log( currentSelectedIndex, data )
+        for( let i=0;i<data[currentSelectedIndex];i++) {
+            remainingDropdownArray.push( data[i] )
+            console.log( 'rem-->', remainingDropdownArray )
+        }
+        // remainingDropdownArray = []
+        // auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates.map( (item, index) => {
+        //     console.log( 'item --> ',item.ID, value, index )
+        //     if( item.ID === value ) {
+        //         if( index === 0 ) {
+        //             remainingDropdownArray = []
+        //         }
+        //     }else{
+        //         remainingDropdownArray.push( item )
+        //     }
+        //     return item
+        // })
+        // console.log( 'remaing --> ', remainingDropdownArray )
         setDropdownValue( value )
     }
 
     const renderCustomDropdown = ( ) => {
-        const data = auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates.map( item => {
+        let data = auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates.map( item => {
             const currentReportingPeriod = { label: item.Value, value: item.ID }
             return currentReportingPeriod
         })
@@ -266,18 +338,30 @@ export const AuditDetailsScreen = () => {
         )
     }
 
+    const onInputValueChange = ( value, list ) => {
+        let arrayData = [...systemFieldsArray]
+        arrayData = arrayData.map( item => {
+            if( item.ControlID === list.ControlID ) {
+                item.SelectedValue = value
+                return item
+            }
+            return item
+        } )
+        setSystemFieldsArray( arrayData )
+    }
+
 
 
     const renderItem = ( { item } ) => {
         switch( item.ControlType ) {
             case 'TextBox': {
                 return (
-                   <CustomInput value={item} isRequired={item.IsMandatory === "True" ? true : false }/>
+                   <CustomInput value={item} onInputValueChange={(value)=>onInputValueChange(value,item)} isRequired={item.IsMandatory === "True" ? true : false }/>
                 )
             }
             case 'DropDownList':                               
                 return (
-                   <EditableDropdown value={item} isRequired={item.IsMandatory === "True" ? true : false }/>
+                   <EditableDropdown value={item} onInputValueChange={(value)=>onInputValueChange(value,item)} isRequired={item.IsMandatory === "True" ? true : false }/>
                 )
             case 'Calendar':
                 return (
@@ -321,6 +405,89 @@ export const AuditDetailsScreen = () => {
         ) 
     }
 
+    const currentSelectedScoreValue = ( value, id  ) => {
+        console.log( 'vaue is ', value, id )
+        if( value === null ) {
+            return null
+        }
+        let clonedGroupsArray = [...groupsArray]
+        clonedGroupsArray = clonedGroupsArray.map( groups => {
+            groups = groups.Attributes.map( attribute => {
+                if( attribute.AttributeID === id ) {
+                    attribute.GivenAnswerID = value
+                    return attribute
+                }
+                return attribute
+            })
+            return {
+                Attributes: groups
+            }
+        })
+        setGroupsArray( clonedGroupsArray )
+    }
+    const onSelectedSourceValue = ( value, id  ) => {
+        console.log( 'value is', value, id )
+        if( value === null ) {
+            return null
+        }
+        let clonedGroupsArray = [...groupsArray]
+        clonedGroupsArray = clonedGroupsArray.map( groups => {
+            groups = groups.Attributes.map( attribute => {
+                if( attribute.AttributeID === id ) {
+                    attribute.SourceID = value
+                    return attribute
+                }
+                return attribute
+            })
+            return {
+                Attributes: groups
+            }
+        })
+        setGroupsArray( clonedGroupsArray )
+    }
+    const onHazardValueSelected = ( value, id  ) => {
+        console.log( 'value is', value, id )
+        if( value === null ) {
+            return null
+        }
+        let clonedGroupsArray = [...groupsArray]
+        clonedGroupsArray = clonedGroupsArray.map( groups => {
+            groups = groups.Attributes.map( attribute => {
+                if( attribute.AttributeID === id ) {
+                    attribute.HazardsID = value
+                    return attribute
+                }
+                return attribute
+            })
+            return {
+                Attributes: groups
+            }
+        })
+        setGroupsArray( clonedGroupsArray )
+    }
+    const onCommentInputChange = ( value, id  ) => {
+        console.log( 'value is', value, id )
+        if( value === null ) {
+            return null
+        }
+        let clonedGroupsArray = [...groupsArray]
+        console.log( 'before',JSON.stringify( clonedGroupsArray ) )
+        clonedGroupsArray = clonedGroupsArray.map( groups => {
+            groups = groups.Attributes.map( attribute => {
+                if( attribute.AttributeID === id ) {
+                    attribute.Comments = value
+                    return attribute
+                }
+                return attribute
+            })
+            return {
+                Attributes: groups
+            }
+        })
+        console.log( 'after',JSON.stringify( clonedGroupsArray ) )
+        setGroupsArray( clonedGroupsArray )
+    }
+
     const renderDynamicGroupsAndAttributes = ( checkboxValue ) => {
         const sortedGroupsData = _.sortBy( auditDetails.GroupsAndAttributes?.Groups, ( item ) => item.GroupOrder )
         const shouldShowHazardDetails = auditDetails.AuditAndInspectionDetails?.IsDisplayHazardList
@@ -335,12 +502,51 @@ export const AuditDetailsScreen = () => {
                     scoreLabel={scoreLabel}
                     auditAndInspectionId={auditDetails.AuditAndInspectionDetails?.AuditAndInspectionID}
                     checkboxValue={checkboxValue}
+                    currentSelectedScoreValue={(value, id )=>currentSelectedScoreValue(value, id )}
+                    onSelectedSourceValue={(value, id )=>onSelectedSourceValue(value, id )}
+                    onHazardValueSelected={(value, id )=>onHazardValueSelected(value, id )}
+                    onCommentInputChange={(value, id )=>onCommentInputChange(value, id )}
                 />
             )
         })
     }
 
     const onSubmit = async ( ) =>  {
+        try {
+            const reportingPeriodDueDate = auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates.find( item => item.ID === dropdownvalue)
+            const token = await AsyncStorage.getItem('Token')
+            const payload = {
+                UserID: userInfo.UserID,
+                PrimaryUserID: PrimaryUserID,
+                AccessToken: token,
+                AuditAndInspectionID: auditDetails.AuditAndInspectionDetails?.AuditAndInspectionID,
+                AuditAndInspectionTemplateID: AuditAndInspectionTemplateID,
+                Type: Type,
+                TypeID: auditDetails.AuditAndInspectionDetails?.TypeID,
+                Notes: auditDetails.AuditAndInspectionDetails?.Notes,
+                ReportingPeriodDueDateSelected: reportingPeriodDueDate?.Value,
+                ReportingPeriodDueDateSelectedID: dropdownvalue,
+                NextDueDate: auditDetails.AuditAndInspectionDetails?.NextDueDate,
+                SkippedReason: auditDetails.AuditAndInspectionDetails?.SkippedReason,
+                SystemFields: {
+                    AuditAndInspection_SystemFieldID: auditDetails.SystemFields?.AuditAndInspection_SystemFieldID,
+                    SystemFields: systemFieldsArray
+                },
+                GroupsAndAttributes: {
+                    Groups: groupsArray
+                }
+            }
+            const result = await api.post({
+                url: `api/AuditAndInspection/SaveAudit`,
+                body: payload
+            })
+
+        } catch ( error ) {
+
+        }
+    }
+
+    const onSaveAndComeBack = async ( ) =>  {
         //
     }
 
@@ -445,6 +651,22 @@ export const AuditDetailsScreen = () => {
                    renderLastDayOfScheduledPeriod()
                 }
             </View>
+            <View>
+                <Text numberOfLines={0} style={{ color: '#9EA0A4', fontWeight: 'bold', marginHorizontal: '5%' }}>By doing this, following period(s) will be skipped: 07-09-2021</Text>
+            </View>
+            <View style={{ marginTop: '3%', marginHorizontal: '2.2%' }}>
+                <Input
+                    label="Reason for Skipping the Last Day of Schedule Period:"
+                    labelStyle={{ marginBottom: 5, fontWeight: 'bold' }}
+                    textAlignVertical="top"
+                    placeholder="Type Here"
+                    placeholderTextColor="#9EA0A4"
+                    inputStyle={{padding:10, textAlign: 'auto',fontSize:16}}
+                    inputContainerStyle={{...inputContainerStyle, minHeight: 60, maxHeight: 90 }}
+                    value={skipReasonValue}
+                    onChangeText={(text) => setSkipReasonValue( text )}
+                />
+            </View>
             {
                 !_.isEmpty( auditDetails.AuditAndInspectionDetails.ScheduleFrequency ) 
                 ? renderAuditDetailsRow( 'Schedule Frequency:', `${auditDetails.AuditAndInspectionDetails.ScheduleFrequency}` )
@@ -470,8 +692,8 @@ export const AuditDetailsScreen = () => {
         </View>
         <View style={{ flex: 0.1 }}>
             <View style={{ flex: 0.8, marginTop: '3%', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center'}}>
-                <Button  title="Submit" titleStyle={{ fontSize: 14 ,fontWeight:'bold'}}  buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} containerStyle={{ width: '42%'}} />
-                <Button  title="Save & Come Back" titleStyle={{ fontSize: 14 , fontWeight:'bold'}} buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} containerStyle={{ width: '42%'}} />
+                <Button  title="Submit" titleStyle={{ fontSize: 14 ,fontWeight:'bold'}}  buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} onPress={onSubmit} containerStyle={{ width: '42%'}} />
+                <Button  title="Save & Come Back" titleStyle={{ fontSize: 14 , fontWeight:'bold'}} buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} onPress={onSaveAndComeBack} containerStyle={{ width: '42%'}} />
             </View>
         </View>
         </View>

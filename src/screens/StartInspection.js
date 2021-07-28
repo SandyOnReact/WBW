@@ -90,25 +90,28 @@ export const StartInspection = () => {
         setSelectedSecondaryDropdownvalue( value )
     }
 
-    const navigateToAuditDetails = ( auditDetails ) => {
+    const navigateToAuditDetails = ( auditDetails, PrimaryUserID ) => {
         navigation.navigate( 'AuditDetails', {
             auditDetails: auditDetails,
             Type: Type,
             selectedDropdownValue: isEmpty( selectedSecondaryDropdownValue ) ? userId : selectedSecondaryDropdownValue,
-            dropdownObject: dropdownObject
+            dropdownObject: dropdownObject,
+            PrimaryUserID: PrimaryUserID,
+            AuditAndInspectionTemplateID: AuditAndInspectionTemplateID
         } )
     }
 
     const onSubmit = async ( ) =>  {
         setIsLoading( true )
         const token = await AsyncStorage.getItem('Token')
+        const PrimaryUserID = isEmpty( selectedSecondaryDropdownValue ) ? userId : selectedSecondaryDropdownValue
         const body = {
             UserID: userId,
             AccessToken: token,
             CustomFormID: CustomFormID,
             AuditAndInspectionTemplateID: AuditAndInspectionTemplateID,
             TypeID: selectedPrimaryDropdownValue,
-            PrimaryUserID: isEmpty( selectedSecondaryDropdownValue ) ? userId : selectedSecondaryDropdownValue,
+            PrimaryUserID: PrimaryUserID,
             Type: Type
         }
         const result = await api.post({
@@ -119,7 +122,7 @@ export const StartInspection = () => {
             Toast.showWithGravity('Something went wrong', Toast.LONG, Toast.CENTER);
             return null
         } 
-        navigateToAuditDetails( result )
+        navigateToAuditDetails( result, PrimaryUserID )
     }
 
     if( isLoading ) {

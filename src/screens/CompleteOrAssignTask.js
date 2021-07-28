@@ -140,7 +140,7 @@ export const CompleteTask = ( props ) => {
                     AuditAndInspectionID: auditAndInspectionId,
                     TaskTitle: item.Title,
                     Comments: commentsValue,
-                    AttributeID: item.AttributeIDm,
+                    AttributeID: item.AttributeID,
                     HazardsID: selectedHazardValue, 
                     CustomFormResultID: item.CustomFormResultID
                 }
@@ -348,7 +348,7 @@ export const ShowTaskDetails = ( props ) => {
             const payload = {
                 UserID: user.UserID,
                 AccessToken: token,
-                AuditAndInspectionTaskID: "1",
+                AuditAndInspectionTaskID: taskDetails.AuditAndInspectionTaskDetails?.AuditAndInspectionTaskID,
                 CustomFormResultID: item.CustomFormResultID
             }
             const result = await api.post({

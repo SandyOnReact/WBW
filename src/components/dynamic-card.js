@@ -18,9 +18,18 @@ const DynamicGroups = ( props ) => {
         hazardList,
         scoreLabel,
         auditAndInspectionId,
-        checkboxValue
+        checkboxValue,
+        currentSelectedScoreValue,
+        onSelectedSourceValue,
+        onHazardValueSelected,
+        onCommentInputChange
     } = props
     const sortedDynamicGroup = _.sortBy( dynamicGroups?.Attributes, ( item ) => item.AttributeOrder )
+
+    const onSelectScoreValue = ( value, id ) => {
+        console.log( 'id in back', id )
+        currentSelectedScoreValue( value, id )
+    }
     
     const renderItem = ( { item } ) => {
         return (
@@ -31,6 +40,10 @@ const DynamicGroups = ( props ) => {
                 hazardList={hazardList}
                 auditAndInspectionId={auditAndInspectionId}
                 checkboxValue={checkboxValue}
+                onSelectScoreValue={(value)=>onSelectScoreValue(value, item.AttributeID)}
+                onSelectedSourceValue={(value)=>onSelectedSourceValue(value, item.AttributeID)}
+                onHazardValueSelected={(value)=>onHazardValueSelected(value, item.AttributeID)}
+                onCommentInputChange={(value)=>onCommentInputChange(value, item.AttributeID)}
             />
         )
     }

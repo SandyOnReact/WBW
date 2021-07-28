@@ -8,7 +8,7 @@ import { useNavigation } from '@react-navigation/core'
 
 const inputContainerStyle = { borderWidth: 1, borderColor: '#1e5873', borderRadius: 6 }
 
-export const CommentInput = ( { item, selectedScoreValue, isMandatoryType } ) => {
+export const CommentInput = ( { item, selectedScoreValue, isMandatoryType, onCommentInputChange } ) => {
     const shouldCheckForNonApplicableValues = item.ScoreList.find( item => {
         if( item.Value === "Not Applicable" && item.ID === selectedScoreValue ) {
             return true
@@ -80,6 +80,11 @@ export const CommentInput = ( { item, selectedScoreValue, isMandatoryType } ) =>
         }
     }
 
+    const onChangeText = ( value ) => {
+        setInputValue( value )
+        onCommentInputChange( value )
+    }
+
     return (
         <View>
             <Input
@@ -93,29 +98,35 @@ export const CommentInput = ( { item, selectedScoreValue, isMandatoryType } ) =>
                 containerStyle={{ margin: 0 }}
                 errorStyle={{ margin: -5 }}
                 value={inputValue}
-                onChangeText={(text) => setInputValue( text )}
+                onChangeText={onChangeText}
             />
         </View>
     )
 }
 
-export const SourceDropdown = ( { sourceList } ) => {
+export const SourceDropdown = ( { sourceList, onSourceValueSelected } ) => {
     const [sourceValue,setSourceValue] = useState( '' )
     const sourceData = sourceList.map( item => {
         const source = { label: item.Value, value: item.ID }
         return source
     })
+
+    const onSourceValueChange = ( value ) => {
+        setSourceValue( value )
+        onSourceValueSelected( value )
+    }
+
     return (
         <CustomDropdown
             title="Source"
             items={sourceData}
             value={sourceValue}
-            onValueChange={(value) => setSourceValue(value)}
+            onValueChange={(value)=>onSourceValueChange(value)}
         />
     )
 }
 
-export const HazardDropdown = ( { hazardList, item, auditAndInspectionId } ) => {
+export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHazardValueSelected } ) => {
     const navigation = useNavigation()
     const [hazardValue,setHazardValue] = useState( '' )
     const hazardData = hazardList.map( item => {
@@ -134,6 +145,7 @@ export const HazardDropdown = ( { hazardList, item, auditAndInspectionId } ) => 
             item: item,
             auditAndInspectionId: auditAndInspectionId
         } )
+        onHazardValueSelected( value )
     }
 
     return (
@@ -148,7 +160,15 @@ export const HazardDropdown = ( { hazardList, item, auditAndInspectionId } ) => 
 
 
 
-const renderHazardDropdown = ( item, sourceValue, sourceList, hazardList, auditAndInspectionId ) => {
+const RenderHazardDropdown = ( props ) => {
+    const {
+        item, 
+        sourceValue, 
+        sourceList, 
+        hazardList, 
+        auditAndInspectionId, 
+        onHazardValueSelected
+    } = props
     const shouldCheckForTruthyValues = item.CorrectAnswerValue === "True" || item.CorrectAnswerValue === "False" || item.CorrectAnswerValue === "Not Applicable"
     if( isEmpty( sourceList ) ) {
         return null
@@ -162,6 +182,7 @@ const renderHazardDropdown = ( item, sourceValue, sourceList, hazardList, auditA
                         hazardList={hazardList}
                         item={item} 
                         auditAndInspectionId={auditAndInspectionId}
+                        onHazardValueSelected={(value)=>onHazardValueSelected(value)}
                     />
                 </View>  
             )
@@ -171,7 +192,7 @@ const renderHazardDropdown = ( item, sourceValue, sourceList, hazardList, auditA
 
 
 export const GroupAttributes = ( props ) => {
-    const { item, scoreLabel, sourceList, hazardList, auditAndInspectionId, currentScoreValue, checkboxValue } = props
+    const { item, scoreLabel, sourceList, hazardList, auditAndInspectionId, currentScoreValue, checkboxValue, onSourceValueSelected, onHazardValueSelected } = props
     const [scoreValue,setScoreValue] = useState( '' )
     const scoreData = item.ScoreList.map( item => {
         const score = { label: item.Value, value: item.ID }
@@ -208,24 +229,46 @@ export const GroupAttributes = ( props ) => {
                 ? null 
                 : (
                     <View>
-                        <SourceDropdown sourceList={sourceList} />
+                        <SourceDropdown 
+                            sourceList={sourceList}
+                            onSourceValueSelected={(value)=>onSourceValueSelected(value)}
+                        />
                     </View>  
                 )
             }
             {
                  isEmpty( scoreValue ) 
                  ? null 
-                 : renderHazardDropdown( item, scoreValue, sourceList, hazardList, auditAndInspectionId )         
+                 // : renderHazardDropdown( item, scoreValue, sourceList, hazardList, auditAndInspectionId, )         
+                 : <RenderHazardDropdown 
+                        item={item}
+                        scoreValue={scoreValue}
+                        sourceList={sourceList}
+                        hazardList={hazardList}
+                        auditAndInspectionId={auditAndInspectionId}
+                        onHazardValueSelected={(value)=>onHazardValueSelected(value)}
+                    />
             }
         </View>
     )
 }
 
 export const DynamicAttribute = ( props ) => {
-    const { item, scoreLabel, sourceList, hazardList, auditAndInspectionId, checkboxValue } = props
+    const { item, scoreLabel, sourceList, hazardList, auditAndInspectionId, checkboxValue, onSelectScoreValue, onSelectedSourceValue, onHazardValueSelected, onCommentInputChange } = props
     const [selectedScoreValue, setSelectedScoreValue] = useState( '' )
+    const [commentValue, setCommentValue] = useState( '' )
     const onChangeCurrentScoreValue = ( value ) => {
         setSelectedScoreValue( value )
+        onSelectScoreValue( value )
+    }
+
+    const onChangeCurrentSourceValue = ( value ) => {
+        onSelectedSourceValue( value )
+    }
+
+    const onCommentValueChange = ( value ) => {
+        setCommentValue( value )
+        onCommentInputChange( value )
     }
 
     return (
@@ -245,13 +288,21 @@ export const DynamicAttribute = ( props ) => {
                             hazardList={hazardList}
                             auditAndInspectionId={auditAndInspectionId}
                             currentScoreValue={(value)=> onChangeCurrentScoreValue( value )}
+                            onSourceValueSelected={(value)=>onChangeCurrentSourceValue(value)}
+                            onHazardValueSelected={(value)=>onHazardValueSelected(value)}
                             checkboxValue={checkboxValue}
+                            onCommentInputChange={(value)=>onCommentInputChange(value)}
                        />
                     </View>
                 )
             }
             <View style={{ marginTop: '3%' }}>
-                <CommentInput item={item} selectedScoreValue={selectedScoreValue} isMandatoryType={item.IsCommentsMandatory} />
+                <CommentInput 
+                    item={item} 
+                    selectedScoreValue={selectedScoreValue} 
+                    isMandatoryType={item.IsCommentsMandatory}
+                    onCommentInputChange={(value)=>onCommentValueChange(value)}
+                />
             </View>
     </View>
     )
