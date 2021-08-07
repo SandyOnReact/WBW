@@ -8,7 +8,7 @@ import { CustomDropdown } from '../components/core/custom-dropdown'
 import { useKeyboard } from '@react-native-community/hooks';
 import { FlatList } from 'react-native';
 import { CustomMultiSelectCheckbox } from "./DynamicControlsScreen"
-import _, { clone, isEmpty } from "lodash"
+import _, { clone, isEmpty, omit } from "lodash"
 import { DynamicGroupsCard } from "../components/dynamic-card"
 import lodash from "lodash"
 import Toast from "react-native-simple-toast"
@@ -185,6 +185,7 @@ export const CustomTextAreaInput = ( { value, isRequired } ) => {
 
 
 let remainingDropdownArray = []
+let selectedScoreArray = []
 export const AuditDetailsScreen = () => {
     const route = useRoute()
     const { auditDetails, Type, selectedDropdownValue, dropdownObject, PrimaryUserID, AuditAndInspectionTemplateID } = route.params
@@ -219,7 +220,12 @@ export const AuditDetailsScreen = () => {
                     SourceID: val.SourceID,
                     HazardsID: val.HazardsID,
                     Comments: val.Comments,
-                    AttributeID: val.AttributeID
+                    AttributeID: val.AttributeID,
+                    AuditAndInspectionScore: val.AuditAndInspectionScore,
+                    IsCommentsMandatory: val.IsCommentsMandatory,
+                    CorrectAnswerID: val.CorrectAnswerID,
+                    ScoreList: val.ScoreList,
+                    isRequired: val.IsCommentsMandatory === "Mandatory" ? 'Comments *' : 'Comments'
                 }
                 return attribute
             })
@@ -236,7 +242,8 @@ export const AuditDetailsScreen = () => {
         const data = auditDetails.SystemFields.SystemFields.map( item => {
             const systemFieldrow = {
                 ControlID: item.ControlID,
-                SelectedValue: item.SelectedValue
+                SelectedValue: item.SelectedValue,
+                IsMandatory: item.IsMandatory
             }
             return systemFieldrow
         })
@@ -393,14 +400,96 @@ export const AuditDetailsScreen = () => {
         ) 
     }
 
+
+    checkIsCommentsMandatory = ( isMandatoryType , CorrectAnswerID, selectedScoreValue, ScoreList ) => {
+        const shouldCheckForNonApplicableValues = ScoreList.find( item => {
+            if( item.Value === "Not Applicable" && item.ID === selectedScoreValue ) {
+                return true
+            }else{
+                return false
+            }
+        })
+        const checkIfTruthyValues = ScoreList.find( item => {
+            if( ["True", "False", "Yes", "No"].includes( item.Value ) && item.ID === selectedScoreValue ) {
+                return true
+            }else{
+                return false
+            }
+        })
+        let commentLabel = ''
+        switch( isMandatoryType ) {
+            case 'Mandatory': {
+                commentLabel = 'Comments *'
+                break;
+            }
+            case 'Mandatory for Passing Score': {
+                if( shouldCheckForNonApplicableValues ) {
+                    commentLabel = 'Comments'
+                    break;
+                }
+                else if( checkIfTruthyValues ? Number( selectedScoreValue ) === Number( CorrectAnswerID ) : Number( selectedScoreValue ) >= Number( CorrectAnswerID ) ) {
+                    commentLabel = 'Comments *'
+                    break;
+                }else{
+                    commentLabel = 'Comments'
+                    break;
+                }
+            }
+            case 'Mandatory for Failing Score': {
+                if( Number(selectedScoreValue) !== 0 && Number( selectedScoreValue ) < Number( CorrectAnswerID ) ) {
+                    commentLabel = 'Comments *'
+                    break;
+                }else{
+                    commentLabel = 'Comments'
+                }
+                
+            }
+            case 'Not Mandatory': {
+                commentLabel = 'Comments'
+                break;
+            }
+            case 'Mandatory for N/A': {
+                if( shouldCheckForNonApplicableValues ) {
+                    commentLabel = 'Comments *'
+                    break;
+                }else{
+                    commentLabel = 'Comments'
+                    break;
+                }
+                
+            }
+            case 'Mandatory for Passing Score and N/A': {
+                if( Number( selectedScoreValue ) >= Number( CorrectAnswerID ) || shouldCheckForNonApplicableValues ) {
+                    commentLabel = 'Comments *'
+                    break;
+                }else{
+                    commentLabel = 'Comments'
+                    break;
+                }
+            }
+            case 'Mandatory for Failing Score and N/A': {
+                if( Number( selectedScoreValue ) < Number( CorrectAnswerID ) || shouldCheckForNonApplicableValues ) {
+                    commentLabel = 'Comments *'
+                    break;
+                }else{
+                    commentLabel = 'Comments'
+                    break;
+                }
+            }
+        }
+        return commentLabel
+    }
+
     const currentSelectedScoreValue = ( value, id  ) => {
         if( value === null ) {
+            Toast.showWithGravity('Please Select score from score column', Toast.LONG, Toast.CENTER);
             return null
         }
         let clonedGroupsArray = [...groupsArray]
         clonedGroupsArray = clonedGroupsArray.map( groups => {
             groups = groups.Attributes.map( attribute => {
                 if( attribute.AttributeID === id ) {
+                    attribute.isRequired = checkIsCommentsMandatory( attribute.IsCommentsMandatory, value, attribute.CorrectAnswerID, attribute.ScoreList  )
                     attribute.GivenAnswerID = value
                     return attribute
                 }
@@ -457,7 +546,6 @@ export const AuditDetailsScreen = () => {
             return null
         }
         let clonedGroupsArray = [...groupsArray]
-        console.log( 'before',JSON.stringify( clonedGroupsArray ) )
         clonedGroupsArray = clonedGroupsArray.map( groups => {
             groups = groups.Attributes.map( attribute => {
                 if( attribute.AttributeID === id ) {
@@ -470,7 +558,6 @@ export const AuditDetailsScreen = () => {
                 Attributes: groups
             }
         })
-        console.log( 'after',JSON.stringify( clonedGroupsArray ) )
         setGroupsArray( clonedGroupsArray )
     }
 
@@ -498,7 +585,6 @@ export const AuditDetailsScreen = () => {
     }
 
     const checkForValidPayload = ( ) => {
-        console.log( shouldShowWarningMessage )
         if( auditDetails.AuditAndInspectionDetails?.ReportingPeriodDueDates === null && shouldShowWarningMessage === false ) {
             return true
         }else{
@@ -515,22 +601,98 @@ export const AuditDetailsScreen = () => {
                 }
                 return result
             }else{
-                console.log( 'ELSE BLOCK' )
                 return false
             }
         }
     }
 
+    const checkForRequiredDynamicFields = ( ) => {
+        const clonedSystemFieldsArray = [...systemFieldsArray]
+        const fieldsArray = clonedSystemFieldsArray.map( item => {
+            if( item.IsMandatory === "True" ) {
+                return !isEmpty( item.SelectedValue )
+            }else{
+                return true
+            }
+        })
+        const result = fieldsArray.every( item => item === true )
+        return result
+    }
+
+    checkForScoresItem = ( ) => {
+        let groupsArrayToCheck = []
+        const clonedGroupsArray = [...groupsArray]
+        clonedGroupsArray.map( item => {
+            const clonedGroupsAttributeArray = [...item.Attributes]
+            clonedGroupsAttributeArray.map( val => {
+                if( val.AuditAndInspectionScore === "Do Not Show Score" ) {
+                    groupsArrayToCheck.push( true )
+                    return val
+                }else{
+                    const givenAnswer = val.GivenAnswerID === "0" || val.GivenAnswerID === null ? false : true
+                    groupsArrayToCheck.push( givenAnswer )
+                    return val  
+                }
+            })
+            return item
+        })
+        const result = groupsArrayToCheck.every( item => item === true )
+        return result
+    }
+
+    checkForCommentsItem = ( ) => {
+        let groupsArrayToCheck = []
+        const clonedGroupsArray = [...groupsArray]        
+        clonedGroupsArray.map( item => {
+            const clonedGroupsAttributeArray = [...item.Attributes] 
+            clonedGroupsAttributeArray.map( val => {
+                if( val.isRequired === "Comments *" && val.Comments !== "" ) {
+                    groupsArrayToCheck.push( true )
+                }else if( val.isRequired === "Comments" ) {
+                    groupsArrayToCheck.push( true )
+                }else{
+                    groupsArrayToCheck.push( false )
+                }
+            })
+            return item
+        })
+
+        const result = groupsArrayToCheck.every( item => item === true )
+        return result
+    }
+
     const onSubmit = async ( ) =>  {
         try {
-            console.log( 'Inside onSubmit' )
             const isValid = checkForValidPayload()
+            console.log( 'isValidInitialPayload', isValid )
             if( !isValid ) {
                 Toast.showWithGravity('Please Enter Valid Schedule period or valid reason for skipping schedule period', Toast.LONG, Toast.CENTER);
                 return null
             }
+            const checkForValidFields = checkForRequiredDynamicFields()
+            console.log( 'check for valid fields', checkForValidFields )
+            if( !checkForValidFields ) {
+                Toast.showWithGravity('Please Enter Valid Worksite Data', Toast.LONG, Toast.CENTER);
+                return null 
+            }
+            const checkForScores = checkForScoresItem() 
+            if( !checkForScores ) {
+                Toast.showWithGravity('Please Enter Valid Score Value', Toast.LONG, Toast.CENTER);
+                return null 
+            }
+            console.log( 'check for scores --> ',checkForScores )
+            const checkForComments = checkForCommentsItem() 
+            console.log( 'check for comments --> ',checkForComments )
+            if( !checkForComments ) {
+                Toast.showWithGravity('Please Enter Required Comments Value', Toast.LONG, Toast.CENTER);
+                return null 
+            }
             const reportingPeriodDueDate = auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates.find( item => item.ID === dropdownvalue)
             const token = await AsyncStorage.getItem('Token')
+            const systemsArrayWithoutMandatoryFields = systemFieldsArray.map( item => {
+                const arrayFields = omit( item, 'IsMandatory' )
+                return arrayFields
+            })
             const payload = {
                 UserID: userInfo.UserID,
                 PrimaryUserID: PrimaryUserID,
@@ -546,7 +708,7 @@ export const AuditDetailsScreen = () => {
                 SkippedReason: auditDetails.AuditAndInspectionDetails?.SkippedReason,
                 SystemFields: {
                     AuditAndInspection_SystemFieldID: auditDetails.SystemFields?.AuditAndInspection_SystemFieldID,
-                    SystemFields: systemFieldsArray
+                    SystemFields: systemsArrayWithoutMandatoryFields
                 },
                 GroupsAndAttributes: {
                     Groups: groupsArray
@@ -576,9 +738,6 @@ export const AuditDetailsScreen = () => {
             callback: ( url, imageData ) => onImageReceive( url, imageData )
         } )
     }
-
-    console.log( 'is scheduler required-->',auditDetails.AuditAndInspectionDetails?.IsSchedulerRequired)
-    console.log( 'reporting period due date-->',auditDetails.AuditAndInspectionDetails?.ReportingPeriodDueDates)
 
     const renderLastDayOfScheduledPeriod = ( ) => {
         if( auditDetails.AuditAndInspectionDetails?.IsSchedulerRequired === "True" && auditDetails.AuditAndInspectionDetails?.ReportingPeriodDueDates === null ) {

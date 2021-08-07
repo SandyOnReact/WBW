@@ -16,9 +16,15 @@ export const CommentInput = ( { item, selectedScoreValue, isMandatoryType, onCom
             return false
         }
     })
+    const checkIfTruthyValues = item.ScoreList.find( item => {
+        if( ["True", "False", "Yes", "No"].includes( item.Value ) && item.ID === selectedScoreValue ) {
+            return true
+        }else{
+            return false
+        }
+    })
     const [inputValue,setInputValue] = useState( item?.Comments )
     let commentLabel = ''
-
     switch( isMandatoryType ) {
         case 'Mandatory': {
             commentLabel = 'Comments *'
@@ -29,7 +35,7 @@ export const CommentInput = ( { item, selectedScoreValue, isMandatoryType, onCom
                 commentLabel = 'Comments'
                 break;
             }
-            else if( Number( selectedScoreValue ) >= Number( item.CorrectAnswerID ) ) {
+            else if( checkIfTruthyValues ? Number( selectedScoreValue ) === Number( item.CorrectAnswerID ) : Number( selectedScoreValue ) >= Number( item.CorrectAnswerID ) ) {
                 commentLabel = 'Comments *'
                 break;
             }else{
@@ -38,7 +44,7 @@ export const CommentInput = ( { item, selectedScoreValue, isMandatoryType, onCom
             }
         }
         case 'Mandatory for Failing Score': {
-            if( Number( selectedScoreValue ) < Number( item.CorrectAnswerID ) ) {
+            if( Number(selectedScoreValue) !== 0 && Number( selectedScoreValue ) < Number( item.CorrectAnswerID ) ) {
                 commentLabel = 'Comments *'
                 break;
             }else{
@@ -193,7 +199,7 @@ const RenderHazardDropdown = ( props ) => {
 
 export const GroupAttributes = ( props ) => {
     const { item, scoreLabel, sourceList, hazardList, auditAndInspectionId, currentScoreValue, checkboxValue, onSourceValueSelected, onHazardValueSelected } = props
-    const [scoreValue,setScoreValue] = useState( '' )
+    const [scoreValue,setScoreValue] = useState( null )
     const scoreData = item.ScoreList.map( item => {
         const score = { label: item.Value, value: item.ID }
         return score
@@ -201,13 +207,15 @@ export const GroupAttributes = ( props ) => {
 
     useEffect(() => {
         if( !checkboxValue ) {
-            setScoreValue( '' )
+            setScoreValue( null )
         }
     }, [checkboxValue])
 
     const onScoreValueChange = ( value ) => {
-        setScoreValue( value ),
-        currentScoreValue( value )
+        if( scoreValue !== value ) {
+            setScoreValue( value ),
+            currentScoreValue( value )
+        }
     }
     
     return (
