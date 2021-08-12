@@ -558,6 +558,7 @@ export const AuditDetailsScreen = () => {
                 Attributes: groups
             }
         })
+        console.log( JSON.stringify( clonedGroupsArray ) )
         setGroupsArray( clonedGroupsArray )
     }
 
@@ -687,12 +688,23 @@ export const AuditDetailsScreen = () => {
                 Toast.showWithGravity('Please Enter Required Comments Value', Toast.LONG, Toast.CENTER);
                 return null 
             }
-            const reportingPeriodDueDate = auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates.find( item => item.ID === dropdownvalue)
+            console.log( 'Hello', auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates )
+            const reportingPeriodDueDate = !isEmpty( auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates ) ? auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates.find( item => item.ID === dropdownvalue) : ''
+            console.log('how are u')
             const token = await AsyncStorage.getItem('Token')
             const systemsArrayWithoutMandatoryFields = systemFieldsArray.map( item => {
                 const arrayFields = omit( item, 'IsMandatory' )
                 return arrayFields
             })
+            const groupsArrayWithOnlyRequiredFields = groupsArray.map( item => {
+                const attributes =  item.Attributes.map( val => {
+                    const attributeFields = omit( val, 'AttributeID', 'AuditAndInspectionScore', 'IsCommentsMandatory', 'CorrectAnswerID', 'ScoreList', 'isRequired' )
+                    return attributeFields
+                })
+                return {
+                    Attributes: attributes
+                }
+            }) 
             const payload = {
                 UserID: userInfo.UserID,
                 PrimaryUserID: PrimaryUserID,
@@ -702,7 +714,7 @@ export const AuditDetailsScreen = () => {
                 Type: Type,
                 TypeID: auditDetails.AuditAndInspectionDetails?.TypeID,
                 Notes: auditDetails.AuditAndInspectionDetails?.Notes,
-                ReportingPeriodDueDateSelected: reportingPeriodDueDate?.Value,
+                ReportingPeriodDueDateSelected: isEmpty( reportingPeriodDueDate ) ? null : reportingPeriodDueDate?.Value,
                 ReportingPeriodDueDateSelectedID: dropdownvalue,
                 NextDueDate: auditDetails.AuditAndInspectionDetails?.NextDueDate,
                 SkippedReason: auditDetails.AuditAndInspectionDetails?.SkippedReason,
@@ -711,16 +723,16 @@ export const AuditDetailsScreen = () => {
                     SystemFields: systemsArrayWithoutMandatoryFields
                 },
                 GroupsAndAttributes: {
-                    Groups: groupsArray
+                    Groups: groupsArrayWithOnlyRequiredFields
                 }
             }
-            // const result = await api.post({
-            //     url: `api/AuditAndInspection/SaveAudit`,
-            //     body: payload
-            // })
-
+            console.log( 'payload is --->',JSON.stringify( payload ))
+            const result = await api.post({
+                url: `api/AuditAndInspection/SaveAudit`,
+                body: payload
+            })
         } catch ( error ) {
-
+            console.log( 'error is ',error)
         }
     }
 
@@ -883,7 +895,7 @@ export const AuditDetailsScreen = () => {
         <View style={{ flex: 0.1 }}>
             <View style={{ flex: 0.8, marginTop: '3%', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center'}}>
                 <Button  title="Submit" titleStyle={{ fontSize: 14 ,fontWeight:'bold'}}  buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} onPress={onSubmit} containerStyle={{ width: '42%'}} />
-                <Button  title="Save & Come Back" titleStyle={{ fontSize: 14 , fontWeight:'bold'}} buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} onPress={onSaveAndComeBack} containerStyle={{ width: '42%'}} />
+                <Button  title="Save & Come Back" titleStyle={{ fontSize: 14 , fontWeight:'bold'}} buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} onPress={onSubmit} containerStyle={{ width: '42%'}} />
             </View>
         </View>
         </View>
