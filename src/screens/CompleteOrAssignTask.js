@@ -156,6 +156,7 @@ export const CompleteTask = ( props ) => {
                 else if( !isEmpty( result ) && isEmpty( imagesObject ) ) {
                     Toast.showWithGravity( 'Task Completed Successfully', Toast.LONG, Toast.CENTER);
                     setTimeout(() => {
+                        commentsValueCallback( commentsValue, item.AttributeID )
                         navigateToBackScreen()
                     }, 2000);
                 }
@@ -169,6 +170,7 @@ export const CompleteTask = ( props ) => {
                         return null
                     }
                     setTimeout(() => {
+                        commentsValueCallback( commentsValue, item.AttributeID )
                         navigateToBackScreen()
                     }, 2000);
                 }
@@ -182,6 +184,7 @@ export const CompleteTask = ( props ) => {
     }
 
     const navigateToBackScreen = ( ) => {
+
         navigation.goBack()
     }
 
@@ -302,7 +305,8 @@ export const ShowTaskDetails = ( props ) => {
         taskDetails,
         selectedHazardValue,
         hazardData,
-        onDelete
+        onDelete,
+        item
     } = props
     const [isButtonLoading,setIsButtonLoading] = useState( false )
     const [isDeleteButtonLoading,setIsDeleteButtonLoading] = useState( false )
@@ -831,7 +835,6 @@ export const CompleteOrAssignTask = ( props ) => {
         hazardData,
         item,
         auditAndInspectionId,
-        clear
     } = route.params
     const STATUS_BAR_HEIGHT = getStatusBarHeight()
     const navigation = useNavigation()
@@ -881,7 +884,6 @@ export const CompleteOrAssignTask = ( props ) => {
     }
 
     const navigatetoBackScreen = () => {
-        clear()
         navigation.goBack()
     }
 
@@ -932,6 +934,7 @@ export const CompleteOrAssignTask = ( props ) => {
             {
                 shouldShowTaskDetails 
                 ? <ShowTaskDetails 
+                    item={item}
                     taskDetails={taskDetails}
                     selectedHazardValue={selectedHazardValue}
                     hazardData={hazardData}

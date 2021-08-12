@@ -270,6 +270,8 @@ export const AuditDetailsScreen = () => {
         setCheckboxValue( checkboxValue => !checkboxValue )
     }
 
+    console.log('audit details -->',JSON.stringify(auditDetails ))
+
     useEffect(() => {
         const backHandler = BackHandler.addEventListener(
             "hardwareBackPress",

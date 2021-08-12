@@ -4,11 +4,12 @@ import { Input } from 'react-native-elements'
 import { CustomDropdown } from './core/custom-dropdown'
 import _, { isEmpty } from "lodash"
 import { useNavigation } from '@react-navigation/core'
+import AsyncStorage from "@react-native-async-storage/async-storage"
 
 
 const inputContainerStyle = { borderWidth: 1, borderColor: '#1e5873', borderRadius: 6 }
 
-export const CommentInput = ( { item, selectedScoreValue, isMandatoryType, onCommentInputChange } ) => {
+export const CommentInput = ( { item, selectedScoreValue, isMandatoryType, onCommentInputChange, commentsFromHazard, attributeIdFromHazard } ) => {
     const shouldCheckForNonApplicableValues = item.ScoreList.find( item => {
         if( item.Value === "Not Applicable" && item.ID === selectedScoreValue ) {
             return true
@@ -23,6 +24,7 @@ export const CommentInput = ( { item, selectedScoreValue, isMandatoryType, onCom
             return false
         }
     })
+    console.log( 'comments in comment s-', commentsFromHazard )
     const [inputValue,setInputValue] = useState( item?.Comments )
     let commentLabel = ''
     switch( isMandatoryType ) {
@@ -86,6 +88,21 @@ export const CommentInput = ( { item, selectedScoreValue, isMandatoryType, onCom
         }
     }
 
+    useEffect(()=>{
+        setCommentsForParticularHazard()
+    },[attributeIdFromHazard,commentsFromHazard])
+
+    const setCommentsForParticularHazard = async ( ) => {
+        console.log( 'atrri--->',attributeIdFromHazard )
+        const attributeId = await AsyncStorage.getItem( 'AttributeID' )
+        console.log( 'attributId', attributeId )
+        if( commentsFromHazard !== '' && attributeId === attributeIdFromHazard ){
+            setInputValue( commentsFromHazard )
+        }else{
+            setInputValue( '' )
+        }
+    }
+
     const onChangeText = ( value ) => {
         setInputValue( value )
         onCommentInputChange( value )
@@ -132,7 +149,7 @@ export const SourceDropdown = ( { sourceList, onSourceValueSelected } ) => {
     )
 }
 
-export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHazardValueSelected } ) => {
+export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHazardValueSelected, commentsValueCallback } ) => {
     const navigation = useNavigation()
     const [hazardValue,setHazardValue] = useState( '' )
     const hazardData = hazardList.map( item => {
@@ -140,16 +157,18 @@ export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHaza
         return hazard
     })
 
-    const onHazardValueChange = ( value ) => {
+    const onHazardValueChange = async ( value ) => {
         if( value === null ) {
             return null
         }
         setHazardValue( value )
+        await AsyncStorage.setItem( 'AttributeID', item.AttributeID )
         navigation.navigate( 'CompleteOrAssignTask', {
             selectedHazardValue: value,
             hazardData: hazardData,
             item: item,
-            auditAndInspectionId: auditAndInspectionId
+            auditAndInspectionId: auditAndInspectionId,
+            commentsValueCallback: ( value, id ) => commentsValueCallback( value, id )
         } )
         onHazardValueSelected( value )
     }
@@ -169,17 +188,22 @@ export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHaza
 const RenderHazardDropdown = ( props ) => {
     const {
         item, 
-        sourceValue, 
+        scoreValue, 
         sourceList, 
         hazardList, 
         auditAndInspectionId, 
-        onHazardValueSelected
+        onHazardValueSelected,
+        commentsValueCallback
     } = props
     const shouldCheckForTruthyValues = item.CorrectAnswerValue === "True" || item.CorrectAnswerValue === "False" || item.CorrectAnswerValue === "Not Applicable"
+    console.log( 'shoudl check for truthy values', shouldCheckForTruthyValues )
+    console.log( 'score value', scoreValue )
+    console.log( 'correct answer id', item.CorrectAnswerID )
+    console.log( 'correct answer id', item.CorrectAnswerID )
     if( isEmpty( sourceList ) ) {
         return null
     }else{
-        if( item.DoNotShowHazard === "True" || shouldCheckForTruthyValues ? Number(sourceValue) === Number(item.CorrectAnswerID) : Number( sourceValue ) >= Number( item.CorrectAnswerID ) ) {
+        if( item.DoNotShowHazard === "True" || shouldCheckForTruthyValues ? Number(scoreValue) === Number(item.CorrectAnswerID) : Number( scoreValue ) >= Number( item.CorrectAnswerID ) ) {
             return null
         }else{
             return (
@@ -189,6 +213,7 @@ const RenderHazardDropdown = ( props ) => {
                         item={item} 
                         auditAndInspectionId={auditAndInspectionId}
                         onHazardValueSelected={(value)=>onHazardValueSelected(value)}
+                        commentsValueCallback={(value, id)=>commentsValueCallback( value, id )}
                     />
                 </View>  
             )
@@ -198,7 +223,7 @@ const RenderHazardDropdown = ( props ) => {
 
 
 export const GroupAttributes = ( props ) => {
-    const { item, scoreLabel, sourceList, hazardList, auditAndInspectionId, currentScoreValue, checkboxValue, onSourceValueSelected, onHazardValueSelected } = props
+    const { item, scoreLabel, sourceList, hazardList, auditAndInspectionId, currentScoreValue, checkboxValue, onSourceValueSelected, onHazardValueSelected, commentsValueCallback } = props
     const [scoreValue,setScoreValue] = useState( null )
     const scoreData = item.ScoreList.map( item => {
         const score = { label: item.Value, value: item.ID }
@@ -255,6 +280,7 @@ export const GroupAttributes = ( props ) => {
                         hazardList={hazardList}
                         auditAndInspectionId={auditAndInspectionId}
                         onHazardValueSelected={(value)=>onHazardValueSelected(value)}
+                        commentsValueCallback={(value, id)=>commentsValueCallback(value, id)}
                     />
             }
         </View>
@@ -265,6 +291,8 @@ export const DynamicAttribute = ( props ) => {
     const { item, scoreLabel, sourceList, hazardList, auditAndInspectionId, checkboxValue, onSelectScoreValue, onSelectedSourceValue, onHazardValueSelected, onCommentInputChange } = props
     const [selectedScoreValue, setSelectedScoreValue] = useState( '' )
     const [commentValue, setCommentValue] = useState( '' )
+    const [commentsFromHazard, setCommentsFromHazard] = useState( '' )
+    const [attributeIdFromHazard, setAttributeIdFromHazard] = useState( '' )
     const onChangeCurrentScoreValue = ( value ) => {
         setSelectedScoreValue( value )
         onSelectScoreValue( value )
@@ -277,6 +305,12 @@ export const DynamicAttribute = ( props ) => {
     const onCommentValueChange = ( value ) => {
         setCommentValue( value )
         onCommentInputChange( value )
+    }
+
+    commentsValueCallback=(value, id)=>{
+        console.log( 'comments from hazard --->', value, id )
+        setCommentsFromHazard( value )
+        setAttributeIdFromHazard( id )
     }
 
     return (
@@ -300,6 +334,7 @@ export const DynamicAttribute = ( props ) => {
                             onHazardValueSelected={(value)=>onHazardValueSelected(value)}
                             checkboxValue={checkboxValue}
                             onCommentInputChange={(value)=>onCommentInputChange(value)}
+                            commentsValueCallback={(value, id)=>commentsValueCallback(value, id)}
                        />
                     </View>
                 )
@@ -309,7 +344,9 @@ export const DynamicAttribute = ( props ) => {
                     item={item} 
                     selectedScoreValue={selectedScoreValue} 
                     isMandatoryType={item.IsCommentsMandatory}
-                    onCommentInputChange={(value)=>onCommentValueChange(value)}
+                    onCommentInputChange={(value, id )=>onCommentValueChange(value, id)}
+                    commentsFromHazard={commentsFromHazard}
+                    attributeIdFromHazard={attributeIdFromHazard}
                 />
             </View>
     </View>
