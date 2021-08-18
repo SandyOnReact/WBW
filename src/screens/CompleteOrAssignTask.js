@@ -155,8 +155,12 @@ export const CompleteTask = ( props ) => {
                 // case 2: if result, but not images
                 else if( !isEmpty( result ) && isEmpty( imagesObject ) ) {
                     Toast.showWithGravity( 'Task Completed Successfully', Toast.LONG, Toast.CENTER);
-                    setTimeout(() => {
-                        commentsValueCallback( commentsValue, item.AttributeID )
+                    setTimeout(async () => {
+                        let returndata={
+                            commentsValue:result.Comments ?? commentsValue,
+                            CustomFormResultID:item.CustomFormResultID,
+                        }
+                        await AsyncStorage.setItem("returndata", JSON.stringify(returndata))
                         navigateToBackScreen()
                     }, 2000);
                 }
@@ -170,7 +174,6 @@ export const CompleteTask = ( props ) => {
                         return null
                     }
                     setTimeout(() => {
-                        commentsValueCallback( commentsValue, item.AttributeID )
                         navigateToBackScreen()
                     }, 2000);
                 }
@@ -544,7 +547,13 @@ export const AssignTask = ( props ) => {
                 // case 2: if result but not images
                 else if( !isEmpty( result ) && isEmpty( imagesObject ) ) {
                     Toast.showWithGravity( 'Task Assigned Successfully', Toast.LONG, Toast.CENTER);
-                    setTimeout(() => {
+                    setTimeout(async () => {
+
+                        let returndata={
+                            commentsValue:result.Comments ?? commentsValue,
+                            CustomFormResultID:item.CustomFormResultID,
+                        }
+                        await AsyncStorage.setItem("returndata", JSON.stringify(returndata))
                         navigateToBackScreen()
                     }, 2000);
                 }

@@ -13,6 +13,7 @@ import { DynamicGroupsCard } from "../components/dynamic-card"
 import lodash from "lodash"
 import Toast from "react-native-simple-toast"
 
+
 const inputContainerStyle = { borderWidth: 1, borderColor: '#1e5873', borderRadius: 6 }
 
 export const CustomInput = ( { value, isRequired, onInputValueChange } ) => {
@@ -199,6 +200,7 @@ export const AuditDetailsScreen = () => {
     const [imagesObject,setImagesObject] = useState( {} )
     const [systemFieldsArray,setSystemFieldsArray] = useState( [] )
     const [groupsArray,setGroupsArray] = useState( [] )
+    const [returnData,setReturnData] = useState( {} )
     const STATUS_BAR_HEIGHT = getStatusBarHeight()
     const keyboard = useKeyboard()
     const navigation = useNavigation()
@@ -210,6 +212,16 @@ export const AuditDetailsScreen = () => {
     useEffect( ( ) => {
         setupGroupsArray()
     }, [] )
+
+
+    useFocusEffect(
+        React.useCallback( async() => {
+            var tempData = await AsyncStorage.getItem("returndata")
+            tempData = JSON.parse(tempData)
+            await AsyncStorage.removeItem("returndata");
+          setReturnData(tempData)
+        }, [])
+      );
 
     const setupGroupsArray = ( ) => {
         const data = auditDetails.GroupsAndAttributes.Groups.map( item => {
@@ -269,10 +281,7 @@ export const AuditDetailsScreen = () => {
     const toggleCheckBoxValue = ( ) => {
         setCheckboxValue( checkboxValue => !checkboxValue )
     }
-
-    console.log('audit details -->',JSON.stringify(auditDetails ))
-
-    useEffect(() => {
+      useEffect(() => {
         const backHandler = BackHandler.addEventListener(
             "hardwareBackPress",
             _handleBackPress
@@ -504,7 +513,6 @@ export const AuditDetailsScreen = () => {
         setGroupsArray( clonedGroupsArray )
     }
     const onSelectedSourceValue = ( value, id  ) => {
-        console.log( 'value is', value, id )
         if( value === null ) {
             return null
         }
@@ -542,33 +550,25 @@ export const AuditDetailsScreen = () => {
         })
         setGroupsArray( clonedGroupsArray )
     }
-    const onCommentInputChange = ( value, id  ) => {
-        console.log( 'value is', value, id )
-        if( value === null ) {
-            return null
-        }
-        let clonedGroupsArray = [...groupsArray]
-        clonedGroupsArray = clonedGroupsArray.map( groups => {
-            groups = groups.Attributes.map( attribute => {
-                if( attribute.AttributeID === id ) {
-                    attribute.Comments = value
-                    return attribute
-                }
-                return attribute
-            })
-            return {
-                Attributes: groups
-            }
-        })
-        console.log( JSON.stringify( clonedGroupsArray ) )
-        setGroupsArray( clonedGroupsArray )
-    }
+
 
     const renderDynamicGroupsAndAttributes = ( checkboxValue ) => {
-        const sortedGroupsData = _.sortBy( auditDetails.GroupsAndAttributes?.Groups, ( item ) => item.GroupOrder )
-        const shouldShowHazardDetails = auditDetails.AuditAndInspectionDetails?.IsDisplayHazardList
-        const shouldShowSourceDetails = auditDetails.AuditAndInspectionDetails?.IsDisplaySource
-        const scoreLabel = auditDetails.AuditAndInspectionDetails?.ScoringLable
+        var sortedGroupsData = _.sortBy( auditDetails.GroupsAndAttributes?.Groups, ( item ) => item.GroupOrder )
+        sortedGroupsData = sortedGroupsData.map(item=>{
+            item.Attributes.map(innerItem=>{
+                if(innerItem.CustomFormResultID  ==  returnData?.CustomFormResultID ){
+                 
+                    innerItem.Comments = returnData?.commentsValue
+                }
+
+                return innerItem
+            })
+            return item
+        })
+
+        var shouldShowHazardDetails = auditDetails.AuditAndInspectionDetails?.IsDisplayHazardList
+        var shouldShowSourceDetails = auditDetails.AuditAndInspectionDetails?.IsDisplaySource
+        var scoreLabel = auditDetails.AuditAndInspectionDetails?.ScoringLable
         return sortedGroupsData.map( item => {
             return (
                 <DynamicGroupsCard 

@@ -11,7 +11,7 @@ import { DynamicAttribute } from "./dynamic-attributes"
  * for all other condition keep same logic.
  */
 
-const DynamicGroups = ( props ) => {
+export const DynamicGroupsCard = ( props ) => {
     const {
         dynamicGroups,
         sourceList,
@@ -64,13 +64,3 @@ const DynamicGroups = ( props ) => {
         </View>
     )
 }
-
-export const DynamicGroupsCard = React.memo( DynamicGroups, showPickerProps )
-
-const showPickerProps = ( nextProps, prevProps ) => {
-    return (
-        nextProps.AttributeID === prevProps.AttributeID
-    )
-}
-
-
