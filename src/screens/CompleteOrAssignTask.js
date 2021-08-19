@@ -603,7 +603,6 @@ export const AssignTask = ( props ) => {
 
     const fetchRiskRatingAndDueDate = async ( ) => {
         setIsFetching( true )
-        setShouldShowRiskRating( false )
         try {
             const user = await fetchUserInfoFromStorage()
         const token = await AsyncStorage.getItem('Token')
@@ -618,11 +617,13 @@ export const AssignTask = ( props ) => {
             url: `api/AuditAndInspection/GetRiskRatingAndDueDate`,
             body: body
         })
+        console.log('result----->',result)
         if( isEmpty( result ) ) {
             return null
         }
         setRiskRatingValue( result.RiskRating )
         setDueDateValue( result.DueDate )
+        setShouldShowRiskRating( true )
         showRiskRating()
         } catch( error ) {
             Toast.showWithGravity(error.message, Toast.LONG, Toast.CENTER);
@@ -827,7 +828,7 @@ export const AssignTask = ( props ) => {
                         </View>
                         <View style={{ marginTop: '3%', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center'}}>
                             <Button  title="Assign Task" titleStyle={{ fontSize: 14 ,fontWeight:'bold'}} loading={isButtonLoading}  buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} containerStyle={{ width: '42%'}} onPress={onAssignTask} />
-                            <Button  title="Cancel" titleStyle={{ fontSize: 14 , fontWeight:'bold'}} buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} containerStyle={{ width: '42%'}} onPress={navigateToPreviousScreen}/>
+                            <Button  title="Cancel" titleStyle={{ fontSize: 14 , fontWeight:'bold'}} buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} containerStyle={{ width: '42%'}} onPress={()=>navigateToPreviousScreen()}/>
                         </View>
                     </ScrollView>
                     </View>

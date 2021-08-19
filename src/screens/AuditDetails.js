@@ -11,6 +11,7 @@ import { CustomMultiSelectCheckbox } from "./DynamicControlsScreen"
 import _, { clone, isEmpty, omit } from "lodash"
 import { DynamicGroupsCard } from "../components/dynamic-card"
 import lodash from "lodash"
+import { api } from '../utils/api'
 import Toast from "react-native-simple-toast"
 
 
@@ -555,6 +556,28 @@ export const AuditDetailsScreen = () => {
         setGroupsArray( clonedGroupsArray )
     }
 
+    const onCommentInputChange = ( value, id  ) => {
+        console.log( 'value is', value, id )
+        if( value === null ) {
+            return null
+        }
+        let clonedGroupsArray = [...groupsArray]
+        clonedGroupsArray = clonedGroupsArray.map( groups => {
+            groups = groups.Attributes.map( attribute => {
+                if( attribute.AttributeID === id ) {
+                    attribute.Comments = value
+                    return attribute
+                }
+                return attribute
+            })
+            return {
+                Attributes: groups
+            }
+        })
+        console.log( JSON.stringify( clonedGroupsArray ) )
+        setGroupsArray( clonedGroupsArray )
+    }
+
 
     const renderDynamicGroupsAndAttributes = ( checkboxValue ) => {
         var sortedGroupsData = _.sortBy( auditDetails.GroupsAndAttributes?.Groups, ( item ) => item.GroupOrder )
@@ -563,6 +586,7 @@ export const AuditDetailsScreen = () => {
                 innerItem.shouldClearHazard = false
                 if(innerItem.CustomFormResultID  ==  returnData?.CustomFormResultID ){          
                     innerItem.Comments = returnData?.commentsValue
+                    //onCommentInputChange( returnData?.commentsValue, innerItem.AttributeID)
                 }
                 if( innerItem.CustomFormResultID == cancelData?.CustomFormResultID ) {
                     console.log( 'Inside IF for clear')
@@ -741,6 +765,7 @@ export const AuditDetailsScreen = () => {
                 url: `api/AuditAndInspection/SaveAudit`,
                 body: payload
             })
+            console.log( 'result is ',JSON.stringify(result))
         } catch ( error ) {
             console.log( 'error is ',error)
         }

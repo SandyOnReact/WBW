@@ -29,6 +29,7 @@ export const CommentInput = ( { item, selectedScoreValue, isMandatoryType, onCom
 
     useEffect(()=>{
         setInputValue(item.Comments)
+        onCommentInputChange( item.Comments )
     },[item.Comments])
     let commentLabel = ''
     switch( isMandatoryType ) {
