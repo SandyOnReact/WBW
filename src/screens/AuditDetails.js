@@ -201,6 +201,7 @@ export const AuditDetailsScreen = () => {
     const [systemFieldsArray,setSystemFieldsArray] = useState( [] )
     const [groupsArray,setGroupsArray] = useState( [] )
     const [returnData,setReturnData] = useState( {} )
+    const [cancelData,setCancelData] = useState( {} )
     const STATUS_BAR_HEIGHT = getStatusBarHeight()
     const keyboard = useKeyboard()
     const navigation = useNavigation()
@@ -219,6 +220,9 @@ export const AuditDetailsScreen = () => {
             var tempData = await AsyncStorage.getItem("returndata")
             tempData = JSON.parse(tempData)
             await AsyncStorage.removeItem("returndata");
+            var cancelData = await AsyncStorage.getItem("cancelData")
+            cancelData = JSON.parse(cancelData)
+            setCancelData( cancelData )
           setReturnData(tempData)
         }, [])
       );
@@ -556,11 +560,15 @@ export const AuditDetailsScreen = () => {
         var sortedGroupsData = _.sortBy( auditDetails.GroupsAndAttributes?.Groups, ( item ) => item.GroupOrder )
         sortedGroupsData = sortedGroupsData.map(item=>{
             item.Attributes.map(innerItem=>{
-                if(innerItem.CustomFormResultID  ==  returnData?.CustomFormResultID ){
-                 
+                innerItem.shouldClearHazard = false
+                if(innerItem.CustomFormResultID  ==  returnData?.CustomFormResultID ){          
                     innerItem.Comments = returnData?.commentsValue
                 }
-
+                if( innerItem.CustomFormResultID == cancelData?.CustomFormResultID ) {
+                    console.log( 'Inside IF for clear')
+                    innerItem.HazardsID = cancelData?.HazardsID
+                    innerItem.shouldClearHazard = true
+                }
                 return innerItem
             })
             return item

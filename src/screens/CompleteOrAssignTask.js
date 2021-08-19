@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { View , Text, Image, ScrollView, ActivityIndicator, StyleSheet } from 'react-native'
+import { View , Text, Image, ScrollView, ActivityIndicator, StyleSheet, BackHandler } from 'react-native'
 import { getStatusBarHeight } from 'react-native-status-bar-height'
 import { Header, Input, Button, Icon } from "react-native-elements"
 import RadioForm from 'react-native-simple-radio-button';
@@ -173,7 +173,12 @@ export const CompleteTask = ( props ) => {
                     if( isEmpty( response ) ) {
                         return null
                     }
-                    setTimeout(() => {
+                    setTimeout( async () => {
+                        let returndata={
+                            commentsValue:result.Comments ?? commentsValue,
+                            CustomFormResultID:item.CustomFormResultID,
+                        }
+                        await AsyncStorage.setItem("returndata", JSON.stringify(returndata))
                         navigateToBackScreen()
                     }, 2000);
                 }
@@ -191,6 +196,14 @@ export const CompleteTask = ( props ) => {
         navigation.goBack()
     }
 
+    const navigateToPreviousScreen = async ( ) => {
+            let cancelData={
+                HazardsID:"",
+                CustomFormResultID:item.CustomFormResultID,
+            }
+            await AsyncStorage.setItem("cancelData", JSON.stringify(cancelData))
+            navigation.goBack()
+    }
     return (
        <View style={{ flex: 1, marginHorizontal: '3%', marginVertical: '3%' }}>
            <ScrollView showsVerticalScrollIndicator={false}>
@@ -225,7 +238,7 @@ export const CompleteTask = ( props ) => {
                 </View>
                 <View style={{ marginTop: '3%', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center'}}>
                     <Button  title="Complete Task" titleStyle={{ fontSize: 14 ,fontWeight:'bold'}} loading={isButtonLoading}  buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} containerStyle={{ width: '42%'}} onPress={onCompleteTask} />
-                    <Button  title="Cancel" titleStyle={{ fontSize: 14 , fontWeight:'bold'}} buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} containerStyle={{ width: '42%'}} onPress={()=>navigation.goBack()}/>
+                    <Button  title="Cancel" titleStyle={{ fontSize: 14 , fontWeight:'bold'}} buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} containerStyle={{ width: '42%'}} onPress={()=>navigateToPreviousScreen()}/>
                 </View>
                 </ScrollView>
        </View>
@@ -703,6 +716,15 @@ export const AssignTask = ( props ) => {
         )
     }
 
+    const navigateToPreviousScreen = async ( ) => {
+        let cancelData={
+            HazardsID:"",
+            CustomFormResultID:item.CustomFormResultID,
+        }
+        await AsyncStorage.setItem("cancelData", JSON.stringify(cancelData))
+        navigation.goBack()
+    }
+
     return (
        <View style={{ flex: 1, marginHorizontal: '3%', marginVertical: '3%' }}>
            <Async promiseFn={fetchTaskRatingDetails}>
@@ -805,7 +827,7 @@ export const AssignTask = ( props ) => {
                         </View>
                         <View style={{ marginTop: '3%', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center'}}>
                             <Button  title="Assign Task" titleStyle={{ fontSize: 14 ,fontWeight:'bold'}} loading={isButtonLoading}  buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} containerStyle={{ width: '42%'}} onPress={onAssignTask} />
-                            <Button  title="Cancel" titleStyle={{ fontSize: 14 , fontWeight:'bold'}} buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} containerStyle={{ width: '42%'}} onPress={navigateToBackScreen}/>
+                            <Button  title="Cancel" titleStyle={{ fontSize: 14 , fontWeight:'bold'}} buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} containerStyle={{ width: '42%'}} onPress={navigateToPreviousScreen}/>
                         </View>
                     </ScrollView>
                     </View>
@@ -856,6 +878,23 @@ export const CompleteOrAssignTask = ( props ) => {
         getTasks()
     }, [] )
 
+    useEffect(() => {
+        const backHandler = BackHandler.addEventListener(
+            "hardwareBackPress",
+            navigateToPreviousScreen
+        );
+        return () => backHandler.remove();
+    }, [])
+
+
+    const navigateToPreviousScreen = async ( ) => {
+        let cancelData={
+            HazardsID:"",
+            CustomFormResultID:item.CustomFormResultID,
+        }
+        await AsyncStorage.setItem("cancelData", JSON.stringify(cancelData))
+        navigation.goBack()
+    }
 
     const fetchUserInfoFromStorage = async () => {
         const userInfo = await AsyncStorage.getItem('USER_INFO');
@@ -904,7 +943,10 @@ export const CompleteOrAssignTask = ( props ) => {
                     hazardData={hazardData}
                     item={item}
                     auditAndInspectionId={auditAndInspectionId}
-                    onCancel={navigatetoBackScreen}
+                    onCancel={async()=>{
+                        
+                        navigation.goBack()
+                    }}
                 />
             )
         }else{
@@ -937,7 +979,7 @@ export const CompleteOrAssignTask = ( props ) => {
                 containerStyle={{ height: 56 + STATUS_BAR_HEIGHT }}
                 statusBarProps={{ barStyle: "light-content", translucent: true, backgroundColor: "transparent" }}
                 containerStyle={{ backgroundColor: '#1e5873' }}
-                leftComponent={{ icon: 'arrow-back', type: 'ionicons', color: 'white', onPress: navigatetoBackScreen }}
+                leftComponent={{ icon: 'arrow-back', type: 'ionicons', color: 'white', onPress: navigateToPreviousScreen }}
                 centerComponent={{ text: 'Complete or Assign Task', style: { color: '#fff', fontSize: 16 } }}
             />
             {

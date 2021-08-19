@@ -142,6 +142,17 @@ export const SourceDropdown = ( { sourceList, onSourceValueSelected } ) => {
 export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHazardValueSelected } ) => {
     const navigation = useNavigation()
     const [hazardValue,setHazardValue] = useState( '' )
+    console.log( 'Inside hazards' )
+    useEffect(()=> {
+        setHazardValueBasedonClearHazard()
+    }, [item.HazardsID] )
+
+    const setHazardValueBasedonClearHazard = async ( ) => {
+        console.log( 'Inside use effect --->')
+        setHazardValue(null)
+        await AsyncStorage.removeItem("cancelData")
+    }
+
     const hazardData = hazardList.map( item => {
         const hazard = { label: item.Value, value: item.ID }
         return hazard
