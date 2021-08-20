@@ -286,6 +286,32 @@ export const AuditDetailsScreen = () => {
     const toggleCheckBoxValue = ( ) => {
         setCheckboxValue( checkboxValue => !checkboxValue )
     }
+
+    const onDeleteAuditAndInspectionRecord = async ( ) => {
+        try {
+            const token = await AsyncStorage.getItem('Token')
+        const payload = {
+            UserID: userInfo.UserID,
+            AccessToken: token,
+            AuditAndInspectionID: auditDetails.AuditAndInspectionDetails?.AuditAndInspectionID,
+        }
+        console.log( 'payload is --->',payload)
+        const result = await api.post({
+            url: `api/AuditAndInspection/DeleteAuditAndInspection`,
+            body: payload
+        })
+        console.log( 'result on delete is -->',JSON.stringify(result) )
+        if( isEmpty( result ) ) {
+            return null
+        }
+        Toast.showWithGravity(result.Message, Toast.LONG, Toast.CENTER);
+        navigation.goBack()
+        }catch( error ) {
+            Toast.showWithGravity(error.message || 'Something Went wrong while deleting audit records', Toast.LONG, Toast.CENTER);
+        }
+        
+    }
+
       useEffect(() => {
         const backHandler = BackHandler.addEventListener(
             "hardwareBackPress",
@@ -306,10 +332,11 @@ export const AuditDetailsScreen = () => {
             },
             {
               text: "Yes",
-              onPress: ( ) => navigation.goBack()
+              onPress: ( ) => onDeleteAuditAndInspectionRecord()
             }
           ],
         );
+        return true
       }
 
     const onChangeDropdownValue = ( value ) => {
@@ -417,7 +444,7 @@ export const AuditDetailsScreen = () => {
     }
 
 
-    checkIsCommentsMandatory = ( isMandatoryType , CorrectAnswerID, selectedScoreValue, ScoreList ) => {
+    const checkIsCommentsMandatory = ( isMandatoryType , CorrectAnswerID, selectedScoreValue, ScoreList ) => {
         const shouldCheckForNonApplicableValues = ScoreList.find( item => {
             if( item.Value === "Not Applicable" && item.ID === selectedScoreValue ) {
                 return true
@@ -586,7 +613,6 @@ export const AuditDetailsScreen = () => {
                 innerItem.shouldClearHazard = false
                 if(innerItem.CustomFormResultID  ==  returnData?.CustomFormResultID ){          
                     innerItem.Comments = returnData?.commentsValue
-                    //onCommentInputChange( returnData?.commentsValue, innerItem.AttributeID)
                 }
                 if( innerItem.CustomFormResultID == cancelData?.CustomFormResultID ) {
                     console.log( 'Inside IF for clear')
@@ -654,7 +680,7 @@ export const AuditDetailsScreen = () => {
         return result
     }
 
-    checkForScoresItem = ( ) => {
+    const checkForScoresItem = ( ) => {
         let groupsArrayToCheck = []
         const clonedGroupsArray = [...groupsArray]
         clonedGroupsArray.map( item => {
@@ -675,7 +701,7 @@ export const AuditDetailsScreen = () => {
         return result
     }
 
-    checkForCommentsItem = ( ) => {
+    const checkForCommentsItem = ( ) => {
         let groupsArrayToCheck = []
         const clonedGroupsArray = [...groupsArray]        
         clonedGroupsArray.map( item => {
@@ -765,14 +791,98 @@ export const AuditDetailsScreen = () => {
                 url: `api/AuditAndInspection/SaveAudit`,
                 body: payload
             })
+            if( isEmpty( result ) ) {
+                return null
+            }else if( !isEmpty( result ) && isEmpty( imagesObject ) ) {
+                navigation.navigate( 'Home' )
+            }else if( !isEmpty( result ) && !isEmpty( imagesObject ) ) {
+                const response = await api.imageUpload({
+                    image: imagesObject,
+                    url: `api/AuditAndInspection/UploadAuditImage?UserID=${userInfo.UserID}&AuditAndInspectionID=${auditDetails.AuditAndInspectionDetails?.AuditAndInspectionID}`
+                })
+                console.log( 'response after uploading',JSON.stringify( response ) )
+                if( isEmpty( response ) ) {
+                    return null
+                }
+                navigation.navigate( 'Home' )
+            }
             console.log( 'result is ',JSON.stringify(result))
         } catch ( error ) {
+            Toast.showWithGravity(error.message, Toast.LONG, Toast.CENTER);
             console.log( 'error is ',error)
         }
     }
 
     const onSaveAndComeBack = async ( ) =>  {
-        //
+        try {
+            const isValid = checkForValidPayload()
+            console.log( 'isValidInitialPayload', isValid )
+            if( !isValid ) {
+                Toast.showWithGravity('Please Enter Valid Schedule period or valid reason for skipping schedule period', Toast.LONG, Toast.CENTER);
+                return null
+            }
+            const reportingPeriodDueDate = !isEmpty( auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates ) ? auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates.find( item => item.ID === dropdownvalue) : ''
+            console.log('how are u')
+            const token = await AsyncStorage.getItem('Token')
+            const systemsArrayWithoutMandatoryFields = systemFieldsArray.map( item => {
+                const arrayFields = omit( item, 'IsMandatory' )
+                return arrayFields
+            })
+            const groupsArrayWithOnlyRequiredFields = groupsArray.map( item => {
+                const attributes =  item.Attributes.map( val => {
+                    const attributeFields = omit( val, 'AttributeID', 'AuditAndInspectionScore', 'IsCommentsMandatory', 'CorrectAnswerID', 'ScoreList', 'isRequired' )
+                    return attributeFields
+                })
+                return {
+                    Attributes: attributes
+                }
+            }) 
+            const payload = {
+                UserID: userInfo.UserID,
+                PrimaryUserID: PrimaryUserID,
+                AccessToken: token,
+                AuditAndInspectionID: auditDetails.AuditAndInspectionDetails?.AuditAndInspectionID,
+                AuditAndInspectionTemplateID: AuditAndInspectionTemplateID,
+                Type: Type,
+                TypeID: auditDetails.AuditAndInspectionDetails?.TypeID,
+                Notes: auditDetails.AuditAndInspectionDetails?.Notes,
+                ReportingPeriodDueDateSelected: isEmpty( reportingPeriodDueDate ) ? null : reportingPeriodDueDate?.Value,
+                ReportingPeriodDueDateSelectedID: dropdownvalue,
+                NextDueDate: auditDetails.AuditAndInspectionDetails?.NextDueDate,
+                SkippedReason: auditDetails.AuditAndInspectionDetails?.SkippedReason,
+                SystemFields: {
+                    AuditAndInspection_SystemFieldID: auditDetails.SystemFields?.AuditAndInspection_SystemFieldID,
+                    SystemFields: systemsArrayWithoutMandatoryFields
+                },
+                GroupsAndAttributes: {
+                    Groups: groupsArrayWithOnlyRequiredFields
+                }
+            }
+            console.log( 'payload is --->',JSON.stringify( payload ))
+            const result = await api.post({
+                url: `api/AuditAndInspection/SaveAudit`,
+                body: payload
+            })
+            if( isEmpty( result ) ) {
+                return null
+            }else if( !isEmpty( result ) && isEmpty( imagesObject ) ) {
+                navigation.navigate( 'Home' )
+            }else if( !isEmpty( result ) && !isEmpty( imagesObject ) ) {
+                const response = await api.imageUpload({
+                    image: imagesObject,
+                    url: `api/AuditAndInspection/UploadAuditImage?UserID=${userInfo.UserID}&AuditAndInspectionID=${auditDetails.AuditAndInspectionDetails?.AuditAndInspectionID}`
+                })
+                console.log( 'response after uploading',JSON.stringify( response ) )
+                if( isEmpty( response ) ) {
+                    return null
+                }
+                navigation.navigate( 'Home' )
+            }
+            console.log( 'result is ',JSON.stringify(result))
+        } catch ( error ) {
+            Toast.showWithGravity(error.message, Toast.LONG, Toast.CENTER);
+            console.log( 'error is ',error)
+        }
     }
 
     const onImageReceive = ( url, imageData ) => {
@@ -930,7 +1040,7 @@ export const AuditDetailsScreen = () => {
         <View style={{ flex: 0.1 }}>
             <View style={{ flex: 0.8, marginTop: '3%', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center'}}>
                 <Button  title="Submit" titleStyle={{ fontSize: 14 ,fontWeight:'bold'}}  buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} onPress={onSubmit} containerStyle={{ width: '42%'}} />
-                <Button  title="Save & Come Back" titleStyle={{ fontSize: 14 , fontWeight:'bold'}} buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} onPress={onSubmit} containerStyle={{ width: '42%'}} />
+                <Button  title="Save & Come Back" titleStyle={{ fontSize: 14 , fontWeight:'bold'}} buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} onPress={onSaveAndComeBack} containerStyle={{ width: '42%'}} />
             </View>
         </View>
         </View>
