@@ -231,6 +231,7 @@ export const AuditDetailsScreen = () => {
     const setupGroupsArray = ( ) => {
         const data = auditDetails.GroupsAndAttributes.Groups.map( item => {
             const attributesArray = item.Attributes.map( val => {
+                console.log( 'attributess----->', JSON.stringify( val ) )
                 const attribute = {
                     CustomFormResultID: val.CustomFormResultID,
                     GivenAnswerID: val.GivenAnswerID,
@@ -242,7 +243,8 @@ export const AuditDetailsScreen = () => {
                     IsCommentsMandatory: val.IsCommentsMandatory,
                     CorrectAnswerID: val.CorrectAnswerID,
                     ScoreList: val.ScoreList,
-                    isRequired: val.IsCommentsMandatory === "Mandatory" ? 'Comments *' : 'Comments'
+                    isRequired: val.IsCommentsMandatory === "Mandatory" ? 'Comments *' : 'Comments',
+                    isHazardsRequired: val.DoNotShowHazard === "True" || val.AuditAndInspectionScore === "Do Not Show Score" ? false : true
                 }
                 return attribute
             })
@@ -523,6 +525,29 @@ export const AuditDetailsScreen = () => {
         return commentLabel
     }
 
+    const checkIsHazardsPresentAndRequired = ( selectedScoreValue, CorrectAnswerID, ScoreList ) => {
+        const shouldCheckForNonApplicableValues = ScoreList.find( item => {
+            if( item.Value === "Not Applicable" && item.ID === selectedScoreValue ) {
+                return true
+            }else{
+                return false
+            }
+        })
+        const checkIfTruthyValues = ScoreList.find( item => {
+            if( ["True", "False", "Yes", "No"].includes( item.Value ) && item.ID === selectedScoreValue ) {
+                return true
+            }else{
+                return false
+            }
+        })
+
+        if( checkIfTruthyValues ? Number(selectedScoreValue) === Number(CorrectAnswerID) : Number( selectedScoreValue ) >= Number( CorrectAnswerID ) ) {
+            return false
+        }else{
+            return true
+        }
+    }
+
     const currentSelectedScoreValue = ( value, id  ) => {
         if( value === null ) {
             Toast.showWithGravity('Please Select score from score column', Toast.LONG, Toast.CENTER);
@@ -532,6 +557,7 @@ export const AuditDetailsScreen = () => {
         clonedGroupsArray = clonedGroupsArray.map( groups => {
             groups = groups.Attributes.map( attribute => {
                 if( attribute.AttributeID === id ) {
+                    attribute.isHazardsRequired = checkIsHazardsPresentAndRequired( value, attribute.CorrectAnswerID, attribute.ScoreList )
                     attribute.isRequired = checkIsCommentsMandatory( attribute.IsCommentsMandatory, value, attribute.CorrectAnswerID, attribute.ScoreList  )
                     attribute.GivenAnswerID = value
                     return attribute
@@ -542,6 +568,7 @@ export const AuditDetailsScreen = () => {
                 Attributes: groups
             }
         })
+        console.log( 'clonedGroupsArray', JSON.stringify( clonedGroupsArray ) )
         setGroupsArray( clonedGroupsArray )
     }
     const onSelectedSourceValue = ( value, id  ) => {
@@ -700,6 +727,23 @@ export const AuditDetailsScreen = () => {
         const result = groupsArrayToCheck.every( item => item === true )
         return result
     }
+    const checkForHazardsItem = ( ) => {
+        let groupsArrayToCheck = []
+        const clonedGroupsArray = [...groupsArray]
+        clonedGroupsArray.map( item => {
+            const clonedGroupsAttributeArray = [...item.Attributes]
+            clonedGroupsAttributeArray.map( val => {
+                if( val.isHazardsRequired === true && !['','0',0,null,undefined].includes(val.HazardsID)){
+                    return true
+                }else{
+                    return false
+                }
+            })
+            return item
+        })
+        const result = groupsArrayToCheck.every( item => item === true )
+        return result
+    }
 
     const checkForCommentsItem = ( ) => {
         let groupsArrayToCheck = []
@@ -746,6 +790,12 @@ export const AuditDetailsScreen = () => {
             console.log( 'check for comments --> ',checkForComments )
             if( !checkForComments ) {
                 Toast.showWithGravity('Please Enter Required Comments Value', Toast.LONG, Toast.CENTER);
+                return null 
+            }
+            const checkForHazards = checkForHazardsItem() 
+            console.log( 'check for hazards --> ',checkForHazards )
+            if( !checkForHazards ) {
+                Toast.showWithGravity('Please Enter Required Hazards Value', Toast.LONG, Toast.CENTER);
                 return null 
             }
             console.log( 'Hello', auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates )
