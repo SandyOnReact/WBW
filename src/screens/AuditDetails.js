@@ -838,7 +838,7 @@ export const AuditDetailsScreen = () => {
             }
             console.log( 'payload is --->',JSON.stringify( payload ))
             const result = await api.post({
-                url: `api/AuditAndInspection/SaveAudit`,
+                url: `api/AuditAndInspection/CompleteAudit`,
                 body: payload
             })
             if( isEmpty( result ) ) {
