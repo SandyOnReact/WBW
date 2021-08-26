@@ -678,21 +678,26 @@ export const AuditDetailsScreen = () => {
         }else{
             const isValidSchedulePeriod = shouldShowWarningMessage ? dropdownvalue === ''  : !lodash.isEmpty(dropdownvalue)
             if( isValidSchedulePeriod && !shouldShowWarningMessage ) {
-                let result = false
-                if( remainingDropdownArray.length === 0 ) {
-                    result = true
-                }
-                else if( skipReasonValue !== '' ) {
-                    result = true
-                }else{
-                    result = false
-                }
-                return result
+                return true
             }else{
                 return false
             }
         }
     }
+
+
+    const checkForSkipreason = ( ) => {
+                let result = false
+                if( remainingDropdownArray.length === 0 ) {
+                    result = true
+                }else  if( skipReasonValue !== '' ) {
+                    result = true
+                }else{
+                    result = false
+                }
+                return result
+            }
+    
 
     const checkForRequiredDynamicFields = ( ) => {
         const clonedSystemFieldsArray = [...systemFieldsArray]
@@ -770,10 +775,20 @@ export const AuditDetailsScreen = () => {
         try {
             const isValid = checkForValidPayload()
             console.log( 'isValidInitialPayload', isValid )
+
+            if( auditDetails.AuditAndInspectionDetails?.IsSchedulerRequired === "True" ){
             if( !isValid ) {
-                Toast.showWithGravity('Please Enter Valid Schedule period or valid reason for skipping schedule period', Toast.LONG, Toast.CENTER);
+                Toast.showWithGravity('Last day of schedule period is required.', Toast.LONG, Toast.CENTER);
                 return null
             }
+            
+            const isreasonFilled = checkForSkipreason()
+            if(!isreasonFilled){
+                Toast.showWithGravity('Reason for skipping the last day of schedule period is required.', Toast.LONG, Toast.CENTER);
+                return null
+            }
+        }
+
             const checkForValidFields = checkForRequiredDynamicFields()
             console.log( 'check for valid fields', checkForValidFields )
             if( !checkForValidFields ) {
@@ -782,20 +797,20 @@ export const AuditDetailsScreen = () => {
             }
             const checkForScores = checkForScoresItem() 
             if( !checkForScores ) {
-                Toast.showWithGravity('Please Enter Valid Score Value', Toast.LONG, Toast.CENTER);
+                Toast.showWithGravity('Please select a score from the Score column', Toast.LONG, Toast.CENTER);
                 return null 
             }
             console.log( 'check for scores --> ',checkForScores )
             const checkForComments = checkForCommentsItem() 
             console.log( 'check for comments --> ',checkForComments )
             if( !checkForComments ) {
-                Toast.showWithGravity('Please Enter Required Comments Value', Toast.LONG, Toast.CENTER);
+                Toast.showWithGravity('Comment(s) required.', Toast.LONG, Toast.CENTER);
                 return null 
             }
             const checkForHazards = checkForHazardsItem() 
             console.log( 'check for hazards --> ',checkForHazards )
             if( !checkForHazards ) {
-                Toast.showWithGravity('Please Enter Required Hazards Value', Toast.LONG, Toast.CENTER);
+                Toast.showWithGravity('Hazard is required.', Toast.LONG, Toast.CENTER);
                 return null 
             }
             console.log( 'Hello', auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates )
@@ -841,6 +856,7 @@ export const AuditDetailsScreen = () => {
                 url: `api/AuditAndInspection/CompleteAudit`,
                 body: payload
             })
+            console.log(result)
             if( isEmpty( result ) ) {
                 return null
             }else if( !isEmpty( result ) && isEmpty( imagesObject ) ) {
@@ -868,11 +884,16 @@ export const AuditDetailsScreen = () => {
             const isValid = checkForValidPayload()
             console.log( 'isValidInitialPayload', isValid )
             if( !isValid ) {
-                Toast.showWithGravity('Please Enter Valid Schedule period or valid reason for skipping schedule period', Toast.LONG, Toast.CENTER);
+                Toast.showWithGravity('Last day of schedule period is required.', Toast.LONG, Toast.CENTER);
+                return null
+            }
+            
+            const isreasonFilled = checkForSkipreason()
+            if(!isreasonFilled){
+                Toast.showWithGravity('Reason for skipping the last day of schedule period is required.', Toast.LONG, Toast.CENTER);
                 return null
             }
             const reportingPeriodDueDate = !isEmpty( auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates ) ? auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates.find( item => item.ID === dropdownvalue) : ''
-            console.log('how are u')
             const token = await AsyncStorage.getItem('Token')
             const systemsArrayWithoutMandatoryFields = systemFieldsArray.map( item => {
                 const arrayFields = omit( item, 'IsMandatory' )
