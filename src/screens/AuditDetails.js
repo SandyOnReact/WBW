@@ -224,14 +224,13 @@ export const AuditDetailsScreen = () => {
             var cancelData = await AsyncStorage.getItem("cancelData")
             cancelData = JSON.parse(cancelData)
             setCancelData( cancelData )
-          setReturnData(tempData)
+            setReturnData(tempData)
         }, [])
       );
 
     const setupGroupsArray = ( ) => {
         const data = auditDetails.GroupsAndAttributes.Groups.map( item => {
             const attributesArray = item.Attributes.map( val => {
-                console.log( 'attributess----->', JSON.stringify( val ) )
                 const attribute = {
                     CustomFormResultID: val.CustomFormResultID,
                     GivenAnswerID: val.GivenAnswerID,
@@ -297,12 +296,10 @@ export const AuditDetailsScreen = () => {
             AccessToken: token,
             AuditAndInspectionID: auditDetails.AuditAndInspectionDetails?.AuditAndInspectionID,
         }
-        console.log( 'payload is --->',payload)
         const result = await api.post({
             url: `api/AuditAndInspection/DeleteAuditAndInspection`,
             body: payload
         })
-        console.log( 'result on delete is -->',JSON.stringify(result) )
         if( isEmpty( result ) ) {
             return null
         }
@@ -541,9 +538,14 @@ export const AuditDetailsScreen = () => {
             }
         })
 
+        console.log( 'trutyvalue ',checkIfTruthyValues )
+        console.log( 'selectedScoreValue ',selectedScoreValue )
+        console.log( 'CorrectAnswerID ',CorrectAnswerID )
         if( checkIfTruthyValues ? Number(selectedScoreValue) === Number(CorrectAnswerID) : Number( selectedScoreValue ) >= Number( CorrectAnswerID ) ) {
+            console.log( 'Inside IF')
             return false
         }else{
+            console.log( 'Inside else')
             return true
         }
     }
@@ -568,7 +570,6 @@ export const AuditDetailsScreen = () => {
                 Attributes: groups
             }
         })
-        console.log( 'clonedGroupsArray', JSON.stringify( clonedGroupsArray ) )
         setGroupsArray( clonedGroupsArray )
     }
     const onSelectedSourceValue = ( value, id  ) => {
@@ -628,7 +629,6 @@ export const AuditDetailsScreen = () => {
                 Attributes: groups
             }
         })
-        console.log( JSON.stringify( clonedGroupsArray ) )
         setGroupsArray( clonedGroupsArray )
     }
 
@@ -642,7 +642,6 @@ export const AuditDetailsScreen = () => {
                     innerItem.Comments = returnData?.commentsValue
                 }
                 if( innerItem.CustomFormResultID == cancelData?.CustomFormResultID ) {
-                    console.log( 'Inside IF for clear')
                     innerItem.HazardsID = cancelData?.HazardsID
                     innerItem.shouldClearHazard = true
                 }
@@ -678,26 +677,21 @@ export const AuditDetailsScreen = () => {
         }else{
             const isValidSchedulePeriod = shouldShowWarningMessage ? dropdownvalue === ''  : !lodash.isEmpty(dropdownvalue)
             if( isValidSchedulePeriod && !shouldShowWarningMessage ) {
-                return true
-            }else{
-                return false
-            }
-        }
-    }
-
-
-    const checkForSkipreason = ( ) => {
                 let result = false
                 if( remainingDropdownArray.length === 0 ) {
                     result = true
-                }else  if( skipReasonValue !== '' ) {
+                }
+                else if( skipReasonValue !== '' ) {
                     result = true
                 }else{
                     result = false
                 }
                 return result
+            }else{
+                return false
             }
-    
+        }
+    }
 
     const checkForRequiredDynamicFields = ( ) => {
         const clonedSystemFieldsArray = [...systemFieldsArray]
@@ -735,17 +729,27 @@ export const AuditDetailsScreen = () => {
     const checkForHazardsItem = ( ) => {
         let groupsArrayToCheck = []
         const clonedGroupsArray = [...groupsArray]
+        console.log( 'clonedGroupsArray before-->',JSON.stringify(clonedGroupsArray) )
         clonedGroupsArray.map( item => {
             const clonedGroupsAttributeArray = [...item.Attributes]
-            clonedGroupsAttributeArray.map( val => {
-                if( val.isHazardsRequired === true && !['','0',0,null,undefined].includes(val.HazardsID)){
+            groupsArrayToCheck = clonedGroupsAttributeArray.map( val => {
+                // console.log( 'val is ',val)
+                // if( val.isHazardsRequired === true && !['','0',0,null,undefined].includes(val.HazardsID)){
+                //     return true
+                // }else{
+                //     return false
+                // }
+                if( val.isHazardsRequired === true && !['','0',0,null,undefined].includes(val.HazardsID) ) {
                     return true
-                }else{
+                }else if( val.isHazardsRequired === true && ['','0',0,null,undefined].includes(val.HazardsID) ) {
                     return false
+                }else if( val.isHazardsRequired === false ) {
+                    return true
                 }
             })
             return item
         })
+        console.log( 'groupsArrayToCheck',JSON.stringify(groupsArrayToCheck))
         const result = groupsArrayToCheck.every( item => item === true )
         return result
     }
@@ -775,20 +779,10 @@ export const AuditDetailsScreen = () => {
         try {
             const isValid = checkForValidPayload()
             console.log( 'isValidInitialPayload', isValid )
-
-            if( auditDetails.AuditAndInspectionDetails?.IsSchedulerRequired === "True" ){
             if( !isValid ) {
-                Toast.showWithGravity('Last day of schedule period is required.', Toast.LONG, Toast.CENTER);
+                Toast.showWithGravity('Please Enter Valid Schedule period or valid reason for skipping schedule period', Toast.LONG, Toast.CENTER);
                 return null
             }
-            
-            const isreasonFilled = checkForSkipreason()
-            if(!isreasonFilled){
-                Toast.showWithGravity('Reason for skipping the last day of schedule period is required.', Toast.LONG, Toast.CENTER);
-                return null
-            }
-        }
-
             const checkForValidFields = checkForRequiredDynamicFields()
             console.log( 'check for valid fields', checkForValidFields )
             if( !checkForValidFields ) {
@@ -797,102 +791,22 @@ export const AuditDetailsScreen = () => {
             }
             const checkForScores = checkForScoresItem() 
             if( !checkForScores ) {
-                Toast.showWithGravity('Please select a score from the Score column', Toast.LONG, Toast.CENTER);
+                Toast.showWithGravity('Please Enter Valid Score Value', Toast.LONG, Toast.CENTER);
                 return null 
             }
             console.log( 'check for scores --> ',checkForScores )
             const checkForComments = checkForCommentsItem() 
             console.log( 'check for comments --> ',checkForComments )
             if( !checkForComments ) {
-                Toast.showWithGravity('Comment(s) required.', Toast.LONG, Toast.CENTER);
+                Toast.showWithGravity('Please Enter Required Comments Value', Toast.LONG, Toast.CENTER);
                 return null 
             }
             const checkForHazards = checkForHazardsItem() 
             console.log( 'check for hazards --> ',checkForHazards )
             if( !checkForHazards ) {
-                Toast.showWithGravity('Hazard is required.', Toast.LONG, Toast.CENTER);
+                Toast.showWithGravity('Please Enter Required Hazards Value', Toast.LONG, Toast.CENTER);
                 return null 
             }
-            console.log( 'Hello', auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates )
-            const reportingPeriodDueDate = !isEmpty( auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates ) ? auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates.find( item => item.ID === dropdownvalue) : ''
-            console.log('how are u')
-            const token = await AsyncStorage.getItem('Token')
-            const systemsArrayWithoutMandatoryFields = systemFieldsArray.map( item => {
-                const arrayFields = omit( item, 'IsMandatory' )
-                return arrayFields
-            })
-            const groupsArrayWithOnlyRequiredFields = groupsArray.map( item => {
-                const attributes =  item.Attributes.map( val => {
-                    const attributeFields = omit( val, 'AttributeID', 'AuditAndInspectionScore', 'IsCommentsMandatory', 'CorrectAnswerID', 'ScoreList', 'isRequired' )
-                    return attributeFields
-                })
-                return {
-                    Attributes: attributes
-                }
-            }) 
-            const payload = {
-                UserID: userInfo.UserID,
-                PrimaryUserID: PrimaryUserID,
-                AccessToken: token,
-                AuditAndInspectionID: auditDetails.AuditAndInspectionDetails?.AuditAndInspectionID,
-                AuditAndInspectionTemplateID: AuditAndInspectionTemplateID,
-                Type: Type,
-                TypeID: auditDetails.AuditAndInspectionDetails?.TypeID,
-                Notes: auditDetails.AuditAndInspectionDetails?.Notes,
-                ReportingPeriodDueDateSelected: isEmpty( reportingPeriodDueDate ) ? null : reportingPeriodDueDate?.Value,
-                ReportingPeriodDueDateSelectedID: dropdownvalue,
-                NextDueDate: auditDetails.AuditAndInspectionDetails?.NextDueDate,
-                SkippedReason: auditDetails.AuditAndInspectionDetails?.SkippedReason,
-                SystemFields: {
-                    AuditAndInspection_SystemFieldID: auditDetails.SystemFields?.AuditAndInspection_SystemFieldID,
-                    SystemFields: systemsArrayWithoutMandatoryFields
-                },
-                GroupsAndAttributes: {
-                    Groups: groupsArrayWithOnlyRequiredFields
-                }
-            }
-            console.log( 'payload is --->',JSON.stringify( payload ))
-            const result = await api.post({
-                url: `api/AuditAndInspection/CompleteAudit`,
-                body: payload
-            })
-            console.log(result)
-            if( isEmpty( result ) ) {
-                return null
-            }else if( !isEmpty( result ) && isEmpty( imagesObject ) ) {
-                navigation.navigate( 'Home' )
-            }else if( !isEmpty( result ) && !isEmpty( imagesObject ) ) {
-                const response = await api.imageUpload({
-                    image: imagesObject,
-                    url: `api/AuditAndInspection/UploadAuditImage?UserID=${userInfo.UserID}&AuditAndInspectionID=${auditDetails.AuditAndInspectionDetails?.AuditAndInspectionID}`
-                })
-                console.log( 'response after uploading',JSON.stringify( response ) )
-                if( isEmpty( response ) ) {
-                    return null
-                }
-                navigation.navigate( 'Home' )
-            }
-            console.log( 'result is ',JSON.stringify(result))
-        } catch ( error ) {
-            Toast.showWithGravity(error.message, Toast.LONG, Toast.CENTER);
-            console.log( 'error is ',error)
-        }
-    }
-
-    const onSaveAndComeBack = async ( ) =>  {
-        try {
-            const isValid = checkForValidPayload()
-            console.log( 'isValidInitialPayload', isValid )
-            if( !isValid ) {
-                Toast.showWithGravity('Last day of schedule period is required.', Toast.LONG, Toast.CENTER);
-                return null
-            }
-            
-            const isreasonFilled = checkForSkipreason()
-            if(!isreasonFilled){
-                Toast.showWithGravity('Reason for skipping the last day of schedule period is required.', Toast.LONG, Toast.CENTER);
-                return null
-            }
             const reportingPeriodDueDate = !isEmpty( auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates ) ? auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates.find( item => item.ID === dropdownvalue) : ''
             const token = await AsyncStorage.getItem('Token')
             const systemsArrayWithoutMandatoryFields = systemFieldsArray.map( item => {
@@ -929,7 +843,6 @@ export const AuditDetailsScreen = () => {
                     Groups: groupsArrayWithOnlyRequiredFields
                 }
             }
-            console.log( 'payload is --->',JSON.stringify( payload ))
             const result = await api.post({
                 url: `api/AuditAndInspection/SaveAudit`,
                 body: payload
@@ -943,13 +856,80 @@ export const AuditDetailsScreen = () => {
                     image: imagesObject,
                     url: `api/AuditAndInspection/UploadAuditImage?UserID=${userInfo.UserID}&AuditAndInspectionID=${auditDetails.AuditAndInspectionDetails?.AuditAndInspectionID}`
                 })
-                console.log( 'response after uploading',JSON.stringify( response ) )
                 if( isEmpty( response ) ) {
                     return null
                 }
                 navigation.navigate( 'Home' )
             }
-            console.log( 'result is ',JSON.stringify(result))
+        } catch ( error ) {
+            Toast.showWithGravity(error.message, Toast.LONG, Toast.CENTER);
+            console.log( 'error is ',error)
+        }
+    }
+
+
+    const onSaveAndComeBack = async ( ) =>  {
+        try {
+            const isValid = checkForValidPayload()
+            console.log( 'isValidInitialPayload', isValid )
+            if( !isValid ) {
+                Toast.showWithGravity('Please Enter Valid Schedule period or valid reason for skipping schedule period', Toast.LONG, Toast.CENTER);
+                return null
+            }
+            const reportingPeriodDueDate = !isEmpty( auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates ) ? auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates.find( item => item.ID === dropdownvalue) : ''
+            const token = await AsyncStorage.getItem('Token')
+            const systemsArrayWithoutMandatoryFields = systemFieldsArray.map( item => {
+                const arrayFields = omit( item, 'IsMandatory' )
+                return arrayFields
+            })
+            const groupsArrayWithOnlyRequiredFields = groupsArray.map( item => {
+                const attributes =  item.Attributes.map( val => {
+                    const attributeFields = omit( val, 'AttributeID', 'AuditAndInspectionScore', 'IsCommentsMandatory', 'CorrectAnswerID', 'ScoreList', 'isRequired' )
+                    return attributeFields
+                })
+                return {
+                    Attributes: attributes
+                }
+            }) 
+            const payload = {
+                UserID: userInfo.UserID,
+                PrimaryUserID: PrimaryUserID,
+                AccessToken: token,
+                AuditAndInspectionID: auditDetails.AuditAndInspectionDetails?.AuditAndInspectionID,
+                AuditAndInspectionTemplateID: AuditAndInspectionTemplateID,
+                Type: Type,
+                TypeID: auditDetails.AuditAndInspectionDetails?.TypeID,
+                Notes: auditDetails.AuditAndInspectionDetails?.Notes,
+                ReportingPeriodDueDateSelected: isEmpty( reportingPeriodDueDate ) ? null : reportingPeriodDueDate?.Value,
+                ReportingPeriodDueDateSelectedID: dropdownvalue,
+                NextDueDate: auditDetails.AuditAndInspectionDetails?.NextDueDate,
+                SkippedReason: auditDetails.AuditAndInspectionDetails?.SkippedReason,
+                SystemFields: {
+                    AuditAndInspection_SystemFieldID: auditDetails.SystemFields?.AuditAndInspection_SystemFieldID,
+                    SystemFields: systemsArrayWithoutMandatoryFields
+                },
+                GroupsAndAttributes: {
+                    Groups: groupsArrayWithOnlyRequiredFields
+                }
+            }
+            const result = await api.post({
+                url: `api/AuditAndInspection/SaveAudit`,
+                body: payload
+            })
+            if( isEmpty( result ) ) {
+                return null
+            }else if( !isEmpty( result ) && isEmpty( imagesObject ) ) {
+                navigation.navigate( 'Home' )
+            }else if( !isEmpty( result ) && !isEmpty( imagesObject ) ) {
+                const response = await api.imageUpload({
+                    image: imagesObject,
+                    url: `api/AuditAndInspection/UploadAuditImage?UserID=${userInfo.UserID}&AuditAndInspectionID=${auditDetails.AuditAndInspectionDetails?.AuditAndInspectionID}`
+                })
+                if( isEmpty( response ) ) {
+                    return null
+                }
+                navigation.navigate( 'Home' )
+            }
         } catch ( error ) {
             Toast.showWithGravity(error.message, Toast.LONG, Toast.CENTER);
             console.log( 'error is ',error)
