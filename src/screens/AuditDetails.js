@@ -217,16 +217,20 @@ export const AuditDetailsScreen = () => {
 
 
     useFocusEffect(
-        React.useCallback( async() => {
-            var tempData = await AsyncStorage.getItem("returndata")
+        React.useCallback( () => {
+            setupLocalStorageValuesOnFocus()
+        }, [])
+      );
+
+      const setupLocalStorageValuesOnFocus = async ( ) => {
+        var tempData = await AsyncStorage.getItem("returndata")
             tempData = JSON.parse(tempData)
             await AsyncStorage.removeItem("returndata");
             var cancelData = await AsyncStorage.getItem("cancelData")
             cancelData = JSON.parse(cancelData)
             setCancelData( cancelData )
             setReturnData(tempData)
-        }, [])
-      );
+    }
 
     const setupGroupsArray = ( ) => {
         const data = auditDetails.GroupsAndAttributes.Groups.map( item => {
@@ -441,9 +445,9 @@ export const AuditDetailsScreen = () => {
             />
         ) 
     }
-
-
-    const checkIsCommentsMandatory = ( isMandatoryType , CorrectAnswerID, selectedScoreValue, ScoreList ) => {
+    
+    
+    const checkIsCommentsMandatory = ( isMandatoryType , selectedScoreValue, CorrectAnswerID, ScoreList ) => {
         const shouldCheckForNonApplicableValues = ScoreList.find( item => {
             if( item.Value === "Not Applicable" && item.ID === selectedScoreValue ) {
                 return true
@@ -521,7 +525,7 @@ export const AuditDetailsScreen = () => {
         }
         return commentLabel
     }
-
+    
     const checkIsHazardsPresentAndRequired = ( selectedScoreValue, CorrectAnswerID, ScoreList ) => {
         const shouldCheckForNonApplicableValues = ScoreList.find( item => {
             if( item.Value === "Not Applicable" && item.ID === selectedScoreValue ) {
@@ -677,6 +681,14 @@ export const AuditDetailsScreen = () => {
         }else{
             const isValidSchedulePeriod = shouldShowWarningMessage ? dropdownvalue === ''  : !lodash.isEmpty(dropdownvalue)
             if( isValidSchedulePeriod && !shouldShowWarningMessage ) {
+                return true
+            }else{
+                return false
+            }
+        }
+    }
+
+    const checkForSkippedReason = ( ) => {
                 let result = false
                 if( remainingDropdownArray.length === 0 ) {
                     result = true
@@ -687,10 +699,6 @@ export const AuditDetailsScreen = () => {
                     result = false
                 }
                 return result
-            }else{
-                return false
-            }
-        }
     }
 
     const checkForRequiredDynamicFields = ( ) => {
@@ -729,16 +737,9 @@ export const AuditDetailsScreen = () => {
     const checkForHazardsItem = ( ) => {
         let groupsArrayToCheck = []
         const clonedGroupsArray = [...groupsArray]
-        console.log( 'clonedGroupsArray before-->',JSON.stringify(clonedGroupsArray) )
         clonedGroupsArray.map( item => {
             const clonedGroupsAttributeArray = [...item.Attributes]
             groupsArrayToCheck = clonedGroupsAttributeArray.map( val => {
-                // console.log( 'val is ',val)
-                // if( val.isHazardsRequired === true && !['','0',0,null,undefined].includes(val.HazardsID)){
-                //     return true
-                // }else{
-                //     return false
-                // }
                 if( val.isHazardsRequired === true && !['','0',0,null,undefined].includes(val.HazardsID) ) {
                     return true
                 }else if( val.isHazardsRequired === true && ['','0',0,null,undefined].includes(val.HazardsID) ) {
@@ -749,7 +750,6 @@ export const AuditDetailsScreen = () => {
             })
             return item
         })
-        console.log( 'groupsArrayToCheck',JSON.stringify(groupsArrayToCheck))
         const result = groupsArrayToCheck.every( item => item === true )
         return result
     }
@@ -770,7 +770,6 @@ export const AuditDetailsScreen = () => {
             })
             return item
         })
-
         const result = groupsArrayToCheck.every( item => item === true )
         return result
     }
@@ -780,7 +779,12 @@ export const AuditDetailsScreen = () => {
             const isValid = checkForValidPayload()
             console.log( 'isValidInitialPayload', isValid )
             if( !isValid ) {
-                Toast.showWithGravity('Please Enter Valid Schedule period or valid reason for skipping schedule period', Toast.LONG, Toast.CENTER);
+                Toast.showWithGravity('Last day of schedule period is required.', Toast.LONG, Toast.CENTER);
+                return null
+            }
+            const isreasonFilled = checkForSkippedReason()
+            if(!isreasonFilled){
+                Toast.showWithGravity('Reason for skipping the last day of schedule period is required.', Toast.LONG, Toast.CENTER);
                 return null
             }
             const checkForValidFields = checkForRequiredDynamicFields()
@@ -791,20 +795,20 @@ export const AuditDetailsScreen = () => {
             }
             const checkForScores = checkForScoresItem() 
             if( !checkForScores ) {
-                Toast.showWithGravity('Please Enter Valid Score Value', Toast.LONG, Toast.CENTER);
+                Toast.showWithGravity('Please select a score from the Score column', Toast.LONG, Toast.CENTER);
                 return null 
             }
             console.log( 'check for scores --> ',checkForScores )
             const checkForComments = checkForCommentsItem() 
             console.log( 'check for comments --> ',checkForComments )
             if( !checkForComments ) {
-                Toast.showWithGravity('Please Enter Required Comments Value', Toast.LONG, Toast.CENTER);
+                Toast.showWithGravity('Comment(s) required.', Toast.LONG, Toast.CENTER);
                 return null 
             }
             const checkForHazards = checkForHazardsItem() 
             console.log( 'check for hazards --> ',checkForHazards )
             if( !checkForHazards ) {
-                Toast.showWithGravity('Please Enter Required Hazards Value', Toast.LONG, Toast.CENTER);
+                Toast.showWithGravity('Hazard is required.', Toast.LONG, Toast.CENTER);
                 return null 
             }
             const reportingPeriodDueDate = !isEmpty( auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates ) ? auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates.find( item => item.ID === dropdownvalue) : ''
@@ -844,7 +848,7 @@ export const AuditDetailsScreen = () => {
                 }
             }
             const result = await api.post({
-                url: `api/AuditAndInspection/SaveAudit`,
+                url: `api/AuditAndInspection/CompleteAudit`,
                 body: payload
             })
             if( isEmpty( result ) ) {
@@ -873,7 +877,12 @@ export const AuditDetailsScreen = () => {
             const isValid = checkForValidPayload()
             console.log( 'isValidInitialPayload', isValid )
             if( !isValid ) {
-                Toast.showWithGravity('Please Enter Valid Schedule period or valid reason for skipping schedule period', Toast.LONG, Toast.CENTER);
+                Toast.showWithGravity('Last day of schedule period is required.', Toast.LONG, Toast.CENTER);
+                return null
+            }
+            const isreasonFilled = checkForSkippedReason()
+            if(!isreasonFilled){
+                Toast.showWithGravity('Reason for skipping the last day of schedule period is required.', Toast.LONG, Toast.CENTER);
                 return null
             }
             const reportingPeriodDueDate = !isEmpty( auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates ) ? auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates.find( item => item.ID === dropdownvalue) : ''

@@ -143,13 +143,11 @@ export const SourceDropdown = ( { sourceList, onSourceValueSelected } ) => {
 export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHazardValueSelected } ) => {
     const navigation = useNavigation()
     const [hazardValue,setHazardValue] = useState( '' )
-    console.log( 'Inside hazards' )
     useEffect(()=> {
         setHazardValueBasedonClearHazard()
     }, [item.HazardsID] )
 
     const setHazardValueBasedonClearHazard = async ( ) => {
-        console.log( 'Inside use effect --->')
         setHazardValue(null)
         await AsyncStorage.removeItem("cancelData")
     }
@@ -196,24 +194,47 @@ const RenderHazardDropdown = ( props ) => {
         onHazardValueSelected
     } = props
     const shouldCheckForTruthyValues = item.CorrectAnswerValue === "True" || item.CorrectAnswerValue === "False" || item.CorrectAnswerValue === "Not Applicable"
-    console.log( 'shoudl check for truthy values', shouldCheckForTruthyValues )
-    if( isEmpty( sourceList ) ) {
+    // if( isEmpty( sourceList ) ) {
+    //     return null
+    // }else{
+    //     if( item.DoNotShowHazard === "True" || shouldCheckForTruthyValues ? Number(scoreValue) === Number(item.CorrectAnswerID) : Number( scoreValue ) >= Number( item.CorrectAnswerID ) ) {
+    //         return null
+    //     }else{
+    //         return (
+    //             <View>
+    //                 <HazardDropdown 
+    //                     hazardList={hazardList}
+    //                     item={item} 
+    //                     auditAndInspectionId={auditAndInspectionId}
+    //                     onHazardValueSelected={(value)=>onHazardValueSelected(value)}
+    //                 />
+    //             </View>  
+    //         )
+    //     }
+    // }
+    const shouldCheckForNonApplicableValues = item.ScoreList.some( item => {
+        if( item.Value === "Not Applicable" && item.ID === scoreValue ) {
+            return true
+        }else{
+            return false
+        }
+    })
+    
+    if( item.DoNotShowHazard === "True" || shouldCheckForTruthyValues ? Number(scoreValue) === Number(item.CorrectAnswerID) : Number( scoreValue ) >= Number( item.CorrectAnswerID ) ) {
+        return null
+    }else if(shouldCheckForNonApplicableValues){
         return null
     }else{
-        if( item.DoNotShowHazard === "True" || shouldCheckForTruthyValues ? Number(scoreValue) === Number(item.CorrectAnswerID) : Number( scoreValue ) >= Number( item.CorrectAnswerID ) ) {
-            return null
-        }else{
-            return (
-                <View>
-                    <HazardDropdown 
-                        hazardList={hazardList}
-                        item={item} 
-                        auditAndInspectionId={auditAndInspectionId}
-                        onHazardValueSelected={(value)=>onHazardValueSelected(value)}
-                    />
-                </View>  
-            )
-        }
+        return (
+            <View>
+                <HazardDropdown 
+                    hazardList={hazardList}
+                    item={item} 
+                    auditAndInspectionId={auditAndInspectionId}
+                    onHazardValueSelected={(value)=>onHazardValueSelected(value)}
+                />
+            </View>  
+        )
     }
 }
 
