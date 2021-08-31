@@ -815,7 +815,7 @@ export const AuditDetailsScreen = () => {
             })
             const groupsArrayWithOnlyRequiredFields = groupsArray.map( item => {
                 const attributes =  item.Attributes.map( val => {
-                    const attributeFields = omit( val, 'AttributeID', 'AuditAndInspectionScore', 'IsCommentsMandatory', 'CorrectAnswerID', 'ScoreList', 'isRequired' )
+                    const attributeFields = omit( val, 'AttributeID', 'AuditAndInspectionScore', 'IsCommentsMandatory', 'CorrectAnswerID', 'ScoreList', 'isRequired', 'isHazardsRequired' )
                     return attributeFields
                 })
                 return {
