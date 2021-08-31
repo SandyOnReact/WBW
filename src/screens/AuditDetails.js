@@ -119,6 +119,7 @@ export const CustomCheckBox = ( { value, isRequired } ) => {
     const [checkboxValue, setCheckboxValue] = useState( false )
 
     const toggleCheckBoxValue = ( ) => {
+        console.log( 'toggling checkbox value' )
         setCheckboxValue( checkboxValue => !checkboxValue )
     }
     return (
@@ -208,16 +209,19 @@ export const AuditDetailsScreen = () => {
     const navigation = useNavigation()
 
     useEffect( ( ) => {
+        console.log( 'Inside first useEffect' )
         setDefaultSystemFieldsArray()
     }, [] )
-
+    
     useEffect( ( ) => {
+        console.log( 'Inside second useEffect' )
         setupGroupsArray()
     }, [] )
-
-
+    
+    
     useFocusEffect(
         React.useCallback( () => {
+            console.log( 'Inside first focusEffect' )
             setupLocalStorageValuesOnFocus()
         }, [])
       );
@@ -273,8 +277,21 @@ export const AuditDetailsScreen = () => {
     }
 
     useEffect( ( ) => {
+        console.log( 'Inside third useEffect' )
         getUserdetails()
     }, [] )
+
+    useEffect( ( ) => {
+        checkIfWarningMessageNeedsToBeDisplayed()
+    }, [] )
+
+    const checkIfWarningMessageNeedsToBeDisplayed = ( ) => {
+        if( auditDetails.AuditAndInspectionDetails?.IsSchedulerRequired === "True" && auditDetails.AuditAndInspectionDetails?.ReportingPeriodDueDates === null ) {
+            setShouldShowWarningMessage( true )
+            return null
+        }
+        console.log( 'Not in IF')
+    }
 
     
     const fetchUserInfoFromStorage = async () => {
@@ -289,6 +306,7 @@ export const AuditDetailsScreen = () => {
     }
 
     const toggleCheckBoxValue = ( ) => {
+        console.log( 'Toggling checkbox' )
         setCheckboxValue( checkboxValue => !checkboxValue )
     }
 
@@ -316,6 +334,7 @@ export const AuditDetailsScreen = () => {
     }
 
       useEffect(() => {
+          console.log( 'Inside fourth useEffect' )
         const backHandler = BackHandler.addEventListener(
             "hardwareBackPress",
             _handleBackPress
@@ -327,11 +346,11 @@ export const AuditDetailsScreen = () => {
         // Works on both iOS and Android
         Alert.alert(
           "Discard changes?",
-          "Are u sure u want to go back",
+          "Are you sure you want to discard the changes?",
           [
             {
               text: "No",
-              onPress: () => console.log("No, continue editing")
+              onPress: () => null
             },
             {
               text: "Yes",
@@ -370,10 +389,12 @@ export const AuditDetailsScreen = () => {
 
     const renderAuditDetailsRow = ( title, value ) => {
         return (
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: '2%', backgroundColor: 'transparent' }}>
-                    <Text style={{ paddingLeft: '5%', paddingRight: '2%', color: 'black', fontSize: 16 }}>{title}</Text>
-                    <View style={{ marginHorizontal: '1%' }}>
-                        <Text>{value}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: '2%', marginHorizontal: '1%', backgroundColor: 'transparent' }}>
+                    <View>
+                        <Text style={{ paddingLeft: '5%', paddingRight: '2%', color: 'black', fontSize: 16 }}>{title}</Text>
+                    </View>
+                    <View style={{ flex: 1, marginHorizontal: '1%' }}>
+                        <Text numberOfLines={0} >{value}</Text>
                     </View>      
             </View>
         )
@@ -541,15 +562,9 @@ export const AuditDetailsScreen = () => {
                 return false
             }
         })
-
-        console.log( 'trutyvalue ',checkIfTruthyValues )
-        console.log( 'selectedScoreValue ',selectedScoreValue )
-        console.log( 'CorrectAnswerID ',CorrectAnswerID )
         if( checkIfTruthyValues ? Number(selectedScoreValue) === Number(CorrectAnswerID) : Number( selectedScoreValue ) >= Number( CorrectAnswerID ) ) {
-            console.log( 'Inside IF')
             return false
         }else{
-            console.log( 'Inside else')
             return true
         }
     }
@@ -676,7 +691,7 @@ export const AuditDetailsScreen = () => {
     }
 
     const checkForValidPayload = ( ) => {
-        if( auditDetails.AuditAndInspectionDetails?.ReportingPeriodDueDates === null && shouldShowWarningMessage === false ) {
+        if( auditDetails.AuditAndInspectionDetails?.IsSchedulerRequired === "True" && auditDetails.AuditAndInspectionDetails?.ReportingPeriodDueDates === null ) {
             return true
         }else{
             const isValidSchedulePeriod = shouldShowWarningMessage ? dropdownvalue === ''  : !lodash.isEmpty(dropdownvalue)
@@ -777,7 +792,6 @@ export const AuditDetailsScreen = () => {
     const onSubmit = async ( ) =>  {
         try {
             const isValid = checkForValidPayload()
-            console.log( 'isValidInitialPayload', isValid )
             if( !isValid ) {
                 Toast.showWithGravity('Last day of schedule period is required.', Toast.LONG, Toast.CENTER);
                 return null
@@ -788,7 +802,6 @@ export const AuditDetailsScreen = () => {
                 return null
             }
             const checkForValidFields = checkForRequiredDynamicFields()
-            console.log( 'check for valid fields', checkForValidFields )
             if( !checkForValidFields ) {
                 Toast.showWithGravity('Please Enter Valid Worksite Data', Toast.LONG, Toast.CENTER);
                 return null 
@@ -798,15 +811,12 @@ export const AuditDetailsScreen = () => {
                 Toast.showWithGravity('Please select a score from the Score column', Toast.LONG, Toast.CENTER);
                 return null 
             }
-            console.log( 'check for scores --> ',checkForScores )
             const checkForComments = checkForCommentsItem() 
-            console.log( 'check for comments --> ',checkForComments )
             if( !checkForComments ) {
                 Toast.showWithGravity('Comment(s) required.', Toast.LONG, Toast.CENTER);
                 return null 
             }
             const checkForHazards = checkForHazardsItem() 
-            console.log( 'check for hazards --> ',checkForHazards )
             if( !checkForHazards ) {
                 Toast.showWithGravity('Hazard is required.', Toast.LONG, Toast.CENTER);
                 return null 
@@ -851,15 +861,20 @@ export const AuditDetailsScreen = () => {
                 url: `api/AuditAndInspection/CompleteAudit`,
                 body: payload
             })
+            console.log('result is ',JSON.stringify(result))
             if( isEmpty( result ) ) {
                 return null
             }else if( !isEmpty( result ) && isEmpty( imagesObject ) ) {
-                navigation.navigate( 'Home' )
+                Toast.showWithGravity(result?.Message, Toast.LONG, Toast.CENTER);
+                setTimeout( ( ) => {
+                    navigation.navigate( 'Home' )
+                }, 2000 )
             }else if( !isEmpty( result ) && !isEmpty( imagesObject ) ) {
                 const response = await api.imageUpload({
                     image: imagesObject,
                     url: `api/AuditAndInspection/UploadAuditImage?UserID=${userInfo.UserID}&AuditAndInspectionID=${auditDetails.AuditAndInspectionDetails?.AuditAndInspectionID}`
                 })
+                console.log( 'response is ',JSON.stringify(response))
                 if( isEmpty( response ) ) {
                     return null
                 }
@@ -875,7 +890,6 @@ export const AuditDetailsScreen = () => {
     const onSaveAndComeBack = async ( ) =>  {
         try {
             const isValid = checkForValidPayload()
-            console.log( 'isValidInitialPayload', isValid )
             if( !isValid ) {
                 Toast.showWithGravity('Last day of schedule period is required.', Toast.LONG, Toast.CENTER);
                 return null
@@ -928,7 +942,10 @@ export const AuditDetailsScreen = () => {
             if( isEmpty( result ) ) {
                 return null
             }else if( !isEmpty( result ) && isEmpty( imagesObject ) ) {
-                navigation.navigate( 'Home' )
+                Toast.showWithGravity(result?.Message, Toast.LONG, Toast.CENTER);
+                setTimeout( ( ) => {
+                    navigation.navigate( 'Home' )
+                }, 2000 )
             }else if( !isEmpty( result ) && !isEmpty( imagesObject ) ) {
                 const response = await api.imageUpload({
                     image: imagesObject,
@@ -957,10 +974,12 @@ export const AuditDetailsScreen = () => {
     }
 
     const renderLastDayOfScheduledPeriod = ( ) => {
+        console.log( 'warning msg',auditDetails.AuditAndInspectionDetails?.IsSchedulerRequired === "True" && auditDetails.AuditAndInspectionDetails?.ReportingPeriodDueDates === null )
+        console.log( 'due date',auditDetails.AuditAndInspectionDetails?.ReportingPeriodDueDates )
         if( auditDetails.AuditAndInspectionDetails?.IsSchedulerRequired === "True" && auditDetails.AuditAndInspectionDetails?.ReportingPeriodDueDates === null ) {
-            setShouldShowWarningMessage( true )
             return null
-        }else if( auditDetails.AuditAndInspectionDetails?.IsSchedulerRequired === "True" ) {
+        }
+        else if( auditDetails.AuditAndInspectionDetails?.IsSchedulerRequired === "True" ) {
             return renderCustomDropdown()
         }else{
             return null
@@ -1003,8 +1022,8 @@ export const AuditDetailsScreen = () => {
             {
                 shouldShowWarningMessage 
                 ? (
-                    <View>
-                       <Text>{auditDetails.AuditAndInspectionDetails?.AdhocWarnigMessage}</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: '2%', marginHorizontal: '5%' }}>
+                        <Text numberOfLines={0}  style={{ color: '#1e5873', fontSize: 18}}>{auditDetails.AuditAndInspectionDetails?.AdhocWarnigMessage}</Text>
                     </View>
                 )
                 : null
