@@ -9,6 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { CustomDropdown } from '../components/core/custom-dropdown'
 import { ActivityIndicator } from 'react-native'
 import { useFocusEffect } from '@react-navigation/native';
+import Toast from "react-native-simple-toast"
 
 
 export const StartInspection = () => {
@@ -101,7 +102,22 @@ export const StartInspection = () => {
         } )
     }
 
+    const checkForValidSecondaryDropdown = ( ) => {
+        if( !isEmpty( secondaryDropdownArray ) && !isEmpty( selectedSecondaryDropdownValue) ) {
+            return true
+        }else if( !isEmpty( secondaryDropdownArray ) && isEmpty( selectedSecondaryDropdownValue ) ) {
+            return false
+        }else{
+            return true
+        }
+    }
+
     const onSubmit = async ( ) =>  {
+        const isValidSecondaryDropdown = checkForValidSecondaryDropdown()
+        if( !isValidSecondaryDropdown ) {
+            Toast.showWithGravity('Inspection on Behalf of is required.', Toast.LONG, Toast.CENTER);
+            return null
+        }
         setIsLoading( true )
         const token = await AsyncStorage.getItem('Token')
         const PrimaryUserID = isEmpty( selectedSecondaryDropdownValue ) ? userId : selectedSecondaryDropdownValue

@@ -50,7 +50,7 @@ export const DynamicGroupsCard = ( props ) => {
 
     return (
         <View style={{ flex: 1 }}>
-            <View style={{ backgroundColor: '#1e5873', height: 50, marginVertical: '3%', borderRadius: 10, alignItems: 'center', justifyContent: 'center', marginHorizontal: '5%' }}>
+            <View style={{ backgroundColor: '#1e5873', height: 50, marginVertical: '3%', borderRadius: 10, alignItems: 'center', justifyContent: 'center', marginHorizontal: '3%' }}>
                 <Text style={{ textAlign: 'center', color: 'white'}}>{dynamicGroups.GroupName}</Text>
             </View>
             <View style={{ flex: 1 }}>

@@ -1031,14 +1031,14 @@ export const AuditDetailsScreen = () => {
             {
                 renderAuditDetailsRow( 'Record Number:', `${auditDetails.AuditAndInspectionDetails?.AuditAndInspectionNumber}`  )
             }
-            <View>
+            <View style={{ marginHorizontal: '1%'}}>
                 <CheckBox
                     title="Select Passing Values for Incomplete Tasks:"
                     checked={checkboxValue}
                     onPress={toggleCheckBoxValue}
                     iconRight={true}
                     textStyle={{ fontSize: 16 ,color: 'black', fontWeight: '600'}}
-                    containerStyle={{ padding: 0, backgroundColor: 'white', borderWidth: 0 }}
+                    containerStyle={{ padding: 0, backgroundColor: 'white', borderWidth: 0, marginHorizontal: '2%' }}
                 />
             </View>
             {
@@ -1060,7 +1060,7 @@ export const AuditDetailsScreen = () => {
                     onChangeText={(text) => setInputValue( text )}
                 />
             </View>
-            <View flex={0.5} style={{ marginHorizontal: '2.2%', marginBottom: '3%'}}>
+            <View flex={0.5} style={{ marginHorizontal: '0.5%' }}>
                 {
                    renderLastDayOfScheduledPeriod()
                 }
@@ -1098,12 +1098,12 @@ export const AuditDetailsScreen = () => {
                 ? renderAuditDetailsRow( 'Schedule Frequency:', `${auditDetails.AuditAndInspectionDetails.ScheduleFrequency}` )
                 : null
             }
-            <View style={{ marginVertical: '3%', marginHorizontal: '2%'}}>
+            <View style={{ marginHorizontal: '2%'}}>
                 {
                     renderDynamicFields()
                 }
             </View>
-            <View>
+            <View style={{ marginTop: -25 }}>
                 {
                     renderDynamicGroupsAndAttributes( checkboxValue )
                 }
