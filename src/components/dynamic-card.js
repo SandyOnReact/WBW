@@ -27,7 +27,6 @@ export const DynamicGroupsCard = ( props ) => {
     const sortedDynamicGroup = _.sortBy( dynamicGroups?.Attributes, ( item ) => item.AttributeOrder )
 
     const onSelectScoreValue = ( value, id ) => {
-        console.log( 'id in back', id )
         currentSelectedScoreValue( value, id )
     }
     

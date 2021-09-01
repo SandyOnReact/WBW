@@ -269,7 +269,7 @@ export const GroupAttributes = ( props ) => {
                     <CustomDropdown
                         title={scoreLabel}
                         items={scoreData}
-                        value={checkboxValue && isEmpty( scoreValue ) ? item.CorrectAnswerID : scoreValue}
+                        value={checkboxValue && isEmpty( scoreValue ) ? item.MaxCorrectAnswerID : scoreValue}
                         onValueChange={onScoreValueChange}
                     />
                 )

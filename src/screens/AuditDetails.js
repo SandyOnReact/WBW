@@ -306,7 +306,6 @@ export const AuditDetailsScreen = () => {
     }
 
     const toggleCheckBoxValue = ( ) => {
-        console.log( 'Toggling checkbox' )
         setCheckboxValue( checkboxValue => !checkboxValue )
     }
 
@@ -803,7 +802,7 @@ export const AuditDetailsScreen = () => {
             }
             const checkForValidFields = checkForRequiredDynamicFields()
             if( !checkForValidFields ) {
-                Toast.showWithGravity('Please Enter Valid Worksite Data', Toast.LONG, Toast.CENTER);
+                Toast.showWithGravity('Please Enter Worksite mandatory data', Toast.LONG, Toast.CENTER);
                 return null 
             }
             const checkForScores = checkForScoresItem() 
