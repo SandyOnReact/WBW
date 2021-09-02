@@ -219,8 +219,11 @@ const RenderHazardDropdown = ( props ) => {
             return false
         }
     })
+    if( item.DoNotShowHazard === "True"){
+        return null
+    }
     
-    if( item.DoNotShowHazard === "True" || shouldCheckForTruthyValues ? Number(scoreValue) === Number(item.CorrectAnswerID) : Number( scoreValue ) >= Number( item.CorrectAnswerID ) ) {
+    if( shouldCheckForTruthyValues ? Number(scoreValue) === Number(item.CorrectAnswerID) : Number( scoreValue ) >= Number( item.CorrectAnswerID ) ) {
         return null
     }else if(shouldCheckForNonApplicableValues){
         return null

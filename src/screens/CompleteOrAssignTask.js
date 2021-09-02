@@ -579,7 +579,13 @@ export const AssignTask = ( props ) => {
                     if( isEmpty( response ) ) {
                         return null
                     }
-                    setTimeout(() => {
+                    setTimeout(async () => {
+
+                        let returndata={
+                            commentsValue:result.Comments ?? commentsValue,
+                            CustomFormResultID:item.CustomFormResultID,
+                        }
+                        await AsyncStorage.setItem("returndata", JSON.stringify(returndata))
                         navigateToBackScreen()
                     }, 2000);
                 }
@@ -617,7 +623,6 @@ export const AssignTask = ( props ) => {
             url: `api/AuditAndInspection/GetRiskRatingAndDueDate`,
             body: body
         })
-        console.log('result----->',result)
         if( isEmpty( result ) ) {
             return null
         }

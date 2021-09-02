@@ -716,9 +716,22 @@ export const AuditDetailsScreen = () => {
     }
 
     const checkForRequiredDynamicFields = ( ) => {
+        var isFlagOn = true
+
         const clonedSystemFieldsArray = [...systemFieldsArray]
         const fieldsArray = clonedSystemFieldsArray.map( item => {
             if( item.IsMandatory === "True" ) {
+                if(isFlagOn){
+                    if(isEmpty(item.SelectedValue)){
+                        if(item.IsMandatory){
+                            Toast.showWithGravity( `${item.ControlID} is required`, Toast.LONG, Toast.CENTER);
+                            isFlagOn= false
+                            return false
+                        }
+
+                    }
+                }
+
                 return !isEmpty( item.SelectedValue )
             }else{
                 return true
@@ -790,6 +803,13 @@ export const AuditDetailsScreen = () => {
 
     const onSubmit = async ( ) =>  {
         try {
+
+            const checkForValidFields = checkForRequiredDynamicFields()
+            if( !checkForValidFields ) {
+               // Toast.showWithGravity('Please Enter Worksite mandatory data', Toast.LONG, Toast.CENTER);
+                return null 
+            }
+
             const isValid = checkForValidPayload()
             if( !isValid ) {
                 Toast.showWithGravity('Last day of schedule period is required.', Toast.LONG, Toast.CENTER);
@@ -800,11 +820,7 @@ export const AuditDetailsScreen = () => {
                 Toast.showWithGravity('Reason for skipping the last day of schedule period is required.', Toast.LONG, Toast.CENTER);
                 return null
             }
-            const checkForValidFields = checkForRequiredDynamicFields()
-            if( !checkForValidFields ) {
-                Toast.showWithGravity('Please Enter Worksite mandatory data', Toast.LONG, Toast.CENTER);
-                return null 
-            }
+           
             const checkForScores = checkForScoresItem() 
             if( !checkForScores ) {
                 Toast.showWithGravity('Please select a score from the Score column', Toast.LONG, Toast.CENTER);
