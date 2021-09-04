@@ -21,8 +21,8 @@ export const UploadImageScreen = ( props ) => {
             {
                 mediaType: 'photo',
                 includeBase64: false,
-                maxHeight: 1024,
-                maxWidth: 1392,
+                maxHeight: 1392,
+                maxWidth: 1024,
             },
             (response) => {
                 if (!response.didCancel) {
