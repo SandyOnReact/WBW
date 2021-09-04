@@ -265,7 +265,8 @@ export const AuditDetailsScreen = () => {
             const systemFieldrow = {
                 ControlID: item.ControlID,
                 SelectedValue: item.SelectedValue,
-                IsMandatory: item.IsMandatory
+                IsMandatory: item.IsMandatory,
+                DisplayOrder: item.DisplayOrder
             }
             return systemFieldrow
         })
@@ -710,8 +711,8 @@ export const AuditDetailsScreen = () => {
 
     const checkForRequiredDynamicFields = ( ) => {
         var isFlagOn = true
-
-        const clonedSystemFieldsArray = [...systemFieldsArray]
+        const SystemFieldsData = _.sortBy(systemFieldsArray, [function(o) { return o.DisplayOrder; }]);
+        const clonedSystemFieldsArray = [...SystemFieldsData]
         const fieldsArray = clonedSystemFieldsArray.map( item => {
             if( item.IsMandatory === "True" ) {
                 if(isFlagOn){
@@ -796,13 +797,6 @@ export const AuditDetailsScreen = () => {
 
     const onSubmit = async ( ) =>  {
         try {
-
-            const checkForValidFields = checkForRequiredDynamicFields()
-            if( !checkForValidFields ) {
-               // Toast.showWithGravity('Please Enter Worksite mandatory data', Toast.LONG, Toast.CENTER);
-                return null 
-            }
-
             const isValid = checkForValidPayload()
             if( !isValid ) {
                 Toast.showWithGravity('Last day of schedule period is required.', Toast.LONG, Toast.CENTER);
@@ -812,6 +806,12 @@ export const AuditDetailsScreen = () => {
             if(!isreasonFilled){
                 Toast.showWithGravity('Reason for skipping the last day of schedule period is required.', Toast.LONG, Toast.CENTER);
                 return null
+            }
+
+            const checkForValidFields = checkForRequiredDynamicFields()
+            if( !checkForValidFields ) {
+               // Toast.showWithGravity('Please Enter Worksite mandatory data', Toast.LONG, Toast.CENTER);
+                return null 
             }
            
             const checkForScores = checkForScoresItem() 
@@ -1124,6 +1124,11 @@ export const AuditDetailsScreen = () => {
                 <Button  title="Save & Come Back" titleStyle={{ fontSize: 14 , fontWeight:'bold'}} buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} onPress={onSaveAndComeBack} containerStyle={{ width: '42%'}} />
             </View>
         </View>
+        {
+                keyboard.keyboardShown
+                ? <View style={{ height: Platform.OS === 'ios' ? '30%' : '3%' }} />
+                : null
+        }
         </View>
     )
 }

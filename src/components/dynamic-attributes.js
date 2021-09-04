@@ -148,6 +148,7 @@ export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHaza
     }, [item.HazardsID] )
 
     const setHazardValueBasedonClearHazard = async ( ) => {
+        console.log( 'Inside clearing haazard', item.HazardsID)
         setHazardValue(null)
         await AsyncStorage.removeItem("cancelData")
     }
@@ -156,6 +157,10 @@ export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHaza
         const hazard = { label: item.Value, value: item.ID }
         return hazard
     })
+    const onClear = ( ) => {
+        console.log( 'clearing hazard' )
+        setHazardValue( '' )
+    }
 
     const onHazardValueChange = async ( value ) => {
         if( value === null ) {
@@ -168,6 +173,7 @@ export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHaza
             hazardData: hazardData,
             item: item,
             auditAndInspectionId: auditAndInspectionId,
+            clearHazards: ( ) => onClear()
         } )
         onHazardValueSelected( value )
     }

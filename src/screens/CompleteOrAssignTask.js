@@ -70,7 +70,8 @@ export const CompleteTask = ( props ) => {
         hazardData,
         item,
         auditAndInspectionId,
-        onCancel
+        onCancel,
+        clearHazards
     } = props
     const [hazardImageValue,setHazardImageValue] = useState( '' )
     const [imagesObject, setImagesObject ] = useState( {} )
@@ -192,7 +193,6 @@ export const CompleteTask = ( props ) => {
     }
 
     const navigateToBackScreen = ( ) => {
-
         navigation.goBack()
     }
 
@@ -202,6 +202,7 @@ export const CompleteTask = ( props ) => {
                 CustomFormResultID:item.CustomFormResultID,
             }
             await AsyncStorage.setItem("cancelData", JSON.stringify(cancelData))
+            clearHazards()
             navigation.goBack()
     }
     return (
@@ -212,10 +213,10 @@ export const CompleteTask = ( props ) => {
                 <Text style={{ marginHorizontal: '5%', fontSize: 16 }}>{selectedHazard?.label}</Text>
            </View>
            <View style={{ marginVertical: '5%'}}>
-               <CustomTextAreaInput onChangeText={(text)=>setTaskTitle( text )} multiline={true} numberOfLines={0} value={taskTitle} label="Task Title" />
+               <CustomTextAreaInput onChangeText={(text)=>setTaskTitle( text )} multiline={true} numberOfLines={0} value={taskTitle} label="Task Title *" />
            </View>
            <View>
-               <CustomTextAreaInput onChangeText={(text)=>setCommentsValue( text )} value={commentsValue} label="Comments" />
+               <CustomTextAreaInput onChangeText={(text)=>setCommentsValue( text )} value={commentsValue} label="Comments *" />
            </View>
             <View style={{ marginTop: '5%'}}>
                     <Input
@@ -418,7 +419,8 @@ export const AssignTask = ( props ) => {
         selectedHazardValue,
         hazardData,
         item,
-        auditAndInspectionId
+        auditAndInspectionId,
+        clearHazards
     } = props
     const [severityRatingList,setSeverityRatingList] = useState( [] )
     const [severityRating,setSeverityRating] = useState( '' )
@@ -728,6 +730,7 @@ export const AssignTask = ( props ) => {
             CustomFormResultID:item.CustomFormResultID,
         }
         await AsyncStorage.setItem("cancelData", JSON.stringify(cancelData))
+        clearHazards()
         navigation.goBack()
     }
 
@@ -872,6 +875,7 @@ export const CompleteOrAssignTask = ( props ) => {
         hazardData,
         item,
         auditAndInspectionId,
+        clearHazards
     } = route.params
     const STATUS_BAR_HEIGHT = getStatusBarHeight()
     const navigation = useNavigation()
@@ -926,6 +930,8 @@ export const CompleteOrAssignTask = ( props ) => {
             setIsDataLoading( false )
             if( result && result.Message !== "No Task Found" ) {
                 setShouldShowTaskDetails( true )
+                // await AsyncStorage.removeItem( 'cancelData' )
+                // await AsyncStorage.removeItem( 'returndata' )
                 setTaskDetails( result )
             } 
         } catch( error ) {
@@ -946,6 +952,7 @@ export const CompleteOrAssignTask = ( props ) => {
                     selectedHazardValue={selectedHazardValue}
                     hazardData={hazardData}
                     item={item}
+                    clearHazards={clearHazards}
                     auditAndInspectionId={auditAndInspectionId}
                     onCancel={async()=>{
                         
