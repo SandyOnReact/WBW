@@ -320,7 +320,7 @@ export const AuditDetailsScreen = () => {
             return null
         }
         Toast.showWithGravity(result.Message, Toast.LONG, Toast.CENTER);
-        navigation.goBack()
+        navigation.pop(2)
         }catch( error ) {
             Toast.showWithGravity(error.message || 'Something Went wrong while deleting audit records', Toast.LONG, Toast.CENTER);
         }
