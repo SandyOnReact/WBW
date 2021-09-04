@@ -225,11 +225,13 @@ export const DynamicControlsScreen = ( props ) => {
         const result = await api.get( {
             url: 'api/POC/GetDynamicControls'
         } )
-        const res = JSON.parse( result ) 
-        if( isEmpty( result ) ) {
-            return null
-        }
-        const sortedArrayByGroupOrder = _.sortBy(result, [function(o) { return o.GroupOrder; }]);
+       if( isEmpty( result ) ) {
+           return null
+       }
+        const res = JSON.parse( result[0].CustomFormDesign )
+        const logicResponse = JSON.parse( result[0].CustomLogicDetails )
+        console.log( 'Logic Response',JSON.stringify(logicResponse))
+        const sortedArrayByGroupOrder = _.sortBy(res, [function(o) { return o.GroupOrder; }]);
         SetDynamicControls( sortedArrayByGroupOrder )
     }
 
