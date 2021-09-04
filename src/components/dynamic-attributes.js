@@ -193,7 +193,7 @@ const RenderHazardDropdown = ( props ) => {
         auditAndInspectionId, 
         onHazardValueSelected
     } = props
-    const shouldCheckForTruthyValues = item.CorrectAnswerValue === "True" || item.CorrectAnswerValue === "False" || item.CorrectAnswerValue === "Not Applicable"
+    const shouldCheckForTruthyValues = item.CorrectAnswerValue === "True" || item.CorrectAnswerValue === "Yes" || item.CorrectAnswerValue === "Pass"|| item.CorrectAnswerValue === "Fail"  ||item.CorrectAnswerValue === "No" || item.CorrectAnswerValue === "False" || item.CorrectAnswerValue === "Not Applicable"
     // if( isEmpty( sourceList ) ) {
     //     return null
     // }else{
@@ -219,11 +219,14 @@ const RenderHazardDropdown = ( props ) => {
             return false
         }
     })
+    
     if( item.DoNotShowHazard === "True"){
+
         return null
     }
     
     if( shouldCheckForTruthyValues ? Number(scoreValue) === Number(item.CorrectAnswerID) : Number( scoreValue ) >= Number( item.CorrectAnswerID ) ) {
+
         return null
     }else if(shouldCheckForNonApplicableValues){
         return null
