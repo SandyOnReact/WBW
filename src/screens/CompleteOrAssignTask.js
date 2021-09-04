@@ -919,12 +919,10 @@ export const CompleteOrAssignTask = ( props ) => {
                 AttributeID: item.AttributeID,
                 CustomFormResultID: item.CustomFormResultID
             }
-            console.log( 'payload for getting tasks', JSON.stringify( payload ) )
             const result = await api.post({
                 url: `api/AuditAndInspection/GetTask`,
                 body: payload
             })
-            console.log( 'result after getting task ',JSON.stringify(result) )
             setIsDataLoading( false )
             if( result && result.Message !== "No Task Found" ) {
                 setShouldShowTaskDetails( true )
