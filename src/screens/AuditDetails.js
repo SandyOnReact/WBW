@@ -542,6 +542,10 @@ export const AuditDetailsScreen = () => {
     }
     
     const checkIsHazardsPresentAndRequired = ( selectedScoreValue, CorrectAnswerID, ScoreList ) => {
+        console.log( 'selected score value ',selectedScoreValue)
+        console.log( 'correct answer id ',CorrectAnswerID)
+        console.log( 'check condition', checkIfTruthyValues ? Number(selectedScoreValue) === Number(CorrectAnswerID) : Number( selectedScoreValue ) >= Number( CorrectAnswerID )  )
+        console.log( 'score  list',JSON.stringify(ScoreList))
         const shouldCheckForNonApplicableValues = ScoreList.find( item => {
             if( item.Value === "Not Applicable" && item.ID === selectedScoreValue ) {
                 return true
@@ -550,7 +554,7 @@ export const AuditDetailsScreen = () => {
             }
         })
         const checkIfTruthyValues = ScoreList.find( item => {
-            if( ["True", "False", "Yes", "No"].includes( item.Value ) && item.ID === selectedScoreValue ) {
+            if( ["True", "False", "Yes", "No", "Pass", "Fail"].includes( item.Value ) && item.ID === selectedScoreValue ) {
                 return true
             }else{
                 return false
@@ -572,10 +576,12 @@ export const AuditDetailsScreen = () => {
         clonedGroupsArray = clonedGroupsArray.map( groups => {
             groups = groups.Attributes.map( attribute => {
                 if( attribute.AttributeID === id ) {
-                    attribute.isHazardsRequired = checkIsHazardsPresentAndRequired( value, attribute.CorrectAnswerID, attribute.ScoreList )
+                    if( attribute.isHazardsRequired === true ) {
+                        attribute.isHazardsRequired = checkIsHazardsPresentAndRequired( value, attribute.CorrectAnswerID, attribute.ScoreList )
+                    }
                     attribute.isRequired = checkIsCommentsMandatory( attribute.IsCommentsMandatory, value, attribute.CorrectAnswerID, attribute.ScoreList  )
                     attribute.GivenAnswerID = value
-                    return attribute
+                    return attribute     
                 }
                 return attribute
             })
@@ -757,20 +763,26 @@ export const AuditDetailsScreen = () => {
     }
     const checkForHazardsItem = ( ) => {
         let groupsArrayToCheck = []
-        const clonedGroupsArray = [...groupsArray]
-        clonedGroupsArray.map( item => {
-            const clonedGroupsAttributeArray = [...item.Attributes]
-            groupsArrayToCheck = clonedGroupsAttributeArray.map( val => {
+        let clonedGroupsArray = [...groupsArray]
+        console.log( 'clonedGroupsArray',JSON.stringify(clonedGroupsArray))
+        clonedGroupsArray = clonedGroupsArray.map( item => {
+            let clonedGroupsAttributeArray = [...item.Attributes]
+            clonedGroupsAttributeArray = clonedGroupsAttributeArray.map( val => {
+                console.log( 'Inside map called' )
                 if( val.isHazardsRequired === true && !['','0',0,null,undefined].includes(val.HazardsID) ) {
+                    groupsArrayToCheck.push( true )
                     return true
                 }else if( val.isHazardsRequired === true && ['','0',0,null,undefined].includes(val.HazardsID) ) {
+                    groupsArrayToCheck.push( false )
                     return false
                 }else if( val.isHazardsRequired === false ) {
+                    groupsArrayToCheck.push( true )
                     return true
                 }
             })
             return item
         })
+        console.log( 'groupsArray to check',JSON.stringify(groupsArrayToCheck))
         const result = groupsArrayToCheck.every( item => item === true )
         return result
     }
