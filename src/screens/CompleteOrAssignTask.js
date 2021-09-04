@@ -441,6 +441,7 @@ export const AssignTask = ( props ) => {
     const [taskTitle,setTaskTitle] = useState( item.Title )
     const navigation = useNavigation()
     const [isFetching,setIsFetching] = useState( false )
+    const [isFetchingRatingData,setIsFetchingRatingData] = useState( false )
     const selectedHazard = hazardData.find( item => item.value === selectedHazardValue )
 
     const fetchUserInfoFromStorage = async () => {
@@ -610,7 +611,7 @@ export const AssignTask = ( props ) => {
     }
 
     const fetchRiskRatingAndDueDate = async ( ) => {
-        setIsFetching( true )
+        setIsFetchingRatingData( true )
         try {
             const user = await fetchUserInfoFromStorage()
         const token = await AsyncStorage.getItem('Token')
@@ -636,7 +637,7 @@ export const AssignTask = ( props ) => {
             Toast.showWithGravity(error.message, Toast.LONG, Toast.CENTER);
             return null
         } finally {
-            setIsFetching( false )    
+            setIsFetchingRatingData( false )    
         }
     }
 
@@ -734,6 +735,27 @@ export const AssignTask = ( props ) => {
         navigation.goBack()
     }
 
+    const renderRatingDetails = ( ) => {
+        if( isFetchingRatingData ) {
+            return (
+                <ActivityIndicator color="red" />
+            )
+        }else if( shouldShowRiskRating ) {
+            return (
+                <View>
+                    <View>
+                        <CustomInput value={riskRatingValue} label="* Risk Rating"/>
+                    </View>
+                    <View>
+                        <CustomCalendar value={dueDateValue} onDateChange={ ( value ) => setDueDateValue( value ) } />
+                    </View>
+                </View>
+            )
+        }else{
+            return null
+        }
+    }
+
     return (
        <View style={{ flex: 1, marginHorizontal: '3%', marginVertical: '3%' }}>
            <Async promiseFn={fetchTaskRatingDetails}>
@@ -765,6 +787,21 @@ export const AssignTask = ( props ) => {
                                 numberOfLines={0}
                             />
                         </View>
+                        <View style={{ flex: 1, marginTop: '3%'}}>
+                            <AutoCompleteInput
+                                style={{ color: 'black', borderColor: 'red', fontSize:'16'}}
+                                data={autoCompleteValue.length === 0 && !shouldHideResults ? userList : filteredData}
+                                renderItem={renderItem}
+                                value={autoCompleteValue}
+                                hideResults={shouldHideResults}
+                                containerStyle={{flex:1, zIndex: 1}}
+                                renderTextInput={renderTextInput}
+                                keyExtractor={(i) => String( i ) }
+                                maxListHeight={400}
+                                fontSize={14}
+                                flatListProps={{ nestedScrollEnabled: true }}
+                            />
+                        </View>
                         <View>
                             <CustomTextAreaInput 
                                 value={descriptionValue} 
@@ -787,34 +824,8 @@ export const AssignTask = ( props ) => {
                                 />
                         </View>
                         {
-                            shouldShowRiskRating
-                            ? (
-                                <View>
-                                    <View>
-                                        <CustomInput value={riskRatingValue} label="* Risk Rating"/>
-                                    </View>
-                                    <View>
-                                        <CustomCalendar value={dueDateValue} onDateChange={ ( value ) => setDueDateValue( value ) } />
-                                    </View>
-                                </View>
-                            )
-                            : null
+                            renderRatingDetails()
                         }
-                        <View style={{ flex: 1, marginTop: '3%'}}>
-                            <AutoCompleteInput
-                                style={{ color: 'black', borderColor: 'red', fontSize:'16'}}
-                                data={autoCompleteValue.length === 0 && !shouldHideResults ? userList : filteredData}
-                                renderItem={renderItem}
-                                value={autoCompleteValue}
-                                hideResults={shouldHideResults}
-                                containerStyle={{flex:1, zIndex: 1}}
-                                renderTextInput={renderTextInput}
-                                keyExtractor={(i) => String( i ) }
-                                maxListHeight={400}
-                                fontSize={14}
-                                flatListProps={{ nestedScrollEnabled: true }}
-                            />
-                        </View>
                         <View>
                             <Input
                                 label="Upload Hazard Image"
