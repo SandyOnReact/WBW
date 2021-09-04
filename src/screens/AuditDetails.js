@@ -119,7 +119,6 @@ export const CustomCheckBox = ( { value, isRequired } ) => {
     const [checkboxValue, setCheckboxValue] = useState( false )
 
     const toggleCheckBoxValue = ( ) => {
-        console.log( 'toggling checkbox value' )
         setCheckboxValue( checkboxValue => !checkboxValue )
     }
     return (
@@ -209,19 +208,16 @@ export const AuditDetailsScreen = () => {
     const navigation = useNavigation()
 
     useEffect( ( ) => {
-        console.log( 'Inside first useEffect' )
         setDefaultSystemFieldsArray()
     }, [] )
     
     useEffect( ( ) => {
-        console.log( 'Inside second useEffect' )
         setupGroupsArray()
     }, [] )
     
     
     useFocusEffect(
         React.useCallback( () => {
-            console.log( 'Inside first focusEffect' )
             setupLocalStorageValuesOnFocus()
         }, [])
       );
@@ -277,7 +273,6 @@ export const AuditDetailsScreen = () => {
     }
 
     useEffect( ( ) => {
-        console.log( 'Inside third useEffect' )
         getUserdetails()
     }, [] )
 
@@ -290,7 +285,6 @@ export const AuditDetailsScreen = () => {
             setShouldShowWarningMessage( true )
             return null
         }
-        console.log( 'Not in IF')
     }
 
     
@@ -311,9 +305,10 @@ export const AuditDetailsScreen = () => {
 
     const onDeleteAuditAndInspectionRecord = async ( ) => {
         try {
+            const user = await fetchUserInfoFromStorage()
             const token = await AsyncStorage.getItem('Token')
         const payload = {
-            UserID: userInfo.UserID,
+            UserID: user?.UserID,
             AccessToken: token,
             AuditAndInspectionID: auditDetails.AuditAndInspectionDetails?.AuditAndInspectionID,
         }
@@ -325,7 +320,7 @@ export const AuditDetailsScreen = () => {
             return null
         }
         Toast.showWithGravity(result.Message, Toast.LONG, Toast.CENTER);
-        navigation.goBack()
+        navigation.pop(2)
         }catch( error ) {
             Toast.showWithGravity(error.message || 'Something Went wrong while deleting audit records', Toast.LONG, Toast.CENTER);
         }
@@ -333,7 +328,6 @@ export const AuditDetailsScreen = () => {
     }
 
       useEffect(() => {
-          console.log( 'Inside fourth useEffect' )
         const backHandler = BackHandler.addEventListener(
             "hardwareBackPress",
             _handleBackPress
@@ -630,7 +624,6 @@ export const AuditDetailsScreen = () => {
     }
 
     const onCommentInputChange = ( value, id  ) => {
-        console.log( 'value is', value, id )
         if( value === null ) {
             return null
         }
@@ -876,7 +869,6 @@ export const AuditDetailsScreen = () => {
                 url: `api/AuditAndInspection/CompleteAudit`,
                 body: payload
             })
-            console.log('result is ',JSON.stringify(result))
             if( isEmpty( result ) ) {
                 return null
             }else if( !isEmpty( result ) && isEmpty( imagesObject ) ) {
@@ -889,7 +881,6 @@ export const AuditDetailsScreen = () => {
                     image: imagesObject,
                     url: `api/AuditAndInspection/UploadAuditImage?UserID=${userInfo.UserID}&AuditAndInspectionID=${auditDetails.AuditAndInspectionDetails?.AuditAndInspectionID}`
                 })
-                console.log( 'response is ',JSON.stringify(response))
                 if( isEmpty( response ) ) {
                     return null
                 }
@@ -897,7 +888,6 @@ export const AuditDetailsScreen = () => {
             }
         } catch ( error ) {
             Toast.showWithGravity(error.message, Toast.LONG, Toast.CENTER);
-            console.log( 'error is ',error)
         }
     }
 
@@ -973,7 +963,6 @@ export const AuditDetailsScreen = () => {
             }
         } catch ( error ) {
             Toast.showWithGravity(error.message, Toast.LONG, Toast.CENTER);
-            console.log( 'error is ',error)
         }
     }
 
@@ -989,8 +978,6 @@ export const AuditDetailsScreen = () => {
     }
 
     const renderLastDayOfScheduledPeriod = ( ) => {
-        console.log( 'warning msg',auditDetails.AuditAndInspectionDetails?.IsSchedulerRequired === "True" && auditDetails.AuditAndInspectionDetails?.ReportingPeriodDueDates === null )
-        console.log( 'due date',auditDetails.AuditAndInspectionDetails?.ReportingPeriodDueDates )
         if( auditDetails.AuditAndInspectionDetails?.IsSchedulerRequired === "True" && auditDetails.AuditAndInspectionDetails?.ReportingPeriodDueDates === null ) {
             return null
         }
