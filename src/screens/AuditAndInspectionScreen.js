@@ -105,7 +105,7 @@ export const AuditAndInspectionScreen = ({ route, navigation }) => {
     const ListEmptyComponent = ( ) => {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-                <Text>No audit records found</Text>
+               <Text></Text>
             </View>
         )
     } 

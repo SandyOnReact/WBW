@@ -886,7 +886,9 @@ export const AuditDetailsScreen = () => {
             }else if( !isEmpty( result ) && isEmpty( imagesObject ) ) {
                 Toast.showWithGravity(result?.Message, Toast.LONG, Toast.CENTER);
                 setTimeout( ( ) => {
-                    navigation.navigate( 'Home' )
+                    navigation.pop(2)
+
+                  //  navigation.navigate( 'Home' )
                 }, 2000 )
             }else if( !isEmpty( result ) && !isEmpty( imagesObject ) ) {
                 const response = await api.imageUpload({
@@ -896,7 +898,8 @@ export const AuditDetailsScreen = () => {
                 if( isEmpty( response ) ) {
                     return null
                 }
-                navigation.navigate( 'Home' )
+                navigation.pop(2)
+              //  navigation.navigate( 'Home' )
             }
         } catch ( error ) {
             Toast.showWithGravity(error.message, Toast.LONG, Toast.CENTER);
@@ -961,7 +964,8 @@ export const AuditDetailsScreen = () => {
             }else if( !isEmpty( result ) && isEmpty( imagesObject ) ) {
                 Toast.showWithGravity(result?.Message, Toast.LONG, Toast.CENTER);
                 setTimeout( ( ) => {
-                    navigation.navigate( 'Home' )
+                    navigation.pop(2)
+                   // navigation.navigate( 'Home' )
                 }, 2000 )
             }else if( !isEmpty( result ) && !isEmpty( imagesObject ) ) {
                 const response = await api.imageUpload({
@@ -971,7 +975,9 @@ export const AuditDetailsScreen = () => {
                 if( isEmpty( response ) ) {
                     return null
                 }
-                navigation.navigate( 'Home' )
+                navigation.pop(2)
+
+               // navigation.navigate( 'Home' )
             }
         } catch ( error ) {
             Toast.showWithGravity(error.message, Toast.LONG, Toast.CENTER);
