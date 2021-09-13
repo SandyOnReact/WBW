@@ -18,7 +18,7 @@ let shouldFetch = true
 let onEndReachedCalledDuringMomentum = true;
 
 export const AuditAndInspectionScreen = ({ route, navigation }) => {
-    const { dashboard, userId } = route.params
+    const { dashboard, userId, CompanyID } = route.params
     const [auditList,setAuditList] = useState( [] )
     const [templateDetails,setTemplateDetails] = useState( {} )
     const [shouldLoad,setShouldLoad] = useState( false )
@@ -71,9 +71,45 @@ export const AuditAndInspectionScreen = ({ route, navigation }) => {
         } )
     }
 
+    const onEditInspection = async ( auditId ) => {
+        if( auditId === null || auditId === undefined ) {
+            return null
+        }
+        const token = await AsyncStorage.getItem('Token')
+        isLoading = true
+        const body = {
+            UserID: userId,
+            AccessToken: token,
+            CustomFormID: dashboard.CustomFormID,
+            AuditAndInspectionTemplateID: dashboard.AuditandInspectionTemplateID,
+            AuditAndInspectionID: auditId,
+            CompanyID: CompanyID
+        }
+        console.log( 'payload is ',JSON.stringify( body ) )
+        const result = await api.post({
+            url: 'api/AuditAndInspection/GetAuditDetails',
+            body: body
+        })
+        console.log( 'response on edit inspection ',JSON.stringify( result ) )
+        if( isEmpty( result ) ) {
+            isLoading = false
+            return null
+        }else{
+            navigation.navigate( 'EditAuditDetails', {
+                auditDetails: result,
+                Type: templateDetails.Type,
+                selectedDropdownValue: userId,
+                dropdownObject: "",
+                PrimaryUserID: "",
+                AuditAndInspectionTemplateID: dashboard.AuditandInspectionTemplateID
+            } )
+        }
+
+    }
+
     const renderItem = ( { item } ) => {
         return(
-            <AuditCard audit={item} templateDetails={templateDetails}/>
+            <AuditCard audit={item} templateDetails={templateDetails} onEditInspection={onEditInspection} />
         )
     }
 

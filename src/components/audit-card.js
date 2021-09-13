@@ -1,20 +1,44 @@
 import React from 'react'
 import { View, Text, Dimensions } from 'react-native'
 import { isEmpty } from "lodash"
+import { Icon } from "react-native-elements"
 
 export const AuditCard = (props) => {
 
-    const { audit, templateDetails } = props;
+    const { audit, templateDetails, onEditInspection } = props;
+
+    editInspection = ( ) => {
+        onEditInspection( audit?.AuditAndInspectionID )
+    }
+
 
     const renderTemplateDetails = () => {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', borderTopLeftRadius: 20, borderTopRightRadius: 20, flexDirection: 'row', backgroundColor: '#1e5873' }}>
-                <View style={{ flex: 0.7, padding: '5%' }}>
-                    <Text style={{ color: 'white', fontSize: 15, fontWeight: 'bold' }}>{audit.RecordNumber}</Text>
-                </View>
-                <View style={{ flex: 0.3, justifyContent: 'center', height: '100%', padding: '5%', alignItems: 'flex-end' }}>
-                    <Text style={{ color: 'white', fontSize: 15 }}>{audit.Status}</Text>
-                </View>
+                {
+                    audit.Status === "In Process"
+                    ? (
+                        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', flexDirection: 'row'}}>
+                            <View style={{ flex: 0.5, padding: '5%' }}>
+                                <Text style={{ color: 'white', fontSize: 15, fontWeight: 'bold' }}>{audit.RecordNumber}</Text>
+                            </View>
+                            <View style={{ flex: 0.4, justifyContent: 'center', height: '100%', padding: '5%', alignItems: 'flex-end' }}>
+                                <Text style={{ color: 'white', fontSize: 15 }}>{audit.Status}</Text>
+                            </View>
+                            <View style={{ flex: 0.1, justifyContent: 'center', height: '100%', padding: '5%', alignItems: 'flex-end' }}>
+                                <Icon name="edit" color="white" size={28} onPress={editInspection}/>
+                            </View>
+                        </View>
+                    )
+                    : <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', flexDirection: 'row' }}>
+                            <View style={{ flex: 0.7, padding: '5%' }}>
+                                <Text style={{ color: 'white', fontSize: 15, fontWeight: 'bold' }}>{audit.RecordNumber}</Text>
+                            </View>
+                            <View style={{ flex: 0.3, justifyContent: 'center', height: '100%', padding: '5%', alignItems: 'flex-end' }}>
+                                <Text style={{ color: 'white', fontSize: 15 }}>{audit.Status}</Text>
+                            </View>
+                      </View>
+                }
             </View>
         )
     }

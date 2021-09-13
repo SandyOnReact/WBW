@@ -53,7 +53,8 @@ export const HomeScreen = ({ navigation }) => {
         }else if( dashboard.Type === "Audit-originator" ) {
             navigation.navigate( 'AuditAndInspectionScreen', {
                 dashboard: dashboard,
-                userId: userInfo.UserID
+                userId: userInfo.UserID,
+                CompanyID: userInfo.CompanyID
             } )
         }
         else{         
