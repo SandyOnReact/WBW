@@ -9,7 +9,7 @@ import { useKeyboard } from '@react-native-community/hooks';
 import { FlatList } from 'react-native';
 import { CustomMultiSelectCheckbox } from "./DynamicControlsScreen"
 import _, { clone, isEmpty, omit } from "lodash"
-import { DynamicGroupsCard } from "../components/dynamic-card"
+import { DynamicGroupsCard } from "../components/edit-audit/dynamic-card"
 import lodash from "lodash"
 import { api } from '../utils/api'
 import Toast from "react-native-simple-toast"
@@ -203,21 +203,33 @@ export const EditAuditDetailsScreen = () => {
     const [groupsArray,setGroupsArray] = useState( [] )
     const [returnData,setReturnData] = useState( {} )
     const [cancelData,setCancelData] = useState( {} )
+    const [primaryUser,setPrimaryUser] = useState( '' )
     const STATUS_BAR_HEIGHT = getStatusBarHeight()
     const keyboard = useKeyboard()
     const navigation = useNavigation()
 
-    useEffect(()=>{
-        console.log( 'isAllow',auditDetails?.AuditAndInspectionDetails?.ReportingPeriodDueDateSelected )
-        if( auditDetails?.AuditAndInspectionDetails?.IsAllowCheckAll === "True" ) {
-            setCheckboxValue( true )
-        }else{
-            setCheckboxValue( false )
+    // useEffect(()=>{
+    //     console.log( 'isAllow',auditDetails?.AuditAndInspectionDetails?.ReportingPeriodDueDateSelected )
+    //     if( auditDetails?.AuditAndInspectionDetails?.IsAllowCheckAll === "True" ) {
+    //         setCheckboxValue( true )
+    //     }else{
+    //         setCheckboxValue( false )
+    //     }
+    // },[auditDetails.IsAllowCheckAll])
+
+    useEffect( ( ) => {
+        if( auditDetails?.AuditAndInspectionDetails?.PrimaryUserList && auditDetails?.AuditAndInspectionDetails?.PrimaryUserList.length > 0  ) {
+            let primaryUserId = auditDetails?.AuditAndInspectionDetails?.PrimaryUserID
+            let currentPrimaryUserDetails = auditDetails?.AuditAndInspectionDetails?.PrimaryUserList.find( item => item.ID === primaryUserId )
+            setPrimaryUser( currentPrimaryUserDetails?.ID )
         }
-    },[auditDetails.IsAllowCheckAll])
+    }, [] )
 
     useEffect(()=>{
         const reportingDateArray = auditDetails?.AuditAndInspectionDetails?.ReportingPeriodDueDates
+        if( !reportingDateArray ) {
+            return null
+        }
         let selectedReportingPeriodDate = reportingDateArray.find( item => {
             if( item.Value === auditDetails?.AuditAndInspectionDetails?.ReportingPeriodDueDateSelected ) {
                 return item.ID
@@ -326,57 +338,8 @@ export const EditAuditDetailsScreen = () => {
         setCheckboxValue( checkboxValue => !checkboxValue )
     }
 
-    const onDeleteAuditAndInspectionRecord = async ( ) => {
-        try {
-            const user = await fetchUserInfoFromStorage()
-            const token = await AsyncStorage.getItem('Token')
-        const payload = {
-            UserID: user?.UserID,
-            AccessToken: token,
-            AuditAndInspectionID: auditDetails.AuditAndInspectionDetails?.AuditAndInspectionID,
-        }
-        const result = await api.post({
-            url: `api/AuditAndInspection/DeleteAuditAndInspection`,
-            body: payload
-        })
-        if( isEmpty( result ) ) {
-            return null
-        }
-        Toast.showWithGravity(result.Message, Toast.LONG, Toast.CENTER);
-        navigation.pop(2)
-        }catch( error ) {
-            Toast.showWithGravity(error.message || 'Something Went wrong while deleting audit records', Toast.LONG, Toast.CENTER);
-        }
-        
-    }
 
-      useEffect(() => {
-        const backHandler = BackHandler.addEventListener(
-            "hardwareBackPress",
-            _handleBackPress
-        );
-        return () => backHandler.remove();
-    }, [])
-
-    const _handleBackPress = ( ) => {
-        // Works on both iOS and Android
-        Alert.alert(
-          "Discard changes?",
-          "Are you sure you want to discard the changes?",
-          [
-            {
-              text: "No",
-              onPress: () => null
-            },
-            {
-              text: "Yes",
-              onPress: ( ) => onDeleteAuditAndInspectionRecord()
-            }
-          ],
-        );
-        return true
-      }
-
+      
     const onChangeDropdownValue = ( value ) => {
         let data = [...auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates]
         let reversedData = data.reverse()
@@ -1017,6 +980,30 @@ export const EditAuditDetailsScreen = () => {
         } )
     }
 
+    const renderPrimaryUserList = ( ) => {
+        if( auditDetails.AuditAndInspectionDetails?.PrimaryUserList && auditDetails.AuditAndInspectionDetails?.PrimaryUserList.length > 0 ) {
+            let data = auditDetails.AuditAndInspectionDetails.PrimaryUserList.map( item => {
+                const primaryUser = { label: item.Name, value: item.ID }
+                return primaryUser
+            })
+
+            const onChangeDropdownValue = ( value ) => {
+                setPrimaryUser( value )
+            }
+
+            return (
+                <CustomDropdown
+                    title="Primary User List *"
+                    value={primaryUser}
+                    onValueChange={onChangeDropdownValue}
+                    items={data}
+                />
+            ) 
+        }else{
+            return null
+        }
+    }
+
     const renderLastDayOfScheduledPeriod = ( ) => {
         if( auditDetails.AuditAndInspectionDetails?.IsSchedulerRequired === "True" && auditDetails.AuditAndInspectionDetails?.ReportingPeriodDueDates === null ) {
             return null
@@ -1057,7 +1044,7 @@ export const EditAuditDetailsScreen = () => {
                 containerStyle={{ height: 56 + STATUS_BAR_HEIGHT }}
                 statusBarProps={{ barStyle: "light-content", translucent: true, backgroundColor: "transparent" }}
                 containerStyle={{ backgroundColor: '#1e5873' }}
-                leftComponent={{ icon: 'arrow-back', type: 'ionicons', color: 'white', onPress: _handleBackPress }}
+                leftComponent={{ icon: 'arrow-back', type: 'ionicons', color: 'white', onPress: ()=>navigation.goBack() }}
                 centerComponent={{ text: 'Inspection Details', style: { color: '#fff', fontSize: 16 } }}
             />
             <ScrollView contentContainerStyle={{ paddingBottom: 30 }}>
@@ -1102,7 +1089,10 @@ export const EditAuditDetailsScreen = () => {
                     onChangeText={(text) => setInputValue( text )}
                 />
             </View>
-            <View flex={0.5} style={{ marginHorizontal: '0.5%' }}>
+            <View flex={0.5} style={{ marginHorizontal: '2%' }}>
+                {
+                    renderPrimaryUserList()
+                }
                 {
                    renderLastDayOfScheduledPeriod()
                 }
