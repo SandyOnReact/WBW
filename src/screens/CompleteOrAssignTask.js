@@ -85,8 +85,8 @@ export const CompleteTask = ( props ) => {
         return userInfo != null ? JSON.parse(userInfo) : null;
     }
 
-    const selectedHazard = hazardData.find( item => item.value === selectedHazardValue )
-
+    const selectedHazard = hazardData.find( item => item.value == selectedHazardValue )
+    console.log( 'selected hazard value',selectedHazard )
     const onImageReceive = ( url, imageData ) => {
         const imageObj = { ...imageData, uri: url }
         setImagesObject( imageObj )
@@ -895,6 +895,7 @@ export const CompleteOrAssignTask = ( props ) => {
     const [isDataLoading,setIsDataLoading] = useState( false )
     const [taskDetails,setTaskDetails] = useState( {} )
 
+    console.log( 'selected hazard value', selectedHazardValue )
     useEffect( ( ) => {
         getTasks()
     }, [] )

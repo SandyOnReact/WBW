@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { View, Text } from 'react-native'
 import _, { isEmpty } from "lodash"
 import { FlatList } from 'react-native'
-import { DynamicAttribute } from "./dynamic-attributes"
+import { DynamicAttribute } from "./edit-dynamic-attributes"
 
 
 /**

@@ -9,7 +9,7 @@ import { useKeyboard } from '@react-native-community/hooks';
 import { FlatList } from 'react-native';
 import { CustomMultiSelectCheckbox } from "./DynamicControlsScreen"
 import _, { clone, isEmpty, omit } from "lodash"
-import { DynamicGroupsCard } from "../components/edit-audit/dynamic-card"
+import { DynamicGroupsCard } from "../components/edit-dynamic-card"
 import lodash from "lodash"
 import { api } from '../utils/api'
 import Toast from "react-native-simple-toast"

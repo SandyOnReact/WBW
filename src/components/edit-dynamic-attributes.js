@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { View, Text } from 'react-native'
 import { Input } from 'react-native-elements'
-import { CustomDropdown } from '../core/custom-dropdown'
+import { CustomDropdown } from './core/custom-dropdown'
 import _, { isEmpty } from "lodash"
 import { useNavigation } from '@react-navigation/core'
 import AsyncStorage from "@react-native-async-storage/async-storage"
