@@ -252,11 +252,13 @@ export const EditAuditDetailsScreen = () => {
     
     useFocusEffect(
         React.useCallback( () => {
+            console.log( 'Inside use focus effect' )
             setupLocalStorageValuesOnFocus()
         }, [])
-      );
-
-      const setupLocalStorageValuesOnFocus = async ( ) => {
+        );
+        
+        const setupLocalStorageValuesOnFocus = async ( ) => {
+          console.log( 'Inside setup storage values on focus' )
         var tempData = await AsyncStorage.getItem("returndata")
             tempData = JSON.parse(tempData)
             await AsyncStorage.removeItem("returndata");
@@ -281,7 +283,7 @@ export const EditAuditDetailsScreen = () => {
                     CorrectAnswerID: val.CorrectAnswerID,
                     ScoreList: val.ScoreList,
                     isRequired: val.IsCommentsMandatory === "Mandatory" ? 'Comments *' : 'Comments',
-                    isHazardsRequired: val.DoNotShowHazard === "True" || val.AuditAndInspectionScore === "Do Not Show Score" ? false : true
+                    isHazardsRequired: false
                 }
                 return attribute
             })
@@ -456,7 +458,7 @@ export const EditAuditDetailsScreen = () => {
             }
         })
         const checkIfTruthyValues = ScoreList.find( item => {
-            if( ["True", "False", "Yes", "No"].includes( item.Value ) && item.ID === selectedScoreValue ) {
+            if( ["True", "False", "Yes", "No","Pass","Fail"].includes( item.Value ) && item.ID === selectedScoreValue ) {
                 return true
             }else{
                 return false
@@ -539,7 +541,7 @@ export const EditAuditDetailsScreen = () => {
             }
         })
         const checkIfTruthyValues = ScoreList.find( item => {
-            if( ["True", "False", "Yes", "No", "Pass", "Fail"].includes( item.Value ) && item.ID === selectedScoreValue ) {
+            if( ["True", "False", "Yes", "No", "Pass", "Fail"].includes( item.Value ) && item.ID == selectedScoreValue ) {
                 return true
             }else{
                 return false
@@ -561,9 +563,9 @@ export const EditAuditDetailsScreen = () => {
         clonedGroupsArray = clonedGroupsArray.map( groups => {
             groups = groups.Attributes.map( attribute => {
                 if( attribute.AttributeID === id ) {
-                    if( attribute.isHazardsRequired === true ) {
-                        attribute.isHazardsRequired = checkIsHazardsPresentAndRequired( value, attribute.CorrectAnswerID, attribute.ScoreList )
-                    }
+                    attribute.isHazardsRequired = checkIsHazardsPresentAndRequired( value, attribute.CorrectAnswerID, attribute.ScoreList )
+                    // if( attribute.isHazardsRequired === true ) {
+                    // }
                     attribute.isRequired = checkIsCommentsMandatory( attribute.IsCommentsMandatory, value, attribute.CorrectAnswerID, attribute.ScoreList  )
                     attribute.GivenAnswerID = value
                     return attribute     
@@ -656,6 +658,7 @@ export const EditAuditDetailsScreen = () => {
         var shouldShowHazardDetails = auditDetails.AuditAndInspectionDetails?.IsDisplayHazardList
         var shouldShowSourceDetails = auditDetails.AuditAndInspectionDetails?.IsDisplaySource
         var scoreLabel = auditDetails.AuditAndInspectionDetails?.ScoringLable
+        console.log( 'time to render it' )
         return sortedGroupsData.map( item => {
             return (
                 <DynamicGroupsCard 
@@ -862,10 +865,12 @@ export const EditAuditDetailsScreen = () => {
                     Groups: groupsArrayWithOnlyRequiredFields
                 }
             }
+            console.log( 'final payload after kadya',JSON.stringify( payload )) 
             const result = await api.post({
                 url: `api/AuditAndInspection/CompleteAudit`,
                 body: payload
             })
+            console.log( 'result after kadya',JSON.stringify( result )) 
             if( isEmpty( result ) ) {
                 return null
             }else if( !isEmpty( result ) && isEmpty( imagesObject ) ) {

@@ -235,6 +235,8 @@ const RenderHazardDropdown = ( props ) => {
         return null
     }else if(shouldCheckForNonApplicableValues){
         return null
+    }else if( item.GivenAnswerID === "0" || item.GivenAnswerID === null || item.GivenAnswerID === undefined ) {
+        return null
     }else{
         return (
             <View>

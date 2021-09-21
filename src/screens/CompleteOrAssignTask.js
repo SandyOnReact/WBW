@@ -86,7 +86,6 @@ export const CompleteTask = ( props ) => {
     }
 
     const selectedHazard = hazardData.find( item => item.value == selectedHazardValue )
-    console.log( 'selected hazard value',selectedHazard )
     const onImageReceive = ( url, imageData ) => {
         const imageObj = { ...imageData, uri: url }
         setImagesObject( imageObj )
@@ -333,7 +332,7 @@ export const ShowTaskDetails = ( props ) => {
         const userInfo = await AsyncStorage.getItem('USER_INFO');
         return userInfo != null ? JSON.parse(userInfo) : null;
     }
-    const newHazard = hazardData.find( item => item.value === selectedHazardValue )
+    const newHazard = hazardData.find( item => item.value == selectedHazardValue )
 
     const onUpdateHazard = async ( ) => {
         try {
@@ -442,7 +441,7 @@ export const AssignTask = ( props ) => {
     const navigation = useNavigation()
     const [isFetching,setIsFetching] = useState( false )
     const [isFetchingRatingData,setIsFetchingRatingData] = useState( false )
-    const selectedHazard = hazardData.find( item => item.value === selectedHazardValue )
+    const selectedHazard = hazardData.find( item => item.value == selectedHazardValue )
 
     const fetchUserInfoFromStorage = async () => {
         const userInfo = await AsyncStorage.getItem('USER_INFO');
@@ -902,7 +901,6 @@ export const CompleteOrAssignTask = ( props ) => {
     const [isDataLoading,setIsDataLoading] = useState( false )
     const [taskDetails,setTaskDetails] = useState( {} )
 
-    console.log( 'selected hazard value', selectedHazardValue )
     useEffect( ( ) => {
         getTasks()
     }, [] )
