@@ -611,9 +611,10 @@ export const AssignTask = ( props ) => {
     }
 
     const fetchRiskRatingAndDueDate = async ( ) => {
+        console.log( 'Inside fetch risk rating and due date' )
         setIsFetchingRatingData( true )
         try {
-            const user = await fetchUserInfoFromStorage()
+        const user = await fetchUserInfoFromStorage()
         const token = await AsyncStorage.getItem('Token')
         const body = {
             UserID: user.UserID,
@@ -622,10 +623,12 @@ export const AssignTask = ( props ) => {
             SeverityRateValue: severityRating,
             ProbabilityRateValue: probabilityRating
         }
+        console.log( 'payload is ',JSON.stringify( body ) )
         const result = await api.post({
             url: `api/AuditAndInspection/GetRiskRatingAndDueDate`,
             body: body
         })
+        console.log( 'result is ',JSON.stringify( result ) )
         if( isEmpty( result ) ) {
             return null
         }
@@ -641,8 +644,11 @@ export const AssignTask = ( props ) => {
         }
     }
 
-    const checkShowRiskRating = ( ) => {
-        if( !isEmpty( severityRating ) && !isEmpty( probabilityRating ) && shouldShowRiskRating === false ) {
+    const checkShowRiskRating = ( severity, probability ) => {
+        console.log( 'severity rating ',severity)
+        console.log( 'probability rating ',probability)
+        console.log( 'isFetching ',isFetchingRatingData)
+        if( !isEmpty( severity ) && !isEmpty( probability ) && isFetchingRatingData === false ) {
             fetchRiskRatingAndDueDate( )
         }
     }
@@ -652,13 +658,14 @@ export const AssignTask = ( props ) => {
         setProbabilityRating( '' )
         setRiskRatingValue( '' )
         setShouldShowRiskRating( false )
-        checkShowRiskRating()
+        checkShowRiskRating( value, '' )
     }
 
     const onProbabilityRatingChange = ( value ) => {
+        console.log( 'severity rating in prob',severityRating)
         setProbabilityRating( value )
         setShouldShowRiskRating( false )
-        checkShowRiskRating()
+        checkShowRiskRating( severityRating, value )
     }
 
     const showDatepicker = () => {
