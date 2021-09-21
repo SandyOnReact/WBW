@@ -235,7 +235,6 @@ export const EditAuditDetailsScreen = () => {
                 return item.ID
             }
         } )
-        console.log( 'selected array',JSON.stringify( selectedReportingPeriodDate ) )
         setDropdownValue( selectedReportingPeriodDate?.ID )
     },[auditDetails?.AuditAndInspectionDetails?.ReportingPeriodDueDateSelected])
 
@@ -252,14 +251,12 @@ export const EditAuditDetailsScreen = () => {
     
     useFocusEffect(
         React.useCallback( () => {
-            console.log( 'Inside use focus effect' )
             setupLocalStorageValuesOnFocus()
         }, [])
         );
         
         const setupLocalStorageValuesOnFocus = async ( ) => {
-          console.log( 'Inside setup storage values on focus' )
-        var tempData = await AsyncStorage.getItem("returndata")
+            var tempData = await AsyncStorage.getItem("returndata")
             tempData = JSON.parse(tempData)
             await AsyncStorage.removeItem("returndata");
             var cancelData = await AsyncStorage.getItem("cancelData")
@@ -529,10 +526,6 @@ export const EditAuditDetailsScreen = () => {
     }
     
     const checkIsHazardsPresentAndRequired = ( selectedScoreValue, CorrectAnswerID, ScoreList ) => {
-        console.log( 'selected score value ',selectedScoreValue)
-        console.log( 'correct answer id ',CorrectAnswerID)
-        console.log( 'check condition', checkIfTruthyValues ? Number(selectedScoreValue) === Number(CorrectAnswerID) : Number( selectedScoreValue ) >= Number( CorrectAnswerID )  )
-        console.log( 'score  list',JSON.stringify(ScoreList))
         const shouldCheckForNonApplicableValues = ScoreList.find( item => {
             if( item.Value === "Not Applicable" && item.ID === selectedScoreValue ) {
                 return true
@@ -658,7 +651,6 @@ export const EditAuditDetailsScreen = () => {
         var shouldShowHazardDetails = auditDetails.AuditAndInspectionDetails?.IsDisplayHazardList
         var shouldShowSourceDetails = auditDetails.AuditAndInspectionDetails?.IsDisplaySource
         var scoreLabel = auditDetails.AuditAndInspectionDetails?.ScoringLable
-        console.log( 'time to render it' )
         return sortedGroupsData.map( item => {
             return (
                 <DynamicGroupsCard 

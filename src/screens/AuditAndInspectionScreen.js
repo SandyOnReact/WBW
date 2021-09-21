@@ -85,7 +85,6 @@ export const AuditAndInspectionScreen = ({ route, navigation }) => {
             AuditAndInspectionID: auditId,
             CompanyID: CompanyID
         }
-        console.log( 'payload is ',JSON.stringify( body ) )
         const result = await api.post({
             url: 'api/AuditAndInspection/GetAuditDetails',
             body: body

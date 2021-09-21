@@ -71,7 +71,8 @@ export const CompleteTask = ( props ) => {
         item,
         auditAndInspectionId,
         onCancel,
-        clearHazards
+        clearHazards,
+        updateHazards
     } = props
     const [hazardImageValue,setHazardImageValue] = useState( '' )
     const [imagesObject, setImagesObject ] = useState( {} )
@@ -158,9 +159,10 @@ export const CompleteTask = ( props ) => {
                     setTimeout(async () => {
                         let returndata={
                             commentsValue:result.Comments ?? commentsValue,
-                            CustomFormResultID:item.CustomFormResultID,
+                            CustomFormResultID:item.CustomFormResultID
                         }
                         await AsyncStorage.setItem("returndata", JSON.stringify(returndata))
+                        updateHazards( selectedHazardValue )
                         navigateToBackScreen()
                     }, 2000);
                 }
@@ -176,8 +178,9 @@ export const CompleteTask = ( props ) => {
                     setTimeout( async () => {
                         let returndata={
                             commentsValue:result.Comments ?? commentsValue,
-                            CustomFormResultID:item.CustomFormResultID,
+                            CustomFormResultID:item.CustomFormResultID
                         }
+                        updateHazards( selectedHazardValue )
                         await AsyncStorage.setItem("returndata", JSON.stringify(returndata))
                         navigateToBackScreen()
                     }, 2000);
@@ -322,7 +325,8 @@ export const ShowTaskDetails = ( props ) => {
         selectedHazardValue,
         hazardData,
         onDelete,
-        item
+        item,
+        updateHazards
     } = props
     const [isButtonLoading,setIsButtonLoading] = useState( false )
     const [isDeleteButtonLoading,setIsDeleteButtonLoading] = useState( false )
@@ -351,6 +355,7 @@ export const ShowTaskDetails = ( props ) => {
             })
             setIsButtonLoading( false )
             if( result && result?.Message === "Hazard Updated" ) {
+                updateHazards( selectedHazardValue )
                 navigation.goBack()
                 return null
             }      
@@ -419,7 +424,8 @@ export const AssignTask = ( props ) => {
         hazardData,
         item,
         auditAndInspectionId,
-        clearHazards
+        clearHazards,
+        updateHazards
     } = props
     const [severityRatingList,setSeverityRatingList] = useState( [] )
     const [severityRating,setSeverityRating] = useState( '' )
@@ -566,9 +572,10 @@ export const AssignTask = ( props ) => {
 
                         let returndata={
                             commentsValue:result.Comments ?? commentsValue,
-                            CustomFormResultID:item.CustomFormResultID,
+                            CustomFormResultID:item.CustomFormResultID
                         }
                         await AsyncStorage.setItem("returndata", JSON.stringify(returndata))
+                        updateHazards( selectedHazardValue )
                         navigateToBackScreen()
                     }, 2000);
                 }
@@ -585,9 +592,10 @@ export const AssignTask = ( props ) => {
 
                         let returndata={
                             commentsValue:result.Comments ?? commentsValue,
-                            CustomFormResultID:item.CustomFormResultID,
+                            CustomFormResultID:item.CustomFormResultID
                         }
                         await AsyncStorage.setItem("returndata", JSON.stringify(returndata))
+                        updateHazards( selectedHazardValue )
                         navigateToBackScreen()
                     }, 2000);
                 }
@@ -610,7 +618,6 @@ export const AssignTask = ( props ) => {
     }
 
     const fetchRiskRatingAndDueDate = async ( severity, probability ) => {
-        console.log( 'Inside fetch risk rating and due date' )
         setIsFetchingRatingData( true )
         try {
         const user = await fetchUserInfoFromStorage()
@@ -892,7 +899,8 @@ export const CompleteOrAssignTask = ( props ) => {
         hazardData,
         item,
         auditAndInspectionId,
-        clearHazards
+        clearHazards,
+        updateHazards
     } = route.params
     const STATUS_BAR_HEIGHT = getStatusBarHeight()
     const navigation = useNavigation()
@@ -971,6 +979,7 @@ export const CompleteOrAssignTask = ( props ) => {
                     item={item}
                     clearHazards={clearHazards}
                     auditAndInspectionId={auditAndInspectionId}
+                    updateHazards={updateHazards}
                     onCancel={async()=>{
                         
                         navigation.goBack()
@@ -984,6 +993,7 @@ export const CompleteOrAssignTask = ( props ) => {
                     hazardData={hazardData}
                     item={item}
                     auditAndInspectionId={auditAndInspectionId}
+                    updateHazards={updateHazards}
                 />
             )
         }
@@ -1018,6 +1028,7 @@ export const CompleteOrAssignTask = ( props ) => {
                     selectedHazardValue={selectedHazardValue}
                     hazardData={hazardData}
                     onDelete={onDelete}
+                    updateHazards={updateHazards}
                  />
                 : (
                     <View style={{ flex: 1 }}>

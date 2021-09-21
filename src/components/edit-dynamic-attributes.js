@@ -143,7 +143,10 @@ export const SourceDropdown = ( { sourceList, onSourceValueSelected } ) => {
 export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHazardValueSelected } ) => {
     const navigation = useNavigation()
     const [hazardValue,setHazardValue] = useState( '' )
+    const [shouldUpdate,setShouldUpdate] = useState( false )
+
     useEffect(()=> {
+        console.log( 'Inside use effect', JSON.stringify( item.HazardsID ) )
         if( item.HazardsID !== "0" || item.HazardsID !== null || item.HazardsID !== undefined ) {
             setHazardValue( item.HazardsID )
         }else{
@@ -160,7 +163,13 @@ export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHaza
         setHazardValue( '' )
     }
 
-    const onHazardValueChange = async ( e, value ) => {
+    const onUpdateHazard = ( newHazard ) => {
+        console.log( 'Inside new hazard', JSON.stringify( newHazard ) )
+        setShouldUpdate( !shouldUpdate )
+        setHazardValue( newHazard )
+    }
+
+    const onHazardValueChange = async ( value ) => {
         console.log( 'value is ',value)
         if( value === null ) {
             return null
@@ -172,7 +181,8 @@ export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHaza
             hazardData: hazardData,
             item: item,
             auditAndInspectionId: auditAndInspectionId,
-            clearHazards: ( ) => onClear()
+            clearHazards: ( ) => onClear(),
+            updateHazards: ( newHazard ) => onUpdateHazard( newHazard )
         } )
         onHazardValueSelected( value )
     }
