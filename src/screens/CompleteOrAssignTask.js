@@ -629,12 +629,10 @@ export const AssignTask = ( props ) => {
             SeverityRateValue: severity,
             ProbabilityRateValue: probability
         }
-        console.log( 'payload is ',JSON.stringify( body ) )
         const result = await api.post({
             url: `api/AuditAndInspection/GetRiskRatingAndDueDate`,
             body: body
         })
-        console.log( 'result is ',JSON.stringify( result ) )
         if( isEmpty( result ) ) {
             return null
         }

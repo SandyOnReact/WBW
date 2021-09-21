@@ -10,15 +10,24 @@ import AsyncStorage from "@react-native-async-storage/async-storage"
 const inputContainerStyle = { borderWidth: 1, borderColor: '#1e5873', borderRadius: 6 }
 
 export const CommentInput = ( { item, selectedScoreValue, isMandatoryType, onCommentInputChange, commentsFromHazard, attributeIdFromHazard } ) => {
+    const [scoreValue,setScoreValue] = useState( '' )
+
+    useEffect(()=>{
+        if( item.GivenAnswerID !== "0" || item.GivenAnswerID !== null || item.GivenAnswerID !== undefined ) {
+            setScoreValue( item.GivenAnswerID )
+        }else{
+            setScoreValue( selectedScoreValue )
+        }
+    }, [item.GivenAnswerID] )
     const shouldCheckForNonApplicableValues = item.ScoreList.find( item => {
-        if( item.Value === "Not Applicable" && item.ID === selectedScoreValue ) {
+        if( item.Value === "Not Applicable" && item.ID === scoreValue ) {
             return true
         }else{
             return false
         }
     })
     const checkIfTruthyValues = item.ScoreList.find( item => {
-        if( ["True", "False", "Yes", "No"].includes( item.Value ) && item.ID === selectedScoreValue ) {
+        if( ["True", "False", "Yes", "No","Pass","Fail"].includes( item.Value ) && item.ID === scoreValue ) {
             return true
         }else{
             return false
@@ -42,7 +51,7 @@ export const CommentInput = ( { item, selectedScoreValue, isMandatoryType, onCom
                 commentLabel = 'Comments'
                 break;
             }
-            else if( checkIfTruthyValues ? Number( selectedScoreValue ) === Number( item.CorrectAnswerID ) : Number( selectedScoreValue ) >= Number( item.CorrectAnswerID ) ) {
+            else if( checkIfTruthyValues ? Number( scoreValue ) === Number( item.CorrectAnswerID ) : Number( scoreValue ) >= Number( item.CorrectAnswerID ) ) {
                 commentLabel = 'Comments *'
                 break;
             }else{
@@ -51,7 +60,7 @@ export const CommentInput = ( { item, selectedScoreValue, isMandatoryType, onCom
             }
         }
         case 'Mandatory for Failing Score': {
-            if( Number(selectedScoreValue) !== 0 && Number( selectedScoreValue ) < Number( item.CorrectAnswerID ) ) {
+            if( Number(scoreValue) !== 0 && Number( scoreValue ) < Number( item.CorrectAnswerID ) ) {
                 commentLabel = 'Comments *'
                 break;
             }else{
@@ -74,7 +83,7 @@ export const CommentInput = ( { item, selectedScoreValue, isMandatoryType, onCom
             
         }
         case 'Mandatory for Passing Score and N/A': {
-            if( Number( selectedScoreValue ) >= Number( item.CorrectAnswerID ) || shouldCheckForNonApplicableValues ) {
+            if( Number( scoreValue ) >= Number( item.CorrectAnswerID ) || shouldCheckForNonApplicableValues ) {
                 commentLabel = 'Comments *'
                 break;
             }else{
@@ -83,7 +92,7 @@ export const CommentInput = ( { item, selectedScoreValue, isMandatoryType, onCom
             }
         }
         case 'Mandatory for Failing Score and N/A': {
-            if( Number( selectedScoreValue ) < Number( item.CorrectAnswerID ) || shouldCheckForNonApplicableValues ) {
+            if( Number( scoreValue ) < Number( item.CorrectAnswerID ) || shouldCheckForNonApplicableValues ) {
                 commentLabel = 'Comments *'
                 break;
             }else{
@@ -118,8 +127,15 @@ export const CommentInput = ( { item, selectedScoreValue, isMandatoryType, onCom
     )
 }
 
-export const SourceDropdown = ( { sourceList, onSourceValueSelected } ) => {
+export const SourceDropdown = ( { item, sourceList, onSourceValueSelected } ) => {
     const [sourceValue,setSourceValue] = useState( '' )
+
+    useEffect( ( ) => {
+        if( item.SourceID !== "0" || item.SourceID !== null || item.SourceID !== undefined ) {
+            setSourceValue( item.SourceID )
+        }
+    }, [item.SourceID] )
+
     const sourceData = sourceList.map( item => {
         const source = { label: item.Value, value: item.ID }
         return source
@@ -146,7 +162,7 @@ export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHaza
     const [shouldUpdate,setShouldUpdate] = useState( false )
 
     useEffect(()=> {
-        console.log( 'Inside use effect', JSON.stringify( item.HazardsID ) )
+        console.log( 'Inside use effect',item.HazardsID)
         if( item.HazardsID !== "0" || item.HazardsID !== null || item.HazardsID !== undefined ) {
             setHazardValue( item.HazardsID )
         }else{
@@ -164,7 +180,6 @@ export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHaza
     }
 
     const onUpdateHazard = ( newHazard ) => {
-        console.log( 'Inside new hazard', JSON.stringify( newHazard ) )
         setShouldUpdate( !shouldUpdate )
         setHazardValue( newHazard )
     }
@@ -245,8 +260,6 @@ const RenderHazardDropdown = ( props ) => {
         return null
     }else if(shouldCheckForNonApplicableValues){
         return null
-    }else if( item.GivenAnswerID === "0" || item.GivenAnswerID === null || item.GivenAnswerID === undefined ) {
-        return null
     }else{
         return (
             <View>
@@ -279,6 +292,7 @@ export const GroupAttributes = ( props ) => {
     useEffect( ( ) => {
         if( item.GivenAnswerID !== "0" || item.GivenAnswerID !== null || item.GivenAnswerID !== undefined ) {
             setScoreValue( item.GivenAnswerID )
+            currentScoreValue( item.GivenAnswerID )
         }
     }, [item.GivenAnswerID] )
 
@@ -309,6 +323,7 @@ export const GroupAttributes = ( props ) => {
                 : (
                     <View>
                         <SourceDropdown 
+                            item={item}
                             sourceList={sourceList}
                             onSourceValueSelected={(value)=>onSourceValueSelected(value)}
                         />
@@ -316,7 +331,7 @@ export const GroupAttributes = ( props ) => {
                 )
             }
             {
-                 isEmpty( scoreValue ) 
+                 isEmpty( scoreValue ) || scoreValue === "0"
                  ? null 
                  // : renderHazardDropdown( item, scoreValue, sourceList, hazardList, auditAndInspectionId, )         
                  : <RenderHazardDropdown 

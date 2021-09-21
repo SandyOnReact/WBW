@@ -280,7 +280,7 @@ export const EditAuditDetailsScreen = () => {
                     CorrectAnswerID: val.CorrectAnswerID,
                     ScoreList: val.ScoreList,
                     isRequired: val.IsCommentsMandatory === "Mandatory" ? 'Comments *' : 'Comments',
-                    isHazardsRequired: false
+                    isHazardsRequired: val.HazardsID === "0" || val.HazardsID === null || val.HazardsID === undefined ? false : true
                 }
                 return attribute
             })
@@ -556,9 +556,9 @@ export const EditAuditDetailsScreen = () => {
         clonedGroupsArray = clonedGroupsArray.map( groups => {
             groups = groups.Attributes.map( attribute => {
                 if( attribute.AttributeID === id ) {
-                    attribute.isHazardsRequired = checkIsHazardsPresentAndRequired( value, attribute.CorrectAnswerID, attribute.ScoreList )
-                    // if( attribute.isHazardsRequired === true ) {
-                    // }
+                    if( attribute.isHazardsRequired === true ) {
+                        attribute.isHazardsRequired = checkIsHazardsPresentAndRequired( value, attribute.CorrectAnswerID, attribute.ScoreList )
+                    }
                     attribute.isRequired = checkIsCommentsMandatory( attribute.IsCommentsMandatory, value, attribute.CorrectAnswerID, attribute.ScoreList  )
                     attribute.GivenAnswerID = value
                     return attribute     
