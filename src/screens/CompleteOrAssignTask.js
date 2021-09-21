@@ -610,7 +610,7 @@ export const AssignTask = ( props ) => {
         setShouldShowRiskRating( true )
     }
 
-    const fetchRiskRatingAndDueDate = async ( ) => {
+    const fetchRiskRatingAndDueDate = async ( severity, probability ) => {
         console.log( 'Inside fetch risk rating and due date' )
         setIsFetchingRatingData( true )
         try {
@@ -620,8 +620,8 @@ export const AssignTask = ( props ) => {
             UserID: user.UserID,
             AccessToken: token,
             AuditAndInspectionID: auditAndInspectionId,
-            SeverityRateValue: severityRating,
-            ProbabilityRateValue: probabilityRating
+            SeverityRateValue: severity,
+            ProbabilityRateValue: probability
         }
         console.log( 'payload is ',JSON.stringify( body ) )
         const result = await api.post({
@@ -649,7 +649,7 @@ export const AssignTask = ( props ) => {
         console.log( 'probability rating ',probability)
         console.log( 'isFetching ',isFetchingRatingData)
         if( !isEmpty( severity ) && !isEmpty( probability ) && isFetchingRatingData === false ) {
-            fetchRiskRatingAndDueDate( )
+            fetchRiskRatingAndDueDate( severity, probability )
         }
     }
 
