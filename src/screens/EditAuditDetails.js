@@ -226,6 +226,10 @@ export const EditAuditDetailsScreen = () => {
     }, [] )
 
     useEffect(()=>{
+        checkForReportingDate()
+    },[auditDetails?.AuditAndInspectionDetails?.ReportingPeriodDueDateSelected])
+
+    const checkForReportingDate = ( ) => {
         const reportingDateArray = auditDetails?.AuditAndInspectionDetails?.ReportingPeriodDueDates
         if( !reportingDateArray ) {
             return null
@@ -236,8 +240,7 @@ export const EditAuditDetailsScreen = () => {
             }
         } )
         setDropdownValue( selectedReportingPeriodDate?.ID )
-    },[auditDetails?.AuditAndInspectionDetails?.ReportingPeriodDueDateSelected])
-
+    }
 
 
     useEffect( ( ) => {
