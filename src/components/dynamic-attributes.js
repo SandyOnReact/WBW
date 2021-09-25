@@ -181,7 +181,8 @@ export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHaza
             item: item,
             auditAndInspectionId: auditAndInspectionId,
             clearHazards: ( ) => onClear(),
-            updateHazards: ( newHazard ) => onUpdateHazard( newHazard )
+            updateHazards: ( newHazard ) => onUpdateHazard( newHazard ),
+            from: "audit"
         } )
         onHazardValueSelected( value )
     }

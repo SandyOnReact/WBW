@@ -898,7 +898,8 @@ export const CompleteOrAssignTask = ( props ) => {
         item,
         auditAndInspectionId,
         clearHazards,
-        updateHazards
+        updateHazards,
+        from
     } = route.params
     const STATUS_BAR_HEIGHT = getStatusBarHeight()
     const navigation = useNavigation()
@@ -921,12 +922,16 @@ export const CompleteOrAssignTask = ( props ) => {
 
 
     const navigateToPreviousScreen = async ( ) => {
-        let cancelData={
-            HazardsID:"",
-            CustomFormResultID:item.CustomFormResultID,
-        }
-        await AsyncStorage.setItem("cancelData", JSON.stringify(cancelData))
-        navigation.goBack()
+        if( from === "edit-audit" ) {
+            navigation.goBack()
+        }else{
+            let cancelData={
+                HazardsID:"",
+                CustomFormResultID:item.CustomFormResultID,
+            }
+            await AsyncStorage.setItem("cancelData", JSON.stringify(cancelData))
+            navigation.goBack()
+        }   
     }
 
     const fetchUserInfoFromStorage = async () => {

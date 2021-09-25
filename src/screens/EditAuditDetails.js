@@ -838,7 +838,7 @@ export const EditAuditDetailsScreen = () => {
             }) 
             const payload = {
                 UserID: userInfo.UserID,
-                PrimaryUserID: primaryUser,
+                PrimaryUserID: !isEmpty( primaryUser ) ? primaryUser : userInfo.UserID,
                 AccessToken: token,
                 AuditAndInspectionID: auditDetails.AuditAndInspectionDetails?.AuditAndInspectionID,
                 AuditAndInspectionTemplateID: AuditAndInspectionTemplateID,

@@ -162,11 +162,8 @@ export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHaza
     const [shouldUpdate,setShouldUpdate] = useState( false )
 
     useEffect(()=> {
-        console.log( 'Inside use effect',item.HazardsID)
         if( item.HazardsID !== "0" || item.HazardsID !== null || item.HazardsID !== undefined ) {
             setHazardValue( item.HazardsID )
-        }else{
-            setHazardValue( null )
         }
     }, [item.HazardsID] )
 
@@ -175,7 +172,6 @@ export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHaza
         return hazard
     })
     const onClear = ( ) => {
-        console.log( 'clearing hazard' )
         setHazardValue( '' )
     }
 
@@ -197,7 +193,8 @@ export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHaza
             item: item,
             auditAndInspectionId: auditAndInspectionId,
             clearHazards: ( ) => onClear(),
-            updateHazards: ( newHazard ) => onUpdateHazard( newHazard )
+            updateHazards: ( newHazard ) => onUpdateHazard( newHazard ),
+            from: "edit-audit"
         } )
         onHazardValueSelected( value )
     }
@@ -207,7 +204,7 @@ export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHaza
             title="Hazards"
             items={hazardData}
             value={hazardValue}
-            onValueChange={(e,value)=>onHazardValueChange(e,value)}
+            onValueChange={(value)=>onHazardValueChange(value)}
         />
     )
 }

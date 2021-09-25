@@ -112,6 +112,11 @@ export const StartInspection = () => {
         }
     }
 
+    const fetchUserInfoFromStorage = async () => {
+        const userInfo = await AsyncStorage.getItem('USER_INFO');
+        return userInfo != null ? JSON.parse(userInfo) : null;
+    }
+
     const onSubmit = async ( ) =>  {
         const isValidSecondaryDropdown = checkForValidSecondaryDropdown()
         if( !isValidSecondaryDropdown ) {
@@ -120,6 +125,7 @@ export const StartInspection = () => {
         }
         setIsLoading( true )
         const token = await AsyncStorage.getItem('Token')
+        const user = await fetchUserInfoFromStorage()
         const PrimaryUserID = isEmpty( selectedSecondaryDropdownValue ) ? userId : selectedSecondaryDropdownValue
         const body = {
             UserID: userId,
@@ -128,7 +134,8 @@ export const StartInspection = () => {
             AuditAndInspectionTemplateID: AuditAndInspectionTemplateID,
             TypeID: selectedPrimaryDropdownValue,
             PrimaryUserID: PrimaryUserID,
-            Type: Type
+            Type: Type,
+            CompanyID: user?.CompanyID
         }
         const result = await api.post({
             url: 'api/AuditAndInspection/StartAudit',

@@ -996,10 +996,10 @@ export const AuditDetailsScreen = () => {
     }
 
     const renderLastDayOfScheduledPeriod = ( ) => {
-        if( auditDetails.AuditAndInspectionDetails?.IsSchedulerRequired === "True" && auditDetails.AuditAndInspectionDetails?.ReportingPeriodDueDates === null ) {
+        if( auditDetails?.AuditAndInspectionDetails?.IsSchedulerRequired === "True" && auditDetails.AuditAndInspectionDetails?.ReportingPeriodDueDates === null ) {
             return null
         }
-        else if( auditDetails.AuditAndInspectionDetails?.IsSchedulerRequired === "True" ) {
+        else if( auditDetails?.AuditAndInspectionDetails?.IsSchedulerRequired === "True" ) {
             return renderCustomDropdown()
         }else{
             return null
