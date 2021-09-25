@@ -7,7 +7,7 @@ import { api } from '../utils/api'
 import { DashboardCard } from '../components/dashboard-card'
 import { Divider, Header } from 'react-native-elements'
 import { CommonActions } from '@react-navigation/native';
-import { isEmpty } from 'lodash-es';
+import { isEmpty, sortBy } from 'lodash-es';
 
 
 export const HomeScreen = ({ navigation }) => {
@@ -25,13 +25,14 @@ export const HomeScreen = ({ navigation }) => {
         console.log( user )
         const token = await AsyncStorage.getItem('Token')
         console.log( token )
-        const result = await api.post({
+        let result = await api.post({
             url: `api/Dashboard/getDashboardLink`,
             body: {
                 UserID: user.UserID,
                 AccessToken: token
             }
         })
+        result = sortBy( result, ( item ) => item.HomePageOrder )
         if ( isEmpty(result ) || result.Message === "Invalid User Token") {
             navigation.dispatch(
                 CommonActions.reset({

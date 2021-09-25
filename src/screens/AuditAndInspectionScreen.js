@@ -48,13 +48,13 @@ export const AuditAndInspectionScreen = ({ route, navigation }) => {
             url: 'api/AuditAndInspection/GetHistory',
             body: body
         })
+        setTemplateDetails( result.TemplateDetails )
         if( isEmpty( result ) || isEmpty( result.AudiAndInspectionListing ) || result.Message === "No Records Found" || result.Message === "Invalid User Token" || result === undefined ) {
             isLoading = false
             shouldFetch = false
             return null
         }
-        setAuditList( auditList => [...auditList, ...result.AudiAndInspectionListing ] )
-        setTemplateDetails( result.TemplateDetails )    
+        setAuditList( auditList => [...auditList, ...result.AudiAndInspectionListing ] )       
         shouldFetch = true
         isLoading = false
         return result;
@@ -99,7 +99,7 @@ export const AuditAndInspectionScreen = ({ route, navigation }) => {
                 Type: templateDetails.Type,
                 selectedDropdownValue: userId,
                 dropdownObject: "",
-                PrimaryUserID: "",
+                PrimaryUserID: userId,
                 AuditAndInspectionTemplateID: dashboard.AuditandInspectionTemplateID
             } )
         }
@@ -140,7 +140,7 @@ export const AuditAndInspectionScreen = ({ route, navigation }) => {
     const ListEmptyComponent = ( ) => {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-               <Text></Text>
+               <Text>No audit/inspection history found</Text>
             </View>
         )
     } 
@@ -157,7 +157,7 @@ export const AuditAndInspectionScreen = ({ route, navigation }) => {
                 <View style={{ flex: 1 }}>
                     <FlatList 
                         data={auditList}
-                        contentContainerStyle={{ paddingBottom: 80 }}
+                        contentContainerStyle={{ paddingBottom: 80, flexGrow: 1 }}
                         keyExtractor={ (item,index) => String( index ) }
                         renderItem={renderItem}
                         onEndReached={loadMoreResults}
