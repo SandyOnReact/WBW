@@ -5,6 +5,7 @@ import { CustomDropdown } from './core/custom-dropdown'
 import _, { isEmpty } from "lodash"
 import { useNavigation } from '@react-navigation/core'
 import AsyncStorage from "@react-native-async-storage/async-storage"
+import { Platform } from 'react-native'
 
 
 const inputContainerStyle = { borderWidth: 1, borderColor: '#1e5873', borderRadius: 6 }
@@ -169,14 +170,10 @@ export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHaza
         setHazardValue( newHazard )
     }
 
-    const onHazardValueChange = async ( value ) => {
-        if( value === null ) {
-            return null
-        }
-        setHazardValue( value )
+    const navigateToCompleteOrAssignTask = async ( ) => {
         await AsyncStorage.setItem( 'AttributeID', item.AttributeID )
         navigation.navigate( 'CompleteOrAssignTask', {
-            selectedHazardValue: value,
+            selectedHazardValue: hazardValue,
             hazardData: hazardData,
             item: item,
             auditAndInspectionId: auditAndInspectionId,
@@ -187,12 +184,23 @@ export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHaza
         onHazardValueSelected( value )
     }
 
+    const onHazardValueChange = async ( value ) => {
+        if( value === null ) {
+            return null
+        }
+        setHazardValue( value )
+        if( Platform.OS === "android" ) {
+            navigateToCompleteOrAssignTask()
+        }
+    }
+
     return (
         <CustomDropdown
             title="Hazards"
             items={hazardData}
             value={hazardValue}
             onValueChange={onHazardValueChange}
+            onDonePress={navigateToCompleteOrAssignTask}
         />
     )
 }

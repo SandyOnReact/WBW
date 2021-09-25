@@ -21,7 +21,8 @@ export const CustomDropdown = memo( ( props ) => {
         onOpen,
         customIcon,
         customTitleStyle,
-        error
+        error,
+        onDonePress
     } = props
 
     const Icon = customIcon || defaultIcon
@@ -64,6 +65,7 @@ export const CustomDropdown = memo( ( props ) => {
                 onOpen={onOpen}
                 Icon={Icon}
                 fixAndroidTouchableBug={true}
+                onDonePress={onDonePress}
             />
             {
                 error && (
