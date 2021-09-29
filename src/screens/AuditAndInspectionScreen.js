@@ -8,7 +8,7 @@ import { getStatusBarHeight } from 'react-native-status-bar-height'
 import { api } from '../utils/api'
 import { AuditCard } from '../components/audit-card'
 import { isEmpty } from 'lodash-es'
-import { useRoute } from '@react-navigation/native';
+import { useFocusEffect, useRoute } from '@react-navigation/native';
 import { result } from 'lodash'
 
 
@@ -33,6 +33,20 @@ export const AuditAndInspectionScreen = ({ route, navigation }) => {
             shouldFetch = true
         }
     }, [])
+
+    useFocusEffect(
+        React.useCallback( () => {
+            fetchDataOnPageLoad()
+        }, [])
+      );
+
+      const fetchDataOnPageLoad = async ( )=> {
+          await setShouldLoad(true)
+          page = 1
+          await setAuditList ([])
+          await setTemplateDetails({})
+          fetchAuditData(page)
+      }
 
     const fetchAuditData = async ( page ) => {
         const token = await AsyncStorage.getItem('Token')

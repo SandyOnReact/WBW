@@ -297,6 +297,9 @@ export const EditAuditDetailsScreen = () => {
     }
 
     const setDefaultSystemFieldsArray = ( ) => {
+        if( isEmpty( auditDetails?.SystemFields?.SystemFields ) ) {
+            return null
+        }
         const data = auditDetails.SystemFields.SystemFields.map( item => {
             const systemFieldrow = {
                 ControlID: item.ControlID,
@@ -436,6 +439,9 @@ export const EditAuditDetailsScreen = () => {
     }
 
     const renderDynamicFields = ( ) => {
+        if( isEmpty( auditDetails?.SystemFields?.SystemFields ) ) {
+            return null
+        }
         const SystemFieldsData = _.sortBy(auditDetails.SystemFields?.SystemFields, [function(o) { return o.DisplayOrder; }]);
         return (
             <FlatList 
@@ -658,8 +664,8 @@ export const EditAuditDetailsScreen = () => {
             return (
                 <DynamicGroupsCard 
                     dynamicGroups={item}  
-                    sourceList={shouldShowSourceDetails ? auditDetails.GroupsAndAttributes.SourceList : [] } 
-                    hazardList={shouldShowHazardDetails ? auditDetails.GroupsAndAttributes.HazardList : [] }
+                    sourceList={shouldShowSourceDetails ? isEmpty( auditDetails?.GroupsAndAttributes?.SourceList ) ? [] : auditDetails?.GroupsAndAttributes?.SourceList : [] } 
+                    hazardList={shouldShowHazardDetails ? isEmpty( auditDetails?.GroupsAndAttributes?.HazardList ) ? [] : auditDetails?.GroupsAndAttributes?.HazardList : [] }
                     scoreLabel={scoreLabel}
                     auditAndInspectionId={auditDetails.AuditAndInspectionDetails?.AuditAndInspectionID}
                     checkboxValue={checkboxValue}
@@ -698,6 +704,10 @@ export const EditAuditDetailsScreen = () => {
                 return result
     }
 
+    function replaceAll(string, search, replace) {
+        return string.split(search).join(replace);
+    }
+
     const checkForRequiredDynamicFields = ( ) => {
         var isFlagOn = true
         const SystemFieldsData = _.sortBy(systemFieldsArray, [function(o) { return o.DisplayOrder; }]);
@@ -707,7 +717,8 @@ export const EditAuditDetailsScreen = () => {
                 if(isFlagOn){
                     if(isEmpty(item.SelectedValue)){
                         if(item.IsMandatory){
-                            Toast.showWithGravity( `${item.ControlID} is required`, Toast.LONG, Toast.CENTER);
+                            const controlIdWithoutUnderScore = replaceAll( item.ControlID, '_','-' )
+                            Toast.showWithGravity( `${controlIdWithoutUnderScore} is required`, Toast.LONG, Toast.CENTER);
                             isFlagOn= false
                             return false
                         }
@@ -1135,7 +1146,7 @@ export const EditAuditDetailsScreen = () => {
                     renderDynamicFields()
                 }
             </View>
-            <View style={{ marginTop: -25 }}>
+            <View style={{ marginTop: `-3%` }}>
                 {
                     renderDynamicGroupsAndAttributes( checkboxValue )
                 }

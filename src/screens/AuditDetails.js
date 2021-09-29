@@ -8,7 +8,7 @@ import { CustomDropdown } from '../components/core/custom-dropdown'
 import { useKeyboard } from '@react-native-community/hooks';
 import { FlatList } from 'react-native';
 import { CustomMultiSelectCheckbox } from "./DynamicControlsScreen"
-import _, { clone, isEmpty, omit } from "lodash"
+import _, { clone, isEmpty, omit, replace } from "lodash"
 import { DynamicGroupsCard } from "../components/dynamic-card"
 import lodash from "lodash"
 import { api } from '../utils/api'
@@ -261,6 +261,9 @@ export const AuditDetailsScreen = () => {
     }
 
     const setDefaultSystemFieldsArray = ( ) => {
+        if( isEmpty( auditDetails?.SystemFields?.SystemFields ) ) {
+            return null
+        }
         const data = auditDetails.SystemFields.SystemFields.map( item => {
             const systemFieldrow = {
                 ControlID: item.ControlID,
@@ -449,6 +452,9 @@ export const AuditDetailsScreen = () => {
     }
 
     const renderDynamicFields = ( ) => {
+        if( isEmpty( auditDetails?.SystemFields?.SystemFields ) ) {
+            return null
+        }
         const SystemFieldsData = _.sortBy(auditDetails.SystemFields?.SystemFields, [function(o) { return o.DisplayOrder; }]);
         return (
             <FlatList 
@@ -670,13 +676,14 @@ export const AuditDetailsScreen = () => {
 
         var shouldShowHazardDetails = auditDetails.AuditAndInspectionDetails?.IsDisplayHazardList
         var shouldShowSourceDetails = auditDetails.AuditAndInspectionDetails?.IsDisplaySource
+
         var scoreLabel = auditDetails.AuditAndInspectionDetails?.ScoringLable
         return sortedGroupsData.map( item => {
             return (
                 <DynamicGroupsCard 
                     dynamicGroups={item}  
-                    sourceList={shouldShowSourceDetails ? auditDetails.GroupsAndAttributes.SourceList : [] } 
-                    hazardList={shouldShowHazardDetails ? auditDetails.GroupsAndAttributes.HazardList : [] }
+                    sourceList={shouldShowSourceDetails ? isEmpty( auditDetails?.GroupsAndAttributes?.SourceList ) ? [] : auditDetails?.GroupsAndAttributes?.SourceList : [] } 
+                    hazardList={shouldShowHazardDetails ? isEmpty( auditDetails?.GroupsAndAttributes?.HazardList ) ? [] : auditDetails?.GroupsAndAttributes?.HazardList : [] }
                     scoreLabel={scoreLabel}
                     auditAndInspectionId={auditDetails.AuditAndInspectionDetails?.AuditAndInspectionID}
                     checkboxValue={checkboxValue}
@@ -715,6 +722,12 @@ export const AuditDetailsScreen = () => {
                 return result
     }
 
+    
+    function replaceAll(string, search, replace) {
+        return string.split(search).join(replace);
+    }
+
+
     const checkForRequiredDynamicFields = ( ) => {
         var isFlagOn = true
         const SystemFieldsData = _.sortBy(systemFieldsArray, [function(o) { return o.DisplayOrder; }]);
@@ -724,7 +737,8 @@ export const AuditDetailsScreen = () => {
                 if(isFlagOn){
                     if(isEmpty(item.SelectedValue)){
                         if(item.IsMandatory){
-                            Toast.showWithGravity( `${item.ControlID} is required`, Toast.LONG, Toast.CENTER);
+                            const controlIdWithoutUnderScore = replaceAll( item.ControlID, '_', '-' )
+                            Toast.showWithGravity( `${controlIdWithoutUnderScore} is required`, Toast.LONG, Toast.CENTER);
                             isFlagOn= false
                             return false
                         }
@@ -906,7 +920,6 @@ export const AuditDetailsScreen = () => {
         }
     }
 
-
     const onSaveAndComeBack = async ( ) =>  {
         try {
             const isValid = checkForValidPayload()
@@ -955,10 +968,12 @@ export const AuditDetailsScreen = () => {
                     Groups: groupsArrayWithOnlyRequiredFields
                 }
             }
+            console.log( 'payload is ',JSON.stringify( payload ) )
             const result = await api.post({
                 url: `api/AuditAndInspection/SaveAudit`,
                 body: payload
             })
+            console.log( 'on save and come back',JSON.stringify( result ))
             if( isEmpty( result ) ) {
                 return null
             }else if( !isEmpty( result ) && isEmpty( imagesObject ) ) {
@@ -1123,7 +1138,7 @@ export const AuditDetailsScreen = () => {
                     renderDynamicFields()
                 }
             </View>
-            <View style={{ marginTop: -25 }}>
+            <View style={{ marginTop: `-3%` }}>
                 {
                     renderDynamicGroupsAndAttributes( checkboxValue )
                 }
