@@ -168,6 +168,7 @@ export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHaza
         console.log( 'Inside new hazard', JSON.stringify( newHazard ) )
         setShouldUpdate( !shouldUpdate )
         setHazardValue( newHazard )
+        onHazardValueSelected( newHazard )
     }
 
     const navigateToCompleteOrAssignTask = async ( ) => {
@@ -185,7 +186,10 @@ export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHaza
     }
 
     const onHazardValueChange = async ( value ) => {
+        console.log( 'value in hazard is  ',value)
         if( value === null ) {
+            setHazardValue( value )
+            onHazardValueSelected( '' )
             return null
         }
         setHazardValue( value )
