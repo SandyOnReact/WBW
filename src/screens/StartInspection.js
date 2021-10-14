@@ -75,9 +75,6 @@ export const StartInspection = () => {
     }
 
     const onPrimaryDropdownValueChange = ( value ) => {
-        if( value === null ) {
-            return null
-        }
         setSelectedPrimaryDropdownvalue( value )
         const selectedObject = data.find( item => String( item.TypeID ) === String( value ))
        if( !isEmpty( selectedObject.PrimaryUserList ) ) {
@@ -125,10 +122,6 @@ export const StartInspection = () => {
         const isValidSecondaryDropdown = checkForValidSecondaryDropdown()
         if( !isValidSecondaryDropdown ) {
             Toast.showWithGravity('Inspection on Behalf of is required.', Toast.LONG, Toast.CENTER);
-            return null
-        }
-        if(isEmpty(selectedPrimaryDropdownValue)){
-            Toast.showWithGravity(`Please select ${Type}`, Toast.LONG, Toast.CENTER);
             return null
         }
         setIsLoading( true )

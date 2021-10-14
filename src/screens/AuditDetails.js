@@ -8,8 +8,9 @@ import { CustomDropdown } from '../components/core/custom-dropdown'
 import { useKeyboard } from '@react-native-community/hooks';
 import { FlatList } from 'react-native';
 import { CustomMultiSelectCheckbox } from "./DynamicControlsScreen"
-import { clone, isEmpty, omit, sortBy, replace, findIndex } from "lodash"
+import _, { clone, isEmpty, omit, replace } from "lodash"
 import { DynamicGroupsCard } from "../components/dynamic-card"
+import lodash from "lodash"
 import { api } from '../utils/api'
 import Toast from "react-native-simple-toast"
 
@@ -202,7 +203,6 @@ export const AuditDetailsScreen = () => {
     const [groupsArray,setGroupsArray] = useState( [] )
     const [returnData,setReturnData] = useState( {} )
     const [cancelData,setCancelData] = useState( {} )
-    const [primaryUser,setPrimaryUser] = useState( PrimaryUserID )
     const STATUS_BAR_HEIGHT = getStatusBarHeight()
     const keyboard = useKeyboard()
     const navigation = useNavigation()
@@ -361,7 +361,7 @@ export const AuditDetailsScreen = () => {
     const onChangeDropdownValue = ( value ) => {
         let data = [...auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates]
         let reversedData = data.reverse()
-        let currentSelectedIndex = findIndex(reversedData, function(o) { return o.ID === value });
+        let currentSelectedIndex = lodash.findIndex(reversedData, function(o) { return o.ID === value });
         remainingDropdownArray = []
         for( let i=0;i<currentSelectedIndex;i++) {
             remainingDropdownArray.push( reversedData[i].Value )
@@ -455,7 +455,7 @@ export const AuditDetailsScreen = () => {
         if( isEmpty( auditDetails?.SystemFields?.SystemFields ) ) {
             return null
         }
-        const SystemFieldsData = sortBy(auditDetails.SystemFields?.SystemFields, [function(o) { return o.DisplayOrder; }]);
+        const SystemFieldsData = _.sortBy(auditDetails.SystemFields?.SystemFields, [function(o) { return o.DisplayOrder; }]);
         return (
             <FlatList 
                 data={SystemFieldsData}
@@ -545,30 +545,6 @@ export const AuditDetailsScreen = () => {
             }
         }
         return commentLabel
-    }
-
-    const renderPrimaryUserList = ( ) => {
-        if( auditDetails.AuditAndInspectionDetails?.PrimaryUserList && auditDetails.AuditAndInspectionDetails?.PrimaryUserList.length > 0 ) {
-            let data = auditDetails.AuditAndInspectionDetails.PrimaryUserList.map( item => {
-                const primaryUser = { label: item.Name, value: item.ID }
-                return primaryUser
-            })
-
-            const onChangeDropdownValue = ( value ) => {
-                setPrimaryUser( value )
-            }
-
-            return (
-                <CustomDropdown
-                    title="Inspection on behalf of *"
-                    value={primaryUser}
-                    onValueChange={onChangeDropdownValue}
-                    items={data}
-                />
-            ) 
-        }else{
-            return null
-        }
     }
     
     const checkIsHazardsPresentAndRequired = ( selectedScoreValue, CorrectAnswerID, ScoreList ) => {
@@ -698,7 +674,7 @@ export const AuditDetailsScreen = () => {
 
 
     const renderDynamicGroupsAndAttributes = ( checkboxValue ) => {
-        var sortedGroupsData = sortBy( auditDetails.GroupsAndAttributes?.Groups, ( item ) => item.GroupOrder )
+        var sortedGroupsData = _.sortBy( auditDetails.GroupsAndAttributes?.Groups, ( item ) => item.GroupOrder )
         sortedGroupsData = sortedGroupsData.map(item=>{
             item.Attributes.map(innerItem=>{
                 innerItem.shouldClearHazard = false
@@ -743,7 +719,7 @@ export const AuditDetailsScreen = () => {
         if( auditDetails.AuditAndInspectionDetails?.IsSchedulerRequired === "True" && auditDetails.AuditAndInspectionDetails?.ReportingPeriodDueDates === null ) {
             return true
         }else{
-            const isValidSchedulePeriod = shouldShowWarningMessage ? dropdownvalue === ''  : !isEmpty(dropdownvalue)
+            const isValidSchedulePeriod = shouldShowWarningMessage ? dropdownvalue === ''  : !lodash.isEmpty(dropdownvalue)
             if( isValidSchedulePeriod && !shouldShowWarningMessage ) {
                 return true
             }else{
@@ -773,7 +749,7 @@ export const AuditDetailsScreen = () => {
 
     const checkForRequiredDynamicFields = ( ) => {
         var isFlagOn = true
-        const SystemFieldsData = sortBy(systemFieldsArray, [function(o) { return o.DisplayOrder; }]);
+        const SystemFieldsData = _.sortBy(systemFieldsArray, [function(o) { return o.DisplayOrder; }]);
         const clonedSystemFieldsArray = [...SystemFieldsData]
         const fieldsArray = clonedSystemFieldsArray.map( item => {
             if( item.IsMandatory === "True" ) {
@@ -1174,9 +1150,6 @@ export const AuditDetailsScreen = () => {
                 />
             </View>
             <View flex={0.5} style={{ marginHorizontal: '0.5%' }}>
-                {
-                    renderPrimaryUserList()
-                }
                 {
                    renderLastDayOfScheduledPeriod()
                 }
