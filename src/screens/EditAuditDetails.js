@@ -717,7 +717,7 @@ export const EditAuditDetailsScreen = () => {
                 if(isFlagOn){
                     if(isEmpty(item.SelectedValue)){
                         if(item.IsMandatory){
-                            const controlIdWithoutUnderScore = replaceAll( item.ControlID, '_','-' )
+                            const controlIdWithoutUnderScore = replaceAll( item.ControlID, '_',' ' )
                             Toast.showWithGravity( `${controlIdWithoutUnderScore} is required`, Toast.LONG, Toast.CENTER);
                             isFlagOn= false
                             return false
@@ -808,6 +808,13 @@ export const EditAuditDetailsScreen = () => {
                 Toast.showWithGravity('Last day of schedule period is required.', Toast.LONG, Toast.CENTER);
                 return null
             }
+            if( auditDetails.AuditAndInspectionDetails?.PrimaryUserList && auditDetails.AuditAndInspectionDetails?.PrimaryUserList.length > 0 && isEmpty(primaryUser) ) {
+                if( isEmpty( primaryUser ) ) {
+                    Toast.showWithGravity('Please select primary user list', Toast.LONG, Toast.CENTER);
+                    return null
+                }
+                return null
+            }
             const isreasonFilled = checkForSkippedReason()
             if(!isreasonFilled){
                 Toast.showWithGravity('Reason for skipping the last day of schedule period is required.', Toast.LONG, Toast.CENTER);
@@ -858,7 +865,7 @@ export const EditAuditDetailsScreen = () => {
                 AuditAndInspectionTemplateID: AuditAndInspectionTemplateID,
                 Type: Type,
                 TypeID: auditDetails.AuditAndInspectionDetails?.TypeID,
-                Notes: auditDetails.AuditAndInspectionDetails?.Notes,
+                Notes: inputValue,
                 ReportingPeriodDueDateSelected: isEmpty( reportingPeriodDueDate ) ? null : reportingPeriodDueDate?.Value,
                 ReportingPeriodDueDateSelectedID: dropdownvalue,
                 NextDueDate: auditDetails.AuditAndInspectionDetails?.NextDueDate,
@@ -872,6 +879,7 @@ export const EditAuditDetailsScreen = () => {
                 }
             }
             console.log( 'final payload after kadya',JSON.stringify( payload )) 
+            return null
             const result = await api.post({
                 url: `api/AuditAndInspection/CompleteAudit`,
                 body: payload
@@ -882,7 +890,7 @@ export const EditAuditDetailsScreen = () => {
             }else if( !isEmpty( result ) && isEmpty( imagesObject ) ) {
                 Toast.showWithGravity(result?.Message, Toast.LONG, Toast.CENTER);
                 setTimeout( ( ) => {
-                    navigation.pop(2)
+                    navigation.pop()
 
                   //  navigation.navigate( 'Home' )
                 }, 2000 )
@@ -894,7 +902,7 @@ export const EditAuditDetailsScreen = () => {
                 if( isEmpty( response ) ) {
                     return null
                 }
-                navigation.pop(2)
+                navigation.pop()
               //  navigation.navigate( 'Home' )
             }
         } catch ( error ) {
@@ -938,7 +946,7 @@ export const EditAuditDetailsScreen = () => {
                 AuditAndInspectionTemplateID: AuditAndInspectionTemplateID,
                 Type: Type,
                 TypeID: auditDetails.AuditAndInspectionDetails?.TypeID,
-                Notes: auditDetails.AuditAndInspectionDetails?.Notes,
+                Notes: inputValue,
                 ReportingPeriodDueDateSelected: isEmpty( reportingPeriodDueDate ) ? null : reportingPeriodDueDate?.Value,
                 ReportingPeriodDueDateSelectedID: dropdownvalue,
                 NextDueDate: auditDetails.AuditAndInspectionDetails?.NextDueDate,
@@ -951,6 +959,8 @@ export const EditAuditDetailsScreen = () => {
                     Groups: groupsArrayWithOnlyRequiredFields
                 }
             }
+            console.log( 'payload for save and come back ',JSON.stringify( payload))
+            return null
             const result = await api.post({
                 url: `api/AuditAndInspection/SaveAudit`,
                 body: payload
@@ -960,7 +970,7 @@ export const EditAuditDetailsScreen = () => {
             }else if( !isEmpty( result ) && isEmpty( imagesObject ) ) {
                 Toast.showWithGravity(result?.Message, Toast.LONG, Toast.CENTER);
                 setTimeout( ( ) => {
-                    navigation.pop(2)
+                    navigation.pop()
                    // navigation.navigate( 'Home' )
                 }, 2000 )
             }else if( !isEmpty( result ) && !isEmpty( imagesObject ) ) {
@@ -971,7 +981,7 @@ export const EditAuditDetailsScreen = () => {
                 if( isEmpty( response ) ) {
                     return null
                 }
-                navigation.pop(2)
+                navigation.pop()
 
                // navigation.navigate( 'Home' )
             }
@@ -1085,7 +1095,7 @@ export const EditAuditDetailsScreen = () => {
                 renderAuditDetailsRow( 'Action Taken By:', `${userInfo?.FullName}` )
             }
             {
-                renderAuditDetailsRow( `Select ${Type} :`, `${dropdownObject?.Name}` )
+                renderAuditDetailsRow( `Select ${Type} :`, `${auditDetails.AuditAndInspectionDetails?.TypeName}` )
             }
             <View style={{ marginTop: '3%', marginHorizontal: '2.2%' }}>
                 <Input

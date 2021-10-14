@@ -208,7 +208,7 @@ export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHaza
 
     return (
         <CustomDropdown
-            title="Hazards"
+            title="Hazards *"
             items={hazardData}
             value={hazardValue}
             onValueChange={(value)=>onHazardValueChange(value)}
@@ -282,7 +282,7 @@ const RenderHazardDropdown = ( props ) => {
 
 export const GroupAttributes = ( props ) => {
     const { item, scoreLabel, sourceList, hazardList, auditAndInspectionId, currentScoreValue, checkboxValue, onSourceValueSelected, onHazardValueSelected } = props
-    const [scoreValue,setScoreValue] = useState( null )
+    const [scoreValue,setScoreValue] = useState( item.GivenAnswerID )
     const scoreData = item.ScoreList.map( item => {
         const score = { label: item.Value, value: item.ID }
         return score

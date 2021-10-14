@@ -477,7 +477,7 @@ export const AuditDetailsScreen = () => {
             }
         })
         const checkIfTruthyValues = ScoreList.find( item => {
-            if( ["True", "False", "Yes", "No"].includes( item.Value ) && item.ID === selectedScoreValue ) {
+            if( ["True", "False", "Yes", "No","Pass","Fail"].includes( item.Value ) && item.ID === selectedScoreValue ) {
                 return true
             }else{
                 return false
@@ -567,9 +567,9 @@ export const AuditDetailsScreen = () => {
             }
         })
         if( checkIfTruthyValues ? Number(selectedScoreValue) === Number(CorrectAnswerID) : Number( selectedScoreValue ) >= Number( CorrectAnswerID ) ) {
-            return false
-        }else{
             return true
+        }else{
+            return false
         }
     }
 
@@ -697,6 +697,9 @@ export const AuditDetailsScreen = () => {
     }
 
     const checkForValidPayload = ( ) => {
+        if( auditDetails.AuditAndInspectionDetails?.IsSchedulerRequired === "False") {
+            return true
+        }
         if( auditDetails.AuditAndInspectionDetails?.IsSchedulerRequired === "True" && auditDetails.AuditAndInspectionDetails?.ReportingPeriodDueDates === null ) {
             return true
         }else{
@@ -737,7 +740,7 @@ export const AuditDetailsScreen = () => {
                 if(isFlagOn){
                     if(isEmpty(item.SelectedValue)){
                         if(item.IsMandatory){
-                            const controlIdWithoutUnderScore = replaceAll( item.ControlID, '_', '-' )
+                            const controlIdWithoutUnderScore = replaceAll( item.ControlID, '_', ' ' )
                             Toast.showWithGravity( `${controlIdWithoutUnderScore} is required`, Toast.LONG, Toast.CENTER);
                             isFlagOn= false
                             return false
@@ -824,17 +827,20 @@ export const AuditDetailsScreen = () => {
     const onSubmit = async ( ) =>  {
         try {
             const isValid = checkForValidPayload()
+            console.log( 'isValid',isValid)
             if( !isValid ) {
                 Toast.showWithGravity('Last day of schedule period is required.', Toast.LONG, Toast.CENTER);
                 return null
             }
             const isreasonFilled = checkForSkippedReason()
+            console.log( 'isReason Filled',isreasonFilled)
             if(!isreasonFilled){
                 Toast.showWithGravity('Reason for skipping the last day of schedule period is required.', Toast.LONG, Toast.CENTER);
                 return null
             }
-
+            
             const checkForValidFields = checkForRequiredDynamicFields()
+            console.log( 'checkForValidFields',checkForValidFields)
             if( !checkForValidFields ) {
                // Toast.showWithGravity('Please Enter Worksite mandatory data', Toast.LONG, Toast.CENTER);
                 return null 
@@ -891,6 +897,8 @@ export const AuditDetailsScreen = () => {
                     Groups: groupsArrayWithOnlyRequiredFields
                 }
             }
+            console.log( 'paload for submitting audit',JSON.stringify( payload ) )
+            return null
             const result = await api.post({
                 url: `api/AuditAndInspection/CompleteAudit`,
                 body: payload
@@ -1129,7 +1137,7 @@ export const AuditDetailsScreen = () => {
                 : null
             }
             {
-                !_.isEmpty( auditDetails.AuditAndInspectionDetails.ScheduleFrequency ) 
+                !isEmpty( auditDetails.AuditAndInspectionDetails.ScheduleFrequency ) 
                 ? renderAuditDetailsRow( 'Schedule Frequency:', `${auditDetails.AuditAndInspectionDetails.ScheduleFrequency}` )
                 : null
             }

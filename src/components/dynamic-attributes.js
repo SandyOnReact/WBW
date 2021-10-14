@@ -19,7 +19,7 @@ export const CommentInput = ( { item, selectedScoreValue, isMandatoryType, onCom
         }
     })
     const checkIfTruthyValues = item.ScoreList.find( item => {
-        if( ["True", "False", "Yes", "No"].includes( item.Value ) && item.ID === selectedScoreValue ) {
+        if( ["True", "False", "Yes", "No","Pass","Fail"].includes( item.Value ) && item.ID === selectedScoreValue ) {
             return true
         }else{
             return false
@@ -196,7 +196,7 @@ export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHaza
 
     return (
         <CustomDropdown
-            title="Hazards"
+            title="Hazards *"
             items={hazardData}
             value={hazardValue}
             onValueChange={onHazardValueChange}
@@ -298,7 +298,7 @@ export const GroupAttributes = ( props ) => {
                     <CustomDropdown
                         title={scoreLabel}
                         items={scoreData}
-                        value={checkboxValue && isEmpty( scoreValue ) ? item.MaxCorrectAnswerID : scoreValue}
+                        value={checkboxValue && isEmpty(scoreValue) ? item.MaxCorrectAnswerID : scoreValue}
                         onValueChange={onScoreValueChange}
                     />
                 )

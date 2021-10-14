@@ -958,8 +958,8 @@ export const CompleteOrAssignTask = ( props ) => {
             setIsDataLoading( false )
             if( result && result.Message !== "No Task Found" ) {
                 setShouldShowTaskDetails( true )
-                // await AsyncStorage.removeItem( 'cancelData' )
-                // await AsyncStorage.removeItem( 'returndata' )
+                await AsyncStorage.removeItem( 'cancelData' )
+                await AsyncStorage.removeItem( 'returndata' )
                 setTaskDetails( result )
             } 
         } catch( error ) {

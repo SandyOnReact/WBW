@@ -26,7 +26,7 @@ export const AuditAndInspectionScreen = ({ route, navigation }) => {
     const STATUS_BAR_HEIGHT = getStatusBarHeight()
 
     useEffect(() => {
-        fetchAuditData( page )
+        // fetchAuditData( page )
         return () => {
             page = 1,
             isLoading = false,
@@ -106,6 +106,7 @@ export const AuditAndInspectionScreen = ({ route, navigation }) => {
         console.log( 'response on edit inspection ',JSON.stringify( result ) )
         if( isEmpty( result ) ) {
             isLoading = false
+            navigatetoBackScreen()
             return null
         }else{
             navigation.navigate( 'EditAuditDetails', {

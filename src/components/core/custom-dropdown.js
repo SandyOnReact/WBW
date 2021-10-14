@@ -54,7 +54,6 @@ export const CustomDropdown = memo( ( props ) => {
                 <Text style={[titleStyle,customTitleStyle]}>{title}</Text>
             </View>
             <RNPickerSelect
-                key={value}
                 items={items}
                 value={value}
                 onValueChange={onValueChange}

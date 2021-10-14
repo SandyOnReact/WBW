@@ -46,6 +46,7 @@ export const StartInspection = () => {
             body: body
         })
         if( isEmpty( result ) ) {
+            navigatetoBackScreen()
             return null
         }
         setData( result )
