@@ -8,9 +8,8 @@ import { CustomDropdown } from '../components/core/custom-dropdown'
 import { useKeyboard } from '@react-native-community/hooks';
 import { FlatList } from 'react-native';
 import { CustomMultiSelectCheckbox } from "./DynamicControlsScreen"
-import _, { clone, isEmpty, omit } from "lodash"
+import { clone, isEmpty, omit, sortBy, replace, findIndex } from "lodash"
 import { DynamicGroupsCard } from "../components/edit-dynamic-card"
-import lodash from "lodash"
 import { api } from '../utils/api'
 import Toast from "react-native-simple-toast"
 
@@ -190,10 +189,10 @@ let remainingDropdownArray = []
 let selectedScoreArray = []
 export const EditAuditDetailsScreen = () => {
     const route = useRoute()
-    const { auditDetails, Type, selectedDropdownValue, dropdownObject, PrimaryUserID, AuditAndInspectionTemplateID } = route.params
+    const { auditDetails, Type, selectedDropdownValue, dropdownObject, AuditAndInspectionTemplateID } = route.params
     const [checkboxValue,setCheckboxValue] = useState( false )
     const [inputValue,setInputValue] = useState( auditDetails?.AuditAndInspectionDetails?.Notes )
-    const [skipReasonValue,setSkipReasonValue] = useState( '' )
+    const [skipReasonValue,setSkipReasonValue] = useState( auditDetails?.AuditAndInspectionDetails.SkippedReason )
     const [dropdownvalue,setDropdownValue] = useState( '' )
     const [userInfo,setUserInfo] = useState( {} )
     const [isReset,setIsReset] = useState( false )
@@ -203,11 +202,10 @@ export const EditAuditDetailsScreen = () => {
     const [groupsArray,setGroupsArray] = useState( [] )
     const [returnData,setReturnData] = useState( {} )
     const [cancelData,setCancelData] = useState( {} )
-    const [primaryUser,setPrimaryUser] = useState( '' )
+    const [primaryUser,setPrimaryUser] = useState(auditDetails?.AuditAndInspectionDetails.PrimaryUserID)
     const STATUS_BAR_HEIGHT = getStatusBarHeight()
     const keyboard = useKeyboard()
     const navigation = useNavigation()
-
     // useEffect(()=>{
     //     console.log( 'isAllow',auditDetails?.AuditAndInspectionDetails?.ReportingPeriodDueDateSelected )
     //     if( auditDetails?.AuditAndInspectionDetails?.IsAllowCheckAll === "True" ) {
@@ -348,7 +346,7 @@ export const EditAuditDetailsScreen = () => {
     const onChangeDropdownValue = ( value ) => {
         let data = [...auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates]
         let reversedData = data.reverse()
-        let currentSelectedIndex = lodash.findIndex(reversedData, function(o) { return o.ID === value });
+        let currentSelectedIndex = findIndex(reversedData, function(o) { return o.ID === value });
         remainingDropdownArray = []
         for( let i=0;i<currentSelectedIndex;i++) {
             remainingDropdownArray.push( reversedData[i].Value )
@@ -442,7 +440,7 @@ export const EditAuditDetailsScreen = () => {
         if( isEmpty( auditDetails?.SystemFields?.SystemFields ) ) {
             return null
         }
-        const SystemFieldsData = _.sortBy(auditDetails.SystemFields?.SystemFields, [function(o) { return o.DisplayOrder; }]);
+        const SystemFieldsData = sortBy(auditDetails.SystemFields?.SystemFields, [function(o) { return o.DisplayOrder; }]);
         return (
             <FlatList 
                 data={SystemFieldsData}
@@ -641,7 +639,7 @@ export const EditAuditDetailsScreen = () => {
 
 
     const renderDynamicGroupsAndAttributes = ( checkboxValue ) => {
-        var sortedGroupsData = _.sortBy( auditDetails.GroupsAndAttributes?.Groups, ( item ) => item.GroupOrder )
+        var sortedGroupsData = sortBy( auditDetails.GroupsAndAttributes?.Groups, ( item ) => item.GroupOrder )
         sortedGroupsData = sortedGroupsData.map(item=>{
             item.Attributes.map(innerItem=>{
                 innerItem.shouldClearHazard = false
@@ -682,7 +680,7 @@ export const EditAuditDetailsScreen = () => {
         if( auditDetails.AuditAndInspectionDetails?.IsSchedulerRequired === "True" && auditDetails.AuditAndInspectionDetails?.ReportingPeriodDueDates === null ) {
             return true
         }else{
-            const isValidSchedulePeriod = shouldShowWarningMessage ? dropdownvalue === ''  : !lodash.isEmpty(dropdownvalue)
+            const isValidSchedulePeriod = shouldShowWarningMessage ? dropdownvalue === ''  : !isEmpty(dropdownvalue)
             if( isValidSchedulePeriod && !shouldShowWarningMessage ) {
                 return true
             }else{
@@ -710,7 +708,7 @@ export const EditAuditDetailsScreen = () => {
 
     const checkForRequiredDynamicFields = ( ) => {
         var isFlagOn = true
-        const SystemFieldsData = _.sortBy(systemFieldsArray, [function(o) { return o.DisplayOrder; }]);
+        const SystemFieldsData = sortBy(systemFieldsArray, [function(o) { return o.DisplayOrder; }]);
         const clonedSystemFieldsArray = [...SystemFieldsData]
         const fieldsArray = clonedSystemFieldsArray.map( item => {
             if( item.IsMandatory === "True" ) {
@@ -801,7 +799,7 @@ export const EditAuditDetailsScreen = () => {
         return result
     }
 
-    const onSubmit = async ( ) =>  {
+    const onSubmit = async ( ) =>  { 
         try {
             const isValid = checkForValidPayload()
             if( !isValid ) {
@@ -869,7 +867,7 @@ export const EditAuditDetailsScreen = () => {
                 ReportingPeriodDueDateSelected: isEmpty( reportingPeriodDueDate ) ? null : reportingPeriodDueDate?.Value,
                 ReportingPeriodDueDateSelectedID: dropdownvalue,
                 NextDueDate: auditDetails.AuditAndInspectionDetails?.NextDueDate,
-                SkippedReason: auditDetails.AuditAndInspectionDetails?.SkippedReason,
+                SkippedReason: skipReasonValue,
                 SystemFields: {
                     AuditAndInspection_SystemFieldID: auditDetails.SystemFields?.AuditAndInspection_SystemFieldID,
                     SystemFields: systemsArrayWithoutMandatoryFields
@@ -880,6 +878,7 @@ export const EditAuditDetailsScreen = () => {
             }
             console.log( 'final payload after kadya',JSON.stringify( payload )) 
             return null
+
             const result = await api.post({
                 url: `api/AuditAndInspection/CompleteAudit`,
                 body: payload
@@ -940,7 +939,7 @@ export const EditAuditDetailsScreen = () => {
             }) 
             const payload = {
                 UserID: userInfo.UserID,
-                PrimaryUserID: PrimaryUserID,
+                PrimaryUserID: !isEmpty( primaryUser ) ? primaryUser : userInfo.UserID,
                 AccessToken: token,
                 AuditAndInspectionID: auditDetails.AuditAndInspectionDetails?.AuditAndInspectionID,
                 AuditAndInspectionTemplateID: AuditAndInspectionTemplateID,
@@ -950,7 +949,7 @@ export const EditAuditDetailsScreen = () => {
                 ReportingPeriodDueDateSelected: isEmpty( reportingPeriodDueDate ) ? null : reportingPeriodDueDate?.Value,
                 ReportingPeriodDueDateSelectedID: dropdownvalue,
                 NextDueDate: auditDetails.AuditAndInspectionDetails?.NextDueDate,
-                SkippedReason: auditDetails.AuditAndInspectionDetails?.SkippedReason,
+                SkippedReason: skipReasonValue,
                 SystemFields: {
                     AuditAndInspection_SystemFieldID: auditDetails.SystemFields?.AuditAndInspection_SystemFieldID,
                     SystemFields: systemsArrayWithoutMandatoryFields
@@ -960,7 +959,6 @@ export const EditAuditDetailsScreen = () => {
                 }
             }
             console.log( 'payload for save and come back ',JSON.stringify( payload))
-            return null
             const result = await api.post({
                 url: `api/AuditAndInspection/SaveAudit`,
                 body: payload
@@ -1147,7 +1145,7 @@ export const EditAuditDetailsScreen = () => {
                 : null
             }
             {
-                !_.isEmpty( auditDetails.AuditAndInspectionDetails.ScheduleFrequency ) 
+                !isEmpty( auditDetails.AuditAndInspectionDetails.ScheduleFrequency ) 
                 ? renderAuditDetailsRow( 'Schedule Frequency:', `${auditDetails.AuditAndInspectionDetails.ScheduleFrequency}` )
                 : null
             }
