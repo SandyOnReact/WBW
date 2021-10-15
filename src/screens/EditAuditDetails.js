@@ -533,6 +533,10 @@ export const EditAuditDetailsScreen = () => {
     }
     
     const checkIsHazardsPresentAndRequired = ( selectedScoreValue, CorrectAnswerID, ScoreList ) => {
+        console.log( 'selected score value ',selectedScoreValue)
+        console.log( 'correct answer id ',CorrectAnswerID)
+        //console.log( 'check condition', checkIfTruthyValues ? Number(selectedScoreValue) === Number(CorrectAnswerID) : Number( selectedScoreValue ) >= Number( CorrectAnswerID )  )
+        console.log( 'score  list',JSON.stringify(ScoreList))
         const shouldCheckForNonApplicableValues = ScoreList.find( item => {
             if( item.Value === "Not Applicable" && item.ID === selectedScoreValue ) {
                 return true
@@ -541,20 +545,24 @@ export const EditAuditDetailsScreen = () => {
             }
         })
         const checkIfTruthyValues = ScoreList.find( item => {
-            if( ["True", "False", "Yes", "No", "Pass", "Fail"].includes( item.Value ) && item.ID == selectedScoreValue ) {
+            if( ["True", "False", "Yes", "No", "Pass", "Fail"].includes( item.Value ) && item.ID === selectedScoreValue ) {
                 return true
             }else{
                 return false
             }
         })
+        console.log( 'truthy value is ',checkIfTruthyValues)
         if( checkIfTruthyValues ? Number(selectedScoreValue) === Number(CorrectAnswerID) : Number( selectedScoreValue ) >= Number( CorrectAnswerID ) ) {
+            console.log( 'Inside IF.. returning false')
             return false
         }else{
+            console.log( 'Inside ELSE.. returning true')
             return true
         }
     }
 
     const currentSelectedScoreValue = ( value, id  ) => {
+        console.log( 'value is ',value, id )
         if( value === null ) {
             Toast.showWithGravity('Please Select score from score column', Toast.LONG, Toast.CENTER);
             return null
@@ -563,13 +571,17 @@ export const EditAuditDetailsScreen = () => {
         clonedGroupsArray = clonedGroupsArray.map( groups => {
             groups = groups.Attributes.map( attribute => {
                 if( attribute.AttributeID === id ) {
-                    if( attribute.isHazardsRequired === true ) {
-                        attribute.isHazardsRequired = checkIsHazardsPresentAndRequired( value, attribute.CorrectAnswerID, attribute.ScoreList )
+                    console.log( 'Inside first IF')
+                   
+                    attribute.isHazardsRequired = checkIsHazardsPresentAndRequired( value, attribute.CorrectAnswerID, attribute.ScoreList )
+                    if( attribute.isHazardsRequired == false ) {
+                        attribute.HazardsID = "0"
                     }
                     attribute.isRequired = checkIsCommentsMandatory( attribute.IsCommentsMandatory, value, attribute.CorrectAnswerID, attribute.ScoreList  )
                     attribute.GivenAnswerID = value
                     return attribute     
                 }
+                console.log( 'outside first IF')
                 return attribute
             })
             return {
@@ -578,6 +590,7 @@ export const EditAuditDetailsScreen = () => {
         })
         setGroupsArray( clonedGroupsArray )
     }
+    
     const onSelectedSourceValue = ( value, id  ) => {
         if( value === null ) {
             return null
@@ -830,16 +843,17 @@ export const EditAuditDetailsScreen = () => {
                 Toast.showWithGravity('Please select a score from the Score column', Toast.LONG, Toast.CENTER);
                 return null 
             }
-            const checkForComments = checkForCommentsItem() 
-            if( !checkForComments ) {
-                Toast.showWithGravity('Comment(s) required.', Toast.LONG, Toast.CENTER);
-                return null 
-            }
             const checkForHazards = checkForHazardsItem() 
             if( !checkForHazards ) {
                 Toast.showWithGravity('Hazard is required.', Toast.LONG, Toast.CENTER);
                 return null 
             }
+            const checkForComments = checkForCommentsItem() 
+            if( !checkForComments ) {
+                Toast.showWithGravity('Comment(s) required.', Toast.LONG, Toast.CENTER);
+                return null 
+            }
+           
             const reportingPeriodDueDate = !isEmpty( auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates ) ? auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates.find( item => item.ID === dropdownvalue) : ''
             const token = await AsyncStorage.getItem('Token')
             const systemsArrayWithoutMandatoryFields = systemFieldsArray.map( item => {
