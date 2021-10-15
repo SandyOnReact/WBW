@@ -961,7 +961,7 @@ export const AuditDetailsScreen = () => {
                 ReportingPeriodDueDateSelected: isEmpty( reportingPeriodDueDate ) ? null : reportingPeriodDueDate?.Value,
                 ReportingPeriodDueDateSelectedID: dropdownvalue,
                 NextDueDate: auditDetails.AuditAndInspectionDetails?.NextDueDate,
-                SkippedReason: auditDetails.AuditAndInspectionDetails?.SkippedReason,
+                SkippedReason: skipReasonValue,
                 SystemFields: {
                     AuditAndInspection_SystemFieldID: auditDetails.SystemFields?.AuditAndInspection_SystemFieldID,
                     SystemFields: systemsArrayWithoutMandatoryFields
@@ -1014,11 +1014,11 @@ export const AuditDetailsScreen = () => {
                 Toast.showWithGravity('Reason for skipping the last day of schedule period is required.', Toast.LONG, Toast.CENTER);
                 return null
             }
-            const checkForHazards = checkForHazardsItem() 
-            if( !checkForHazards ) {
-                Toast.showWithGravity('Hazard is required.', Toast.LONG, Toast.CENTER);
-                return null 
-            }
+            // const checkForHazards = checkForHazardsItem() 
+            // if( !checkForHazards ) {
+            //     Toast.showWithGravity('Hazard is required.', Toast.LONG, Toast.CENTER);
+            //     return null 
+            // }
             const reportingPeriodDueDate = !isEmpty( auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates ) ? auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates.find( item => item.ID === dropdownvalue) : ''
             const token = await AsyncStorage.getItem('Token')
             const systemsArrayWithoutMandatoryFields = systemFieldsArray.map( item => {
@@ -1046,7 +1046,7 @@ export const AuditDetailsScreen = () => {
                 ReportingPeriodDueDateSelected: isEmpty( reportingPeriodDueDate ) ? null : reportingPeriodDueDate?.Value,
                 ReportingPeriodDueDateSelectedID: dropdownvalue,
                 NextDueDate: auditDetails.AuditAndInspectionDetails?.NextDueDate,
-                SkippedReason: auditDetails.AuditAndInspectionDetails?.SkippedReason,
+                SkippedReason: skipReasonValue,
                 SystemFields: {
                     AuditAndInspection_SystemFieldID: auditDetails.SystemFields?.AuditAndInspection_SystemFieldID,
                     SystemFields: systemsArrayWithoutMandatoryFields
@@ -1099,6 +1099,7 @@ export const AuditDetailsScreen = () => {
 
     const renderLastDayOfScheduledPeriod = ( ) => {
         if( auditDetails?.AuditAndInspectionDetails?.IsSchedulerRequired === "True" && auditDetails.AuditAndInspectionDetails?.ReportingPeriodDueDates === null ) {
+            console.log("auditDetails?.AuditAndInspectionDetails?.IsSchedulerRequired",auditDetails.AuditAndInspectionDetails?.ReportingPeriodDueDates)
             return null
         }
         else if( auditDetails?.AuditAndInspectionDetails?.IsSchedulerRequired === "True" ) {
@@ -1191,7 +1192,7 @@ export const AuditDetailsScreen = () => {
                 }
             </View>
             {
-                remainingDropdownArray && remainingDropdownArray.length > 0
+                remainingDropdownArray && remainingDropdownArray.length > 0 && auditDetails.AuditAndInspectionDetails?.ReportingPeriodDueDates != null
                 ? (
                     <View>
                         <View>
