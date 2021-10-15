@@ -189,7 +189,7 @@ export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHaza
         console.log( 'value in hazard is  ',value)
         if( value === null ) {
             setHazardValue( value )
-            onHazardValueSelected( '' )
+            onHazardValueSelected( "0" )
             return null
         }
         setHazardValue( value )

@@ -618,7 +618,7 @@ export const AuditDetailsScreen = () => {
                     // }
                     attribute.isHazardsRequired = checkIsHazardsPresentAndRequired( value, attribute.CorrectAnswerID, attribute.ScoreList )
                     if( attribute.isHazardsRequired == false ) {
-                        attribute.HazardsID = ""
+                        attribute.HazardsID = "0"
                     }
                     attribute.isRequired = checkIsCommentsMandatory( attribute.IsCommentsMandatory, value, attribute.CorrectAnswerID, attribute.ScoreList  )
                     attribute.GivenAnswerID = value
@@ -921,20 +921,23 @@ export const AuditDetailsScreen = () => {
                 Toast.showWithGravity('Please select a score from the Score column', Toast.LONG, Toast.CENTER);
                 return null 
             }
-            const checkForComments = checkForCommentsItem() 
-            if( !checkForComments ) {
-                Toast.showWithGravity('Comment(s) required.', Toast.LONG, Toast.CENTER);
-                return null 
-            }
+
             const checkForHazards = checkForHazardsItem() 
             if( !checkForHazards ) {
                 Toast.showWithGravity('Hazard is required.', Toast.LONG, Toast.CENTER);
                 return null 
             }
+
+            const checkForComments = checkForCommentsItem() 
+            if( !checkForComments ) {
+                Toast.showWithGravity('Comment(s) required.', Toast.LONG, Toast.CENTER);
+                return null 
+            }
+            
             const reportingPeriodDueDate = !isEmpty( auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates ) ? auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates.find( item => item.ID === dropdownvalue) : ''
             const token = await AsyncStorage.getItem('Token')
             const systemsArrayWithoutMandatoryFields = systemFieldsArray.map( item => {
-                const arrayFields = omit( item, 'IsMandatory' )
+                const arrayFields = omit( item, 'IsMandatory', 'DisplayOrder' )
                 return arrayFields
             })
             const groupsArrayWithOnlyRequiredFields = groupsArray.map( item => {
@@ -968,11 +971,11 @@ export const AuditDetailsScreen = () => {
                 }
             }
             console.log( 'paload for submitting audit',JSON.stringify( payload ) )
-            return null
             const result = await api.post({
                 url: `api/AuditAndInspection/CompleteAudit`,
                 body: payload
             })
+            console.log( 'result is', JSON.stringify( result ))
             if( isEmpty( result ) ) {
                 return null
             }else if( !isEmpty( result ) && isEmpty( imagesObject ) ) {
@@ -994,6 +997,7 @@ export const AuditDetailsScreen = () => {
               //  navigation.navigate( 'Home' )
             }
         } catch ( error ) {
+            console.log( 'error is ',JSON.stringify( error ))
             Toast.showWithGravity(error.message, Toast.LONG, Toast.CENTER);
         }
     }
@@ -1009,6 +1013,11 @@ export const AuditDetailsScreen = () => {
             if(!isreasonFilled){
                 Toast.showWithGravity('Reason for skipping the last day of schedule period is required.', Toast.LONG, Toast.CENTER);
                 return null
+            }
+            const checkForHazards = checkForHazardsItem() 
+            if( !checkForHazards ) {
+                Toast.showWithGravity('Hazard is required.', Toast.LONG, Toast.CENTER);
+                return null 
             }
             const reportingPeriodDueDate = !isEmpty( auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates ) ? auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates.find( item => item.ID === dropdownvalue) : ''
             const token = await AsyncStorage.getItem('Token')
@@ -1210,7 +1219,7 @@ export const AuditDetailsScreen = () => {
                 : null
             }
             {
-                !isEmpty( auditDetails.AuditAndInspectionDetails.ScheduleFrequency ) 
+                auditDetails.AuditAndInspectionDetails.ScheduleFrequency == null || auditDetails.AuditAndInspectionDetails.ScheduleFrequency == undefined
                 ? renderAuditDetailsRow( 'Schedule Frequency:', `${auditDetails.AuditAndInspectionDetails.ScheduleFrequency}` )
                 : null
             }
