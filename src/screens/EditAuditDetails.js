@@ -533,10 +533,10 @@ export const EditAuditDetailsScreen = () => {
     }
     
     const checkIsHazardsPresentAndRequired = ( selectedScoreValue, CorrectAnswerID, ScoreList ) => {
-        console.log( 'selected score value ',selectedScoreValue)
-        console.log( 'correct answer id ',CorrectAnswerID)
-        //console.log( 'check condition', checkIfTruthyValues ? Number(selectedScoreValue) === Number(CorrectAnswerID) : Number( selectedScoreValue ) >= Number( CorrectAnswerID )  )
-        console.log( 'score  list',JSON.stringify(ScoreList))
+        // console.log( 'selected score value ',selectedScoreValue)
+        // console.log( 'correct answer id ',CorrectAnswerID)
+        // //console.log( 'check condition', checkIfTruthyValues ? Number(selectedScoreValue) === Number(CorrectAnswerID) : Number( selectedScoreValue ) >= Number( CorrectAnswerID )  )
+        // console.log( 'score  list',JSON.stringify(ScoreList))
         const shouldCheckForNonApplicableValues = ScoreList.find( item => {
             if( item.Value === "Not Applicable" && item.ID === selectedScoreValue ) {
                 return true
@@ -551,18 +551,18 @@ export const EditAuditDetailsScreen = () => {
                 return false
             }
         })
-        console.log( 'truthy value is ',checkIfTruthyValues)
+        // console.log( 'truthy value is ',checkIfTruthyValues)
         if( checkIfTruthyValues ? Number(selectedScoreValue) === Number(CorrectAnswerID) : Number( selectedScoreValue ) >= Number( CorrectAnswerID ) ) {
-            console.log( 'Inside IF.. returning false')
+            // console.log( 'Inside IF.. returning false')
             return false
         }else{
-            console.log( 'Inside ELSE.. returning true')
+            // console.log( 'Inside ELSE.. returning true')
             return true
         }
     }
 
     const currentSelectedScoreValue = ( value, id  ) => {
-        console.log( 'value is ',value, id )
+        console.log( 'selected score value is  ',value, id )
         if( value === null ) {
             Toast.showWithGravity('Please Select score from score column', Toast.LONG, Toast.CENTER);
             return null
@@ -581,7 +581,6 @@ export const EditAuditDetailsScreen = () => {
                     attribute.GivenAnswerID = value
                     return attribute     
                 }
-                console.log( 'outside first IF')
                 return attribute
             })
             return {
@@ -769,11 +768,11 @@ export const EditAuditDetailsScreen = () => {
     const checkForHazardsItem = ( ) => {
         let groupsArrayToCheck = []
         let clonedGroupsArray = [...groupsArray]
-        console.log( 'clonedGroupsArray',JSON.stringify(clonedGroupsArray))
+        // console.log( 'clonedGroupsArray',JSON.stringify(clonedGroupsArray))
         clonedGroupsArray = clonedGroupsArray.map( item => {
             let clonedGroupsAttributeArray = [...item.Attributes]
             clonedGroupsAttributeArray = clonedGroupsAttributeArray.map( val => {
-                console.log( 'Inside map called' )
+                // console.log( 'Inside map called' )
                 if( val.isHazardsRequired === true && !['','0',0,null,undefined].includes(val.HazardsID) ) {
                     groupsArrayToCheck.push( true )
                     return true
@@ -787,7 +786,7 @@ export const EditAuditDetailsScreen = () => {
             })
             return item
         })
-        console.log( 'groupsArray to check',JSON.stringify(groupsArrayToCheck))
+        // console.log( 'groupsArray to check',JSON.stringify(groupsArrayToCheck))
         const result = groupsArrayToCheck.every( item => item === true )
         return result
     }
