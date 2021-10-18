@@ -1109,6 +1109,17 @@ export const AuditDetailsScreen = () => {
         }
     }
 
+    const renderSaveAndComeBackButton = ( ) => {
+        if( auditDetails?.AuditAndInspectionDetails?.IsSchedulerRequired === "True" && auditDetails.AuditAndInspectionDetails?.ReportingPeriodDueDates === null ) {
+            return null
+        }
+        else if( auditDetails?.AuditAndInspectionDetails?.IsSchedulerRequired === "True" ) {
+            return <Button  title="Save & Come Back" titleStyle={{ fontSize: 14 , fontWeight:'bold'}} buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} onPress={onSaveAndComeBack} containerStyle={{ width: '42%'}} />
+        }else{
+            return null
+        }
+    }
+
     const renderImage = ( ) => {
         if( !isEmpty( imagesObject ) ) {
             return (
@@ -1245,7 +1256,9 @@ export const AuditDetailsScreen = () => {
         <View style={{ flex: 0.1 }}>
             <View style={{ flex: 0.8, marginTop: '3%', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center'}}>
                 <Button  title="Submit" titleStyle={{ fontSize: 14 ,fontWeight:'bold'}}  buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} onPress={onSubmit} containerStyle={{ width: '42%'}} />
-                <Button  title="Save & Come Back" titleStyle={{ fontSize: 14 , fontWeight:'bold'}} buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} onPress={onSaveAndComeBack} containerStyle={{ width: '42%'}} />
+                {
+                    renderSaveAndComeBackButton()
+                }
             </View>
         </View>
         {
