@@ -528,20 +528,12 @@ export const EditAuditDetailsScreen = () => {
 
     const currentSelectedScoreValue = ( value, id  ) => {
         console.log( 'value is ',value, id )
-        // if( value === null ) {
-        //     Toast.showWithGravity('Please Select score from score column', Toast.LONG, Toast.CENTER);
-        //     return null
-        // }
+       
         let clonedGroupsArray = [...groupsArray]
         clonedGroupsArray = clonedGroupsArray.map( groups => {
             groups = groups.Attributes.map( attribute => {
                 if( attribute.AttributeID === id ) {
                     console.log( 'Inside first IF')
-                    // if( attribute.isHazardsRequired === true ) {
-                    //     console.log( 'Checking for hazard requirement' )
-                        
-                    //     console.log( 'after hazard requirement checked' )
-                    // }
                     console.log( 'after hazard requirement checked' ,attribute)
                     attribute.isHazardsRequired = checkIsHazardsPresentAndRequired( value, attribute.CorrectAnswerID, attribute.ScoreList )
                     if( attribute.isHazardsRequired == false ) {
@@ -593,11 +585,7 @@ export const EditAuditDetailsScreen = () => {
         console.log( 'cloned groups array before ',JSON.stringify( clonedGroupsArray ) )
         clonedGroupsArray = clonedGroupsArray.map( groups => {
             groups = groups.Attributes.map( attribute => {
-                // if( value === 0 ) {
-                //     attribute.isHazardsRequired = true
-                // }else{
-                //     attribute.isHazardsRequired = false
-                // }
+              
                 if( attribute.AttributeID === id ) {
                     console.log( 'Inside first IF' )
                     attribute.HazardsID = value
@@ -929,11 +917,7 @@ export const EditAuditDetailsScreen = () => {
                 Toast.showWithGravity('Reason for skipping the last day of schedule period is required.', Toast.LONG, Toast.CENTER);
                 return null
             }
-            // const checkForHazards = checkForHazardsItem() 
-            // if( !checkForHazards ) {
-            //     Toast.showWithGravity('Hazard is required.', Toast.LONG, Toast.CENTER);
-            //     return null 
-            // }
+           
             const reportingPeriodDueDate = !isEmpty( auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates ) ? auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates.find( item => item.ID === dropdownvalue) : ''
             const token = await AsyncStorage.getItem('Token')
             const systemsArrayWithoutMandatoryFields = systemFieldsArray.map( item => {

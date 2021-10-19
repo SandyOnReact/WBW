@@ -221,24 +221,7 @@ const RenderHazardDropdown = ( props ) => {
         onHazardValueSelected
     } = props
     const shouldCheckForTruthyValues = item.CorrectAnswerValue === "True" || item.CorrectAnswerValue === "Yes" || item.CorrectAnswerValue === "Pass"|| item.CorrectAnswerValue === "Fail"  ||item.CorrectAnswerValue === "No" || item.CorrectAnswerValue === "False" || item.CorrectAnswerValue === "Not Applicable"
-    // if( isEmpty( sourceList ) ) {
-    //     return null
-    // }else{
-    //     if( item.DoNotShowHazard === "True" || shouldCheckForTruthyValues ? Number(scoreValue) === Number(item.CorrectAnswerID) : Number( scoreValue ) >= Number( item.CorrectAnswerID ) ) {
-    //         return null
-    //     }else{
-    //         return (
-    //             <View>
-    //                 <HazardDropdown 
-    //                     hazardList={hazardList}
-    //                     item={item} 
-    //                     auditAndInspectionId={auditAndInspectionId}
-    //                     onHazardValueSelected={(value)=>onHazardValueSelected(value)}
-    //                 />
-    //             </View>  
-    //         )
-    //     }
-    // }
+  
     const shouldCheckForNonApplicableValues = item.ScoreList.some( item => {
         if( item.Value === "Not Applicable" && item.ID === scoreValue ) {
             return true
