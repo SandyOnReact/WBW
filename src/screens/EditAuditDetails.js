@@ -193,7 +193,7 @@ export const EditAuditDetailsScreen = () => {
     const [checkboxValue,setCheckboxValue] = useState( false )
     const [inputValue,setInputValue] = useState( auditDetails?.AuditAndInspectionDetails?.Notes )
     const [skipReasonValue,setSkipReasonValue] = useState( auditDetails?.AuditAndInspectionDetails.SkippedReason )
-    const [dropdownvalue,setDropdownValue] = useState( '' )
+    const [dropdownvalue,setDropdownValue] = useState("-1" )
     const [userInfo,setUserInfo] = useState( {} )
     const [isReset,setIsReset] = useState( false )
     const [shouldShowWarningMessage,setShouldShowWarningMessage] = useState( false )
@@ -206,40 +206,6 @@ export const EditAuditDetailsScreen = () => {
     const STATUS_BAR_HEIGHT = getStatusBarHeight()
     const keyboard = useKeyboard()
     const navigation = useNavigation()
-    // useEffect(()=>{
-    //     console.log( 'isAllow',auditDetails?.AuditAndInspectionDetails?.ReportingPeriodDueDateSelected )
-    //     if( auditDetails?.AuditAndInspectionDetails?.IsAllowCheckAll === "True" ) {
-    //         setCheckboxValue( true )
-    //     }else{
-    //         setCheckboxValue( false )
-    //     }
-    // },[auditDetails.IsAllowCheckAll])
-
-    useEffect( ( ) => {
-        if( auditDetails?.AuditAndInspectionDetails?.PrimaryUserList && auditDetails?.AuditAndInspectionDetails?.PrimaryUserList.length > 0  ) {
-            let primaryUserId = auditDetails?.AuditAndInspectionDetails?.PrimaryUserID
-            let currentPrimaryUserDetails = auditDetails?.AuditAndInspectionDetails?.PrimaryUserList.find( item => item.ID === primaryUserId )
-            setPrimaryUser( currentPrimaryUserDetails?.ID )
-        }
-    }, [] )
-
-    useEffect(()=>{
-        checkForReportingDate()
-    },[auditDetails?.AuditAndInspectionDetails?.ReportingPeriodDueDateSelected])
-
-    const checkForReportingDate = ( ) => {
-        const reportingDateArray = auditDetails?.AuditAndInspectionDetails?.ReportingPeriodDueDates
-        if( !reportingDateArray ) {
-            return null
-        }
-        let selectedReportingPeriodDate = reportingDateArray.find( item => {
-            if( item.Value === auditDetails?.AuditAndInspectionDetails?.ReportingPeriodDueDateSelected ) {
-                return item.ID
-            }
-        } )
-        setDropdownValue( selectedReportingPeriodDate?.ID )
-    }
-
 
     useEffect( ( ) => {
         setDefaultSystemFieldsArray()
@@ -254,10 +220,10 @@ export const EditAuditDetailsScreen = () => {
         React.useCallback( () => {
             setupLocalStorageValuesOnFocus()
         }, [])
-        );
-        
-        const setupLocalStorageValuesOnFocus = async ( ) => {
-            var tempData = await AsyncStorage.getItem("returndata")
+      );
+
+    const setupLocalStorageValuesOnFocus = async ( ) => {
+        var tempData = await AsyncStorage.getItem("returndata")
             tempData = JSON.parse(tempData)
             await AsyncStorage.removeItem("returndata");
             var cancelData = await AsyncStorage.getItem("cancelData")
@@ -281,7 +247,7 @@ export const EditAuditDetailsScreen = () => {
                     CorrectAnswerID: val.CorrectAnswerID,
                     ScoreList: val.ScoreList,
                     isRequired: val.IsCommentsMandatory === "Mandatory" ? 'Comments *' : 'Comments',
-                    isHazardsRequired: val.HazardsID === "0" || val.HazardsID === null || val.HazardsID === undefined ? false : true
+                    isHazardsRequired: val.DoNotShowHazard === "True" || val.AuditAndInspectionScore === "Do Not Show Score" ? false : true
                 }
                 return attribute
             })
@@ -342,7 +308,6 @@ export const EditAuditDetailsScreen = () => {
     }
 
 
-      
     const onChangeDropdownValue = ( value ) => {
         let data = [...auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates]
         let reversedData = data.reverse()
@@ -533,10 +498,10 @@ export const EditAuditDetailsScreen = () => {
     }
     
     const checkIsHazardsPresentAndRequired = ( selectedScoreValue, CorrectAnswerID, ScoreList ) => {
-        // console.log( 'selected score value ',selectedScoreValue)
-        // console.log( 'correct answer id ',CorrectAnswerID)
-        // //console.log( 'check condition', checkIfTruthyValues ? Number(selectedScoreValue) === Number(CorrectAnswerID) : Number( selectedScoreValue ) >= Number( CorrectAnswerID )  )
-        // console.log( 'score  list',JSON.stringify(ScoreList))
+        console.log( 'selected score value ',selectedScoreValue)
+        console.log( 'correct answer id ',CorrectAnswerID)
+        //console.log( 'check condition', checkIfTruthyValues ? Number(selectedScoreValue) === Number(CorrectAnswerID) : Number( selectedScoreValue ) >= Number( CorrectAnswerID )  )
+        console.log( 'score  list',JSON.stringify(ScoreList))
         const shouldCheckForNonApplicableValues = ScoreList.find( item => {
             if( item.Value === "Not Applicable" && item.ID === selectedScoreValue ) {
                 return true
@@ -551,36 +516,47 @@ export const EditAuditDetailsScreen = () => {
                 return false
             }
         })
-        // console.log( 'truthy value is ',checkIfTruthyValues)
+        console.log( 'truthy value is ',checkIfTruthyValues)
         if( checkIfTruthyValues ? Number(selectedScoreValue) === Number(CorrectAnswerID) : Number( selectedScoreValue ) >= Number( CorrectAnswerID ) ) {
-            // console.log( 'Inside IF.. returning false')
+            console.log( 'Inside IF.. returning false')
             return false
         }else{
-            // console.log( 'Inside ELSE.. returning true')
+            console.log( 'Inside ELSE.. returning true')
             return true
         }
     }
 
     const currentSelectedScoreValue = ( value, id  ) => {
-        console.log( 'selected score value is  ',value, id )
-        if( value === null ) {
-            Toast.showWithGravity('Please Select score from score column', Toast.LONG, Toast.CENTER);
-            return null
-        }
+        console.log( 'value is ',value, id )
+        // if( value === null ) {
+        //     Toast.showWithGravity('Please Select score from score column', Toast.LONG, Toast.CENTER);
+        //     return null
+        // }
         let clonedGroupsArray = [...groupsArray]
         clonedGroupsArray = clonedGroupsArray.map( groups => {
             groups = groups.Attributes.map( attribute => {
                 if( attribute.AttributeID === id ) {
                     console.log( 'Inside first IF')
-                   
+                    // if( attribute.isHazardsRequired === true ) {
+                    //     console.log( 'Checking for hazard requirement' )
+                        
+                    //     console.log( 'after hazard requirement checked' )
+                    // }
+                    console.log( 'after hazard requirement checked' ,attribute)
                     attribute.isHazardsRequired = checkIsHazardsPresentAndRequired( value, attribute.CorrectAnswerID, attribute.ScoreList )
                     if( attribute.isHazardsRequired == false ) {
                         attribute.HazardsID = "0"
                     }
                     attribute.isRequired = checkIsCommentsMandatory( attribute.IsCommentsMandatory, value, attribute.CorrectAnswerID, attribute.ScoreList  )
-                    attribute.GivenAnswerID = value
+                    if(value == null || value == undefined){
+                        attribute.GivenAnswerID = 0
+
+                    }else{
+                        attribute.GivenAnswerID = value
+                    }
                     return attribute     
                 }
+                console.log( 'outside first IF')
                 return attribute
             })
             return {
@@ -589,7 +565,6 @@ export const EditAuditDetailsScreen = () => {
         })
         setGroupsArray( clonedGroupsArray )
     }
-    
     const onSelectedSourceValue = ( value, id  ) => {
         if( value === null ) {
             return null
@@ -610,13 +585,21 @@ export const EditAuditDetailsScreen = () => {
         setGroupsArray( clonedGroupsArray )
     }
     const onHazardValueSelected = ( value, id  ) => {
+        console.log( 'new hazard value selected', value, id )
         if( value === null ) {
             return null
         }
         let clonedGroupsArray = [...groupsArray]
+        console.log( 'cloned groups array before ',JSON.stringify( clonedGroupsArray ) )
         clonedGroupsArray = clonedGroupsArray.map( groups => {
             groups = groups.Attributes.map( attribute => {
+                // if( value === 0 ) {
+                //     attribute.isHazardsRequired = true
+                // }else{
+                //     attribute.isHazardsRequired = false
+                // }
                 if( attribute.AttributeID === id ) {
+                    console.log( 'Inside first IF' )
                     attribute.HazardsID = value
                     return attribute
                 }
@@ -626,6 +609,7 @@ export const EditAuditDetailsScreen = () => {
                 Attributes: groups
             }
         })
+        console.log( 'cloned groups array after ',JSON.stringify( clonedGroupsArray ) )
         setGroupsArray( clonedGroupsArray )
     }
 
@@ -669,6 +653,7 @@ export const EditAuditDetailsScreen = () => {
 
         var shouldShowHazardDetails = auditDetails.AuditAndInspectionDetails?.IsDisplayHazardList
         var shouldShowSourceDetails = auditDetails.AuditAndInspectionDetails?.IsDisplaySource
+
         var scoreLabel = auditDetails.AuditAndInspectionDetails?.ScoringLable
         return sortedGroupsData.map( item => {
             return (
@@ -689,6 +674,9 @@ export const EditAuditDetailsScreen = () => {
     }
 
     const checkForValidPayload = ( ) => {
+        if( auditDetails.AuditAndInspectionDetails?.IsSchedulerRequired === "False") {
+            return true
+        }
         if( auditDetails.AuditAndInspectionDetails?.IsSchedulerRequired === "True" && auditDetails.AuditAndInspectionDetails?.ReportingPeriodDueDates === null ) {
             return true
         }else{
@@ -714,9 +702,11 @@ export const EditAuditDetailsScreen = () => {
                 return result
     }
 
+    
     function replaceAll(string, search, replace) {
         return string.split(search).join(replace);
     }
+
 
     const checkForRequiredDynamicFields = ( ) => {
         var isFlagOn = true
@@ -727,7 +717,7 @@ export const EditAuditDetailsScreen = () => {
                 if(isFlagOn){
                     if(isEmpty(item.SelectedValue)){
                         if(item.IsMandatory){
-                            const controlIdWithoutUnderScore = replaceAll( item.ControlID, '_',' ' )
+                            const controlIdWithoutUnderScore = replaceAll( item.ControlID, '_', ' ' )
                             Toast.showWithGravity( `${controlIdWithoutUnderScore} is required`, Toast.LONG, Toast.CENTER);
                             isFlagOn= false
                             return false
@@ -768,11 +758,11 @@ export const EditAuditDetailsScreen = () => {
     const checkForHazardsItem = ( ) => {
         let groupsArrayToCheck = []
         let clonedGroupsArray = [...groupsArray]
-        // console.log( 'clonedGroupsArray',JSON.stringify(clonedGroupsArray))
+        console.log( 'clonedGroupsArray',JSON.stringify(clonedGroupsArray))
         clonedGroupsArray = clonedGroupsArray.map( item => {
             let clonedGroupsAttributeArray = [...item.Attributes]
             clonedGroupsAttributeArray = clonedGroupsAttributeArray.map( val => {
-                // console.log( 'Inside map called' )
+                console.log( 'Inside map called' )
                 if( val.isHazardsRequired === true && !['','0',0,null,undefined].includes(val.HazardsID) ) {
                     groupsArrayToCheck.push( true )
                     return true
@@ -786,7 +776,7 @@ export const EditAuditDetailsScreen = () => {
             })
             return item
         })
-        // console.log( 'groupsArray to check',JSON.stringify(groupsArrayToCheck))
+        console.log( 'groupsArray to check',JSON.stringify(groupsArrayToCheck))
         const result = groupsArrayToCheck.every( item => item === true )
         return result
     }
@@ -814,6 +804,7 @@ export const EditAuditDetailsScreen = () => {
     const onSubmit = async ( ) =>  { 
         try {
             const isValid = checkForValidPayload()
+            console.log( 'isValid',isValid)
             if( !isValid ) {
                 Toast.showWithGravity('Last day of schedule period is required.', Toast.LONG, Toast.CENTER);
                 return null
@@ -826,12 +817,14 @@ export const EditAuditDetailsScreen = () => {
                 return null
             }
             const isreasonFilled = checkForSkippedReason()
+            console.log( 'isReason Filled',isreasonFilled)
             if(!isreasonFilled){
                 Toast.showWithGravity('Reason for skipping the last day of schedule period is required.', Toast.LONG, Toast.CENTER);
                 return null
             }
-
+            
             const checkForValidFields = checkForRequiredDynamicFields()
+            console.log( 'checkForValidFields',checkForValidFields)
             if( !checkForValidFields ) {
                // Toast.showWithGravity('Please Enter Worksite mandatory data', Toast.LONG, Toast.CENTER);
                 return null 
@@ -842,21 +835,23 @@ export const EditAuditDetailsScreen = () => {
                 Toast.showWithGravity('Please select a score from the Score column', Toast.LONG, Toast.CENTER);
                 return null 
             }
+
             const checkForHazards = checkForHazardsItem() 
             if( !checkForHazards ) {
                 Toast.showWithGravity('Hazard is required.', Toast.LONG, Toast.CENTER);
                 return null 
             }
+
             const checkForComments = checkForCommentsItem() 
             if( !checkForComments ) {
                 Toast.showWithGravity('Comment(s) required.', Toast.LONG, Toast.CENTER);
                 return null 
             }
-           
+            
             const reportingPeriodDueDate = !isEmpty( auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates ) ? auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates.find( item => item.ID === dropdownvalue) : ''
             const token = await AsyncStorage.getItem('Token')
             const systemsArrayWithoutMandatoryFields = systemFieldsArray.map( item => {
-                const arrayFields = omit( item, 'IsMandatory' )
+                const arrayFields = omit( item, 'IsMandatory', 'DisplayOrder' )
                 return arrayFields
             })
             const groupsArrayWithOnlyRequiredFields = groupsArray.map( item => {
@@ -889,14 +884,13 @@ export const EditAuditDetailsScreen = () => {
                     Groups: groupsArrayWithOnlyRequiredFields
                 }
             }
-            console.log( 'final payload after kadya',JSON.stringify( payload )) 
+            console.log( 'paload for submitting audit',JSON.stringify( payload ) )
             return null
-
             const result = await api.post({
                 url: `api/AuditAndInspection/CompleteAudit`,
                 body: payload
             })
-            console.log( 'result after kadya',JSON.stringify( result )) 
+            console.log( 'result is', JSON.stringify( result ))
             if( isEmpty( result ) ) {
                 return null
             }else if( !isEmpty( result ) && isEmpty( imagesObject ) ) {
@@ -918,10 +912,10 @@ export const EditAuditDetailsScreen = () => {
               //  navigation.navigate( 'Home' )
             }
         } catch ( error ) {
+            console.log( 'error is ',JSON.stringify( error ))
             Toast.showWithGravity(error.message, Toast.LONG, Toast.CENTER);
         }
     }
-
 
     const onSaveAndComeBack = async ( ) =>  {
         try {
@@ -935,6 +929,11 @@ export const EditAuditDetailsScreen = () => {
                 Toast.showWithGravity('Reason for skipping the last day of schedule period is required.', Toast.LONG, Toast.CENTER);
                 return null
             }
+            // const checkForHazards = checkForHazardsItem() 
+            // if( !checkForHazards ) {
+            //     Toast.showWithGravity('Hazard is required.', Toast.LONG, Toast.CENTER);
+            //     return null 
+            // }
             const reportingPeriodDueDate = !isEmpty( auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates ) ? auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates.find( item => item.ID === dropdownvalue) : ''
             const token = await AsyncStorage.getItem('Token')
             const systemsArrayWithoutMandatoryFields = systemFieldsArray.map( item => {
@@ -971,11 +970,12 @@ export const EditAuditDetailsScreen = () => {
                     Groups: groupsArrayWithOnlyRequiredFields
                 }
             }
-            console.log( 'payload for save and come back ',JSON.stringify( payload))
+            console.log( 'payload is ',JSON.stringify( payload ) )
             const result = await api.post({
                 url: `api/AuditAndInspection/SaveAudit`,
                 body: payload
             })
+            console.log( 'on save and come back',JSON.stringify( result ))
             if( isEmpty( result ) ) {
                 return null
             }else if( !isEmpty( result ) && isEmpty( imagesObject ) ) {
@@ -1012,6 +1012,20 @@ export const EditAuditDetailsScreen = () => {
         } )
     }
 
+    
+    const renderSaveAndComeBackButton = ( ) => {
+        if( auditDetails?.AuditAndInspectionDetails?.IsSchedulerRequired === "True" && auditDetails.AuditAndInspectionDetails?.ReportingPeriodDueDates === null ) {
+            return null
+        }
+        else if( auditDetails?.AuditAndInspectionDetails?.IsSchedulerRequired === "True" ) {
+            return <Button  title="Save & Come Back" titleStyle={{ fontSize: 14 , fontWeight:'bold'}} buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} onPress={onSaveAndComeBack} containerStyle={{ width: '42%'}} />
+        }else{
+            return null
+        }
+    }
+
+
+
     const renderPrimaryUserList = ( ) => {
         if( auditDetails.AuditAndInspectionDetails?.PrimaryUserList && auditDetails.AuditAndInspectionDetails?.PrimaryUserList.length > 0 ) {
             let data = auditDetails.AuditAndInspectionDetails.PrimaryUserList.map( item => {
@@ -1025,7 +1039,7 @@ export const EditAuditDetailsScreen = () => {
 
             return (
                 <CustomDropdown
-                    title="Primary User List *"
+                    title="Inspection on behalf of *"
                     value={primaryUser}
                     onValueChange={onChangeDropdownValue}
                     items={data}
@@ -1035,18 +1049,17 @@ export const EditAuditDetailsScreen = () => {
             return null
         }
     }
-
     const renderLastDayOfScheduledPeriod = ( ) => {
-        if( auditDetails.AuditAndInspectionDetails?.IsSchedulerRequired === "True" && auditDetails.AuditAndInspectionDetails?.ReportingPeriodDueDates === null ) {
+        if( auditDetails?.AuditAndInspectionDetails?.IsSchedulerRequired === "True" && auditDetails.AuditAndInspectionDetails?.ReportingPeriodDueDates === null ) {
+            console.log("auditDetails?.AuditAndInspectionDetails?.IsSchedulerRequired",auditDetails.AuditAndInspectionDetails?.ReportingPeriodDueDates)
             return null
         }
-        else if( auditDetails.AuditAndInspectionDetails?.IsSchedulerRequired === "True" ) {
+        else if( auditDetails?.AuditAndInspectionDetails?.IsSchedulerRequired === "True" ) {
             return renderCustomDropdown()
         }else{
             return null
         }
     }
-
     const renderImage = ( ) => {
         if( !isEmpty( imagesObject ) ) {
             return (
@@ -1121,7 +1134,7 @@ export const EditAuditDetailsScreen = () => {
                     onChangeText={(text) => setInputValue( text )}
                 />
             </View>
-            <View flex={0.5} style={{ marginHorizontal: '2%' }}>
+            <View flex={0.5} style={{ marginHorizontal: '0.5%' }}>
                 {
                     renderPrimaryUserList()
                 }
@@ -1130,7 +1143,7 @@ export const EditAuditDetailsScreen = () => {
                 }
             </View>
             {
-                remainingDropdownArray && remainingDropdownArray.length > 0
+                remainingDropdownArray && remainingDropdownArray.length > 0 && auditDetails.AuditAndInspectionDetails?.ReportingPeriodDueDates != null
                 ? (
                     <View>
                         <View>
@@ -1158,7 +1171,7 @@ export const EditAuditDetailsScreen = () => {
                 : null
             }
             {
-                !isEmpty( auditDetails.AuditAndInspectionDetails.ScheduleFrequency ) 
+                auditDetails.AuditAndInspectionDetails.ScheduleFrequency == null || auditDetails.AuditAndInspectionDetails.ScheduleFrequency == undefined
                 ? renderAuditDetailsRow( 'Schedule Frequency:', `${auditDetails.AuditAndInspectionDetails.ScheduleFrequency}` )
                 : null
             }
@@ -1183,7 +1196,9 @@ export const EditAuditDetailsScreen = () => {
         <View style={{ flex: 0.1 }}>
             <View style={{ flex: 0.8, marginTop: '3%', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center'}}>
                 <Button  title="Submit" titleStyle={{ fontSize: 14 ,fontWeight:'bold'}}  buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} onPress={onSubmit} containerStyle={{ width: '42%'}} />
-                <Button  title="Save & Come Back" titleStyle={{ fontSize: 14 , fontWeight:'bold'}} buttonStyle={{ backgroundColor: '#1e5873', padding: 15 }} onPress={onSaveAndComeBack} containerStyle={{ width: '42%'}} />
+                {
+                    renderSaveAndComeBackButton()
+                }
             </View>
         </View>
         {

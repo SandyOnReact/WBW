@@ -11,24 +11,15 @@ import { Platform } from 'react-native'
 const inputContainerStyle = { borderWidth: 1, borderColor: '#1e5873', borderRadius: 6 }
 
 export const CommentInput = ( { item, selectedScoreValue, isMandatoryType, onCommentInputChange, commentsFromHazard, attributeIdFromHazard } ) => {
-    const [scoreValue,setScoreValue] = useState( '' )
-
-    useEffect(()=>{
-        if( item.GivenAnswerID !== "0" || item.GivenAnswerID !== null || item.GivenAnswerID !== undefined ) {
-            setScoreValue( item.GivenAnswerID )
-        }else{
-            setScoreValue( selectedScoreValue )
-        }
-    }, [item.GivenAnswerID] )
     const shouldCheckForNonApplicableValues = item.ScoreList.find( item => {
-        if( item.Value === "Not Applicable" && item.ID === scoreValue ) {
+        if( item.Value === "Not Applicable" && item.ID === selectedScoreValue ) {
             return true
         }else{
             return false
         }
     })
     const checkIfTruthyValues = item.ScoreList.find( item => {
-        if( ["True", "False", "Yes", "No","Pass","Fail"].includes( item.Value ) && item.ID === scoreValue ) {
+        if( ["True", "False", "Yes", "No","Pass","Fail"].includes( item.Value ) && item.ID === selectedScoreValue ) {
             return true
         }else{
             return false
@@ -52,7 +43,7 @@ export const CommentInput = ( { item, selectedScoreValue, isMandatoryType, onCom
                 commentLabel = 'Comments'
                 break;
             }
-            else if( checkIfTruthyValues ? Number( scoreValue ) === Number( item.CorrectAnswerID ) : Number( scoreValue ) >= Number( item.CorrectAnswerID ) ) {
+            else if( checkIfTruthyValues ? Number( selectedScoreValue ) === Number( item.CorrectAnswerID ) : Number( selectedScoreValue ) >= Number( item.CorrectAnswerID ) ) {
                 commentLabel = 'Comments *'
                 break;
             }else{
@@ -61,7 +52,7 @@ export const CommentInput = ( { item, selectedScoreValue, isMandatoryType, onCom
             }
         }
         case 'Mandatory for Failing Score': {
-            if( Number(scoreValue) !== 0 && Number( scoreValue ) < Number( item.CorrectAnswerID ) ) {
+            if( Number(selectedScoreValue) !== 0 && Number( selectedScoreValue ) < Number( item.CorrectAnswerID ) ) {
                 commentLabel = 'Comments *'
                 break;
             }else{
@@ -84,7 +75,7 @@ export const CommentInput = ( { item, selectedScoreValue, isMandatoryType, onCom
             
         }
         case 'Mandatory for Passing Score and N/A': {
-            if( Number( scoreValue ) >= Number( item.CorrectAnswerID ) || shouldCheckForNonApplicableValues ) {
+            if( Number( selectedScoreValue ) >= Number( item.CorrectAnswerID ) || shouldCheckForNonApplicableValues ) {
                 commentLabel = 'Comments *'
                 break;
             }else{
@@ -93,7 +84,7 @@ export const CommentInput = ( { item, selectedScoreValue, isMandatoryType, onCom
             }
         }
         case 'Mandatory for Failing Score and N/A': {
-            if( Number( scoreValue ) < Number( item.CorrectAnswerID ) || shouldCheckForNonApplicableValues ) {
+            if( Number( selectedScoreValue ) < Number( item.CorrectAnswerID ) || shouldCheckForNonApplicableValues ) {
                 commentLabel = 'Comments *'
                 break;
             }else{
@@ -136,7 +127,6 @@ export const SourceDropdown = ( { item, sourceList, onSourceValueSelected } ) =>
             setSourceValue( item.SourceID )
         }
     }, [item.SourceID] )
-
     const sourceData = sourceList.map( item => {
         const source = { label: item.Value, value: item.ID }
         return source
@@ -161,37 +151,36 @@ export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHaza
     const navigation = useNavigation()
     const [hazardValue,setHazardValue] = useState( '' )
     const [shouldUpdate,setShouldUpdate] = useState( false )
-
     useEffect(()=> {
+        setHazardValueBasedonClearHazard()
         if( item.HazardsID !== "0" || item.HazardsID !== null || item.HazardsID !== undefined ) {
             setHazardValue( item.HazardsID )
         }
     }, [item.HazardsID] )
+
+    const setHazardValueBasedonClearHazard = async ( ) => {
+        console.log( 'Inside clearing haazard', item.HazardsID)
+        setHazardValue(null)
+        await AsyncStorage.removeItem("cancelData")
+    }
 
     const hazardData = hazardList.map( item => {
         const hazard = { label: item.Value, value: item.ID }
         return hazard
     })
     const onClear = ( ) => {
+        console.log( 'clearing hazard' )
         setHazardValue( '' )
     }
 
     const onUpdateHazard = ( newHazard ) => {
+        console.log( 'Inside new hazard', JSON.stringify( newHazard ) )
         setShouldUpdate( !shouldUpdate )
         setHazardValue( newHazard )
+        onHazardValueSelected( newHazard )
     }
 
-    const onHazardValueChange = async ( value ) => {
-        if( value === null ) {
-            return null
-        }
-        setHazardValue( value )
-        if( Platform.OS === "android" ) {
-            navigateToCompleteTask()
-        }
-    }
-
-    const navigateToCompleteTask = async ( ) => {
+    const navigateToCompleteOrAssignTask = async ( ) => {
         await AsyncStorage.setItem( 'AttributeID', item.AttributeID )
         navigation.navigate( 'CompleteOrAssignTask', {
             selectedHazardValue: hazardValue,
@@ -205,13 +194,26 @@ export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHaza
         onHazardValueSelected( value )
     }
 
+    const onHazardValueChange = async ( value ) => {
+        console.log( 'value in hazard is  ',value)
+        if( value === null ) {
+            setHazardValue( value )
+            onHazardValueSelected( "0" )
+            return null
+        }
+        setHazardValue( value )
+        if( Platform.OS === "android" ) {
+            navigateToCompleteOrAssignTask()
+        }
+    }
+
     return (
         <CustomDropdown
             title="Hazards *"
             items={hazardData}
             value={hazardValue}
-            onValueChange={(value)=>onHazardValueChange(value)}
-            onDonePress={navigateToCompleteTask}
+            onValueChange={onHazardValueChange}
+            onDonePress={navigateToCompleteOrAssignTask}
         />
     )
 }
@@ -228,24 +230,7 @@ const RenderHazardDropdown = ( props ) => {
         onHazardValueSelected
     } = props
     const shouldCheckForTruthyValues = item.CorrectAnswerValue === "True" || item.CorrectAnswerValue === "Yes" || item.CorrectAnswerValue === "Pass"|| item.CorrectAnswerValue === "Fail"  ||item.CorrectAnswerValue === "No" || item.CorrectAnswerValue === "False" || item.CorrectAnswerValue === "Not Applicable"
-    // if( isEmpty( sourceList ) ) {
-    //     return null
-    // }else{
-    //     if( item.DoNotShowHazard === "True" || shouldCheckForTruthyValues ? Number(scoreValue) === Number(item.CorrectAnswerID) : Number( scoreValue ) >= Number( item.CorrectAnswerID ) ) {
-    //         return null
-    //     }else{
-    //         return (
-    //             <View>
-    //                 <HazardDropdown 
-    //                     hazardList={hazardList}
-    //                     item={item} 
-    //                     auditAndInspectionId={auditAndInspectionId}
-    //                     onHazardValueSelected={(value)=>onHazardValueSelected(value)}
-    //                 />
-    //             </View>  
-    //         )
-    //     }
-    // }
+    
     const shouldCheckForNonApplicableValues = item.ScoreList.some( item => {
         if( item.Value === "Not Applicable" && item.ID === scoreValue ) {
             return true
@@ -290,15 +275,7 @@ export const GroupAttributes = ( props ) => {
     useEffect(() => {
         onCheckboxValueChange()
     }, [checkboxValue])
-
-    // useEffect( ( ) => {
-    //     if( item.GivenAnswerID !== 0 || item.GivenAnswerID !== null || item.GivenAnswerID !== undefined ) {
-    //         setScoreValue( item.GivenAnswerID )
-    //         currentScoreValue( item.GivenAnswerID )
-    //     }
-    // }, [item.GivenAnswerID] )
-
-    const onCheckboxValueChange = ( ) => {
+        const onCheckboxValueChange = ( ) => {
         console.log( 'Inside checkbox value method', item.GivenAnswerID )
         if( !checkboxValue ) {
             if( item.GivenAnswerID != 0 || item.GivenAnswerID != null || item.GivenAnswerID != undefined ) {
@@ -308,8 +285,8 @@ export const GroupAttributes = ( props ) => {
             }
             else{
                 // console.log( 'Inside If esle part' )
-                // setScoreValue( 0 )
-                // currentScoreValue( 0 )
+                 setScoreValue( 0 )
+                 currentScoreValue( 0 )
             }
         }else{
             console.log( 'Inside else checking',JSON.stringify(item.GivenAnswerID) )
@@ -343,7 +320,7 @@ export const GroupAttributes = ( props ) => {
                     <CustomDropdown
                         title={scoreLabel}
                         items={scoreData}
-                        value={checkboxValue && isEmpty( scoreValue ) ? item.MaxCorrectAnswerID : scoreValue}
+                        value={checkboxValue && isEmpty(scoreValue) ? item.MaxCorrectAnswerID : scoreValue}
                         onValueChange={onScoreValueChange}
                     />
                 )
@@ -362,7 +339,7 @@ export const GroupAttributes = ( props ) => {
                 )
             }
             {
-                 isEmpty( scoreValue ) || scoreValue === "0"
+                 isEmpty( scoreValue ) 
                  ? null 
                  // : renderHazardDropdown( item, scoreValue, sourceList, hazardList, auditAndInspectionId, )         
                  : <RenderHazardDropdown 

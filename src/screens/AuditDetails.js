@@ -602,10 +602,7 @@ export const AuditDetailsScreen = () => {
 
     const currentSelectedScoreValue = ( value, id  ) => {
         console.log( 'value is ',value, id )
-        if( value === null ) {
-            Toast.showWithGravity('Please Select score from score column', Toast.LONG, Toast.CENTER);
-            return null
-        }
+       
         let clonedGroupsArray = [...groupsArray]
         clonedGroupsArray = clonedGroupsArray.map( groups => {
             groups = groups.Attributes.map( attribute => {
@@ -621,7 +618,13 @@ export const AuditDetailsScreen = () => {
                         attribute.HazardsID = "0"
                     }
                     attribute.isRequired = checkIsCommentsMandatory( attribute.IsCommentsMandatory, value, attribute.CorrectAnswerID, attribute.ScoreList  )
-                    attribute.GivenAnswerID = value
+                    if(value == null || value == undefined){
+                        attribute.GivenAnswerID = 0
+
+                    }else{
+                        attribute.GivenAnswerID = value
+
+                    }
                     return attribute     
                 }
                 console.log( 'outside first IF')
