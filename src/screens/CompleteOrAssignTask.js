@@ -923,6 +923,7 @@ export const CompleteOrAssignTask = ( props ) => {
 
     const navigateToPreviousScreen = async ( ) => {
         if( from === "edit-audit" ) {
+            updateHazards( 0 )
             navigation.goBack()
         }else{
             let cancelData={

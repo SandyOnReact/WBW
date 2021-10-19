@@ -178,10 +178,11 @@ export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHaza
         onHazardValueSelected( newHazard )
     }
 
-    const navigateToCompleteOrAssignTask = async ( ) => {
+    const navigateToCompleteOrAssignTask = async ( value ) => {
+        console.log( 'navigating -->', hazardValue )
         await AsyncStorage.setItem( 'AttributeID', item.AttributeID )
         navigation.navigate( 'CompleteOrAssignTask', {
-            selectedHazardValue: hazardValue,
+            selectedHazardValue: value,
             hazardData: hazardData,
             item: item,
             auditAndInspectionId: auditAndInspectionId,
@@ -189,20 +190,24 @@ export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHaza
             updateHazards: ( newHazard ) => onUpdateHazard( newHazard ),
             from: "edit-audit"
         } )
-        onHazardValueSelected( hazardValue )
+        onHazardValueSelected( value )
     }
 
     const onHazardValueChange = async ( value ) => {
         console.log( 'value in hazard is  ',value)
-        if( value === null ) {
+        if( value === null || value == undefined ) {
             setHazardValue( value )
             onHazardValueSelected( "0" )
             return null
         }
-        setHazardValue( value )
-        if( Platform.OS === "android" ) {
-            navigateToCompleteOrAssignTask()
+        console.log( 'hazard value',hazardValue, value )
+        if( hazardValue != value ) {
+            setHazardValue( value )
+            if( Platform.OS === "android" ) {
+                navigateToCompleteOrAssignTask( value )
+            }
         }
+        
     }
 
     return (
@@ -210,7 +215,7 @@ export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHaza
             title="Hazards *"
             items={hazardData}
             value={hazardValue}
-            onValueChange={()=>onHazardValueChange()}
+            onValueChange={(value)=>onHazardValueChange(value)}
             onDonePress={navigateToCompleteOrAssignTask}
         />
     )
@@ -242,6 +247,10 @@ const RenderHazardDropdown = ( props ) => {
         return null
     }
     
+    console.log( 'in hazard score',Number(scoreValue))
+    if( Number(scoreValue) == 0 ){
+        return null
+    }
     if( shouldCheckForTruthyValues ? Number(scoreValue) === Number(item.CorrectAnswerID) : Number( scoreValue ) >= Number( item.CorrectAnswerID ) ) {
 
         return null
@@ -296,6 +305,11 @@ export const GroupAttributes = ( props ) => {
     }
 
     const onScoreValueChange = ( value ) => {
+        console.log( 'score value is ',value)
+        if( value == null ) {
+            setScoreValue( value ),
+            currentScoreValue( 0 )
+        }
         if( scoreValue !== value ) {
             setScoreValue( value ),
             currentScoreValue( value )

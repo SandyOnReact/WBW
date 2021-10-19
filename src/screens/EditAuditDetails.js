@@ -193,7 +193,7 @@ export const EditAuditDetailsScreen = () => {
     const [checkboxValue,setCheckboxValue] = useState( false )
     const [inputValue,setInputValue] = useState( auditDetails?.AuditAndInspectionDetails?.Notes )
     const [skipReasonValue,setSkipReasonValue] = useState( auditDetails?.AuditAndInspectionDetails.SkippedReason )
-    const [dropdownvalue,setDropdownValue] = useState("-1" )
+    const [dropdownvalue,setDropdownValue] = useState("")
     const [userInfo,setUserInfo] = useState( {} )
     const [isReset,setIsReset] = useState( false )
     const [shouldShowWarningMessage,setShouldShowWarningMessage] = useState( false )
@@ -231,6 +231,21 @@ export const EditAuditDetailsScreen = () => {
     const STATUS_BAR_HEIGHT = getStatusBarHeight()
     const keyboard = useKeyboard()
     const navigation = useNavigation()
+
+    useEffect(()=>{
+        if( isEmpty( auditDetails.AuditAndInspectionDetails?.ReportingPeriodDueDates ) ) {
+            return null
+        }else{
+            let selectedValue = auditDetails.AuditAndInspectionDetails?.ReportingPeriodDueDateSelected
+            let correctId = ''
+            auditDetails.AuditAndInspectionDetails?.ReportingPeriodDueDates.map( item => {
+                if( selectedValue == item.Value ) {
+                    correctId = item.ID
+                }
+            })
+            setDropdownValue( correctId )
+        }
+    }, [] )
 
     useEffect( ( ) => {
         setDefaultSystemFieldsArray()
@@ -517,13 +532,14 @@ export const EditAuditDetailsScreen = () => {
             groups = groups.Attributes.map( attribute => {
                 if( attribute.AttributeID === id ) {
                     attribute.isHazardsRequired = checkIsHazardsPresentAndRequired( value, attribute.CorrectAnswerID, attribute.ScoreList )
+                    console.log( 'isHazard required',attribute.isHazardsRequired )
                     if( attribute.isHazardsRequired == false ) {
                         attribute.HazardsID = "0"
                     }
                     attribute.isRequired = checkIsCommentsMandatory( attribute.IsCommentsMandatory, value, attribute.CorrectAnswerID, attribute.ScoreList  )
-                    if(value == null || value == undefined){
+                    if(value == null || value == undefined || value == 0 ){
                         attribute.GivenAnswerID = 0
-                        
+                        attribute.isHazardsRequired = false 
                     }else{
                         attribute.GivenAnswerID = value
                     }
