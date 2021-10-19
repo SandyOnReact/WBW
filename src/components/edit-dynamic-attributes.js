@@ -159,7 +159,6 @@ export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHaza
     }, [item.HazardsID] )
 
     const setHazardValueBasedonClearHazard = async ( ) => {
-        console.log( 'Inside clearing haazard', item.HazardsID)
         setHazardValue(null)
         await AsyncStorage.removeItem("cancelData")
     }
@@ -169,7 +168,6 @@ export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHaza
         return hazard
     })
     const onClear = ( ) => {
-        console.log( 'clearing hazard' )
         setHazardValue( '' )
     }
 
@@ -191,7 +189,7 @@ export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHaza
             updateHazards: ( newHazard ) => onUpdateHazard( newHazard ),
             from: "edit-audit"
         } )
-        onHazardValueSelected( value )
+        onHazardValueSelected( hazardValue )
     }
 
     const onHazardValueChange = async ( value ) => {
@@ -212,7 +210,7 @@ export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHaza
             title="Hazards *"
             items={hazardData}
             value={hazardValue}
-            onValueChange={onHazardValueChange}
+            onValueChange={()=>onHazardValueChange()}
             onDonePress={navigateToCompleteOrAssignTask}
         />
     )
@@ -276,28 +274,21 @@ export const GroupAttributes = ( props ) => {
         onCheckboxValueChange()
     }, [checkboxValue])
         const onCheckboxValueChange = ( ) => {
-        console.log( 'Inside checkbox value method', item.GivenAnswerID )
         if( !checkboxValue ) {
             if( item.GivenAnswerID != 0 || item.GivenAnswerID != null || item.GivenAnswerID != undefined ) {
-                console.log( 'Inside first if first if')
                 setScoreValue( item.GivenAnswerID )
                 currentScoreValue( item.GivenAnswerID )
             }
             else{
-                // console.log( 'Inside If esle part' )
                  setScoreValue( 0 )
                  currentScoreValue( 0 )
             }
         }else{
-            console.log( 'Inside else checking',JSON.stringify(item.GivenAnswerID) )
             if( item.GivenAnswerID == 0 || item.GivenAnswerID == null || item.GivenAnswerID == undefined ) {
-                console.log( 'Inside else first if' )
-                console.log( 'MaxCoorect', item.MaxCorrectAnswerID )
                 setScoreValue( item.MaxCorrectAnswerID )
                 currentScoreValue( item.MaxCorrectAnswerID )
 
             }else{
-                console.log( 'Inside else first else' )
                 setScoreValue( item.GivenAnswerID )
                 currentScoreValue( item.GivenAnswerID )
             }

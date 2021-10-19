@@ -572,10 +572,6 @@ export const AuditDetailsScreen = () => {
     }
     
     const checkIsHazardsPresentAndRequired = ( selectedScoreValue, CorrectAnswerID, ScoreList ) => {
-        console.log( 'selected score value ',selectedScoreValue)
-        console.log( 'correct answer id ',CorrectAnswerID)
-        //console.log( 'check condition', checkIfTruthyValues ? Number(selectedScoreValue) === Number(CorrectAnswerID) : Number( selectedScoreValue ) >= Number( CorrectAnswerID )  )
-        console.log( 'score  list',JSON.stringify(ScoreList))
         const shouldCheckForNonApplicableValues = ScoreList.find( item => {
             if( item.Value === "Not Applicable" && item.ID === selectedScoreValue ) {
                 return true
@@ -590,29 +586,18 @@ export const AuditDetailsScreen = () => {
                 return false
             }
         })
-        console.log( 'truthy value is ',checkIfTruthyValues)
         if( checkIfTruthyValues ? Number(selectedScoreValue) === Number(CorrectAnswerID) : Number( selectedScoreValue ) >= Number( CorrectAnswerID ) ) {
-            console.log( 'Inside IF.. returning false')
             return false
         }else{
-            console.log( 'Inside ELSE.. returning true')
             return true
         }
     }
 
-    const currentSelectedScoreValue = ( value, id  ) => {
-        console.log( 'value is ',value, id )
-       
+    const currentSelectedScoreValue = ( value, id  ) => {       
         let clonedGroupsArray = [...groupsArray]
         clonedGroupsArray = clonedGroupsArray.map( groups => {
             groups = groups.Attributes.map( attribute => {
                 if( attribute.AttributeID === id ) {
-                    console.log( 'Inside first IF')
-                    // if( attribute.isHazardsRequired === true ) {
-                    //     console.log( 'Checking for hazard requirement' )
-                        
-                    //     console.log( 'after hazard requirement checked' )
-                    // }
                     attribute.isHazardsRequired = checkIsHazardsPresentAndRequired( value, attribute.CorrectAnswerID, attribute.ScoreList )
                     if( attribute.isHazardsRequired == false ) {
                         attribute.HazardsID = "0"
@@ -627,7 +612,6 @@ export const AuditDetailsScreen = () => {
                     }
                     return attribute     
                 }
-                console.log( 'outside first IF')
                 return attribute
             })
             return {
@@ -655,30 +639,7 @@ export const AuditDetailsScreen = () => {
         })
         setGroupsArray( clonedGroupsArray )
     }
-    // const onHazardValueSelected = ( value, id  ) => {
-    //     console.log( 'new hazard value selected', value, id )
-    //     if( value === null ) {
-    //         return null
-    //     }
-    //     let clonedGroupsArray = [...groupsArray]
-    //     console.log( 'cloned groups array before ',JSON.stringify( clonedGroupsArray ) )
-    //     clonedGroupsArray = clonedGroupsArray.map( groups => {
-    //         groups = groups.Attributes.map( attribute => {
-    //             if( attribute.AttributeID === id ) {
-    //                 console.log( 'Inside first IF' )
-    //                 attribute.HazardsID = value
-    //                 return attribute
-    //             }
-    //             return attribute
-    //         })
-    //         return {
-    //             Attributes: groups
-    //         }
-    //     })
-    //     console.log( 'cloned groups array after ',JSON.stringify( clonedGroupsArray ) )
-    //     setGroupsArray( clonedGroupsArray )
-    // }
-
+    
     const onCommentInputChange = ( value, id  ) => {
         if( value === null ) {
             return null
@@ -823,21 +784,13 @@ export const AuditDetailsScreen = () => {
     }
 
     const onHazardValueSelected = ( value, id  ) => {
-        console.log( 'new hazard value selected', value, id )
         if( value === null ) {
             return null
         }
         let clonedGroupsArray = [...groupsArray]
-        console.log( 'cloned groups array before ',JSON.stringify( clonedGroupsArray ) )
         clonedGroupsArray = clonedGroupsArray.map( groups => {
             groups = groups.Attributes.map( attribute => {
-                // if( value === 0 ) {
-                //     attribute.isHazardsRequired = true
-                // }else{
-                //     attribute.isHazardsRequired = false
-                // }
                 if( attribute.AttributeID === id ) {
-                    console.log( 'Inside first IF' )
                     attribute.HazardsID = value
                     return attribute
                 }
@@ -847,18 +800,15 @@ export const AuditDetailsScreen = () => {
                 Attributes: groups
             }
         })
-        console.log( 'cloned groups array after ',JSON.stringify( clonedGroupsArray ) )
         setGroupsArray( clonedGroupsArray )
     }
 
     const checkForHazardsItem = ( ) => {
         let groupsArrayToCheck = []
         let clonedGroupsArray = [...groupsArray]
-        console.log( 'clonedGroupsArray',JSON.stringify(clonedGroupsArray))
         clonedGroupsArray = clonedGroupsArray.map( item => {
             let clonedGroupsAttributeArray = [...item.Attributes]
             clonedGroupsAttributeArray = clonedGroupsAttributeArray.map( val => {
-                console.log( 'Inside map called' )
                 if( val.isHazardsRequired === true && !['','0',0,null,undefined].includes(val.HazardsID) ) {
                     groupsArrayToCheck.push( true )
                     return true
@@ -872,7 +822,6 @@ export const AuditDetailsScreen = () => {
             })
             return item
         })
-        console.log( 'groupsArray to check',JSON.stringify(groupsArrayToCheck))
         const result = groupsArrayToCheck.every( item => item === true )
         return result
     }
@@ -974,6 +923,7 @@ export const AuditDetailsScreen = () => {
                 }
             }
             console.log( 'paload for submitting audit',JSON.stringify( payload ) )
+            return null
             const result = await api.post({
                 url: `api/AuditAndInspection/CompleteAudit`,
                 body: payload
@@ -1017,11 +967,6 @@ export const AuditDetailsScreen = () => {
                 Toast.showWithGravity('Reason for skipping the last day of schedule period is required.', Toast.LONG, Toast.CENTER);
                 return null
             }
-            // const checkForHazards = checkForHazardsItem() 
-            // if( !checkForHazards ) {
-            //     Toast.showWithGravity('Hazard is required.', Toast.LONG, Toast.CENTER);
-            //     return null 
-            // }
             const reportingPeriodDueDate = !isEmpty( auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates ) ? auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates.find( item => item.ID === dropdownvalue) : ''
             const token = await AsyncStorage.getItem('Token')
             const systemsArrayWithoutMandatoryFields = systemFieldsArray.map( item => {
@@ -1102,7 +1047,6 @@ export const AuditDetailsScreen = () => {
 
     const renderLastDayOfScheduledPeriod = ( ) => {
         if( auditDetails?.AuditAndInspectionDetails?.IsSchedulerRequired === "True" && auditDetails.AuditAndInspectionDetails?.ReportingPeriodDueDates === null ) {
-            console.log("auditDetails?.AuditAndInspectionDetails?.IsSchedulerRequired",auditDetails.AuditAndInspectionDetails?.ReportingPeriodDueDates)
             return null
         }
         else if( auditDetails?.AuditAndInspectionDetails?.IsSchedulerRequired === "True" ) {

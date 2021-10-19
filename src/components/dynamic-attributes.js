@@ -265,7 +265,8 @@ export const GroupAttributes = ( props ) => {
 
     useEffect(() => {
         if( !checkboxValue ) {
-            setScoreValue( null )
+            setScoreValue( 0 )
+            currentScoreValue( 0 )
         }
     }, [checkboxValue])
 

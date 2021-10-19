@@ -199,41 +199,8 @@ export const EditAuditDetailsScreen = () => {
     const [shouldShowWarningMessage,setShouldShowWarningMessage] = useState( false )
     const [imagesObject,setImagesObject] = useState( {} )
     const [systemFieldsArray,setSystemFieldsArray] = useState( [] )
-    const [groupsArray,setGroupsArray] = useState( [] )
-    const [returnData,setReturnData] = useState( {} )
-    const [cancelData,setCancelData] = useState( {} )
-    const [primaryUser,setPrimaryUser] = useState(auditDetails?.AuditAndInspectionDetails.PrimaryUserID)
-    const STATUS_BAR_HEIGHT = getStatusBarHeight()
-    const keyboard = useKeyboard()
-    const navigation = useNavigation()
-
-    useEffect( ( ) => {
-        setDefaultSystemFieldsArray()
-    }, [] )
-    
-    useEffect( ( ) => {
-        setupGroupsArray()
-    }, [] )
-    
-    
-    useFocusEffect(
-        React.useCallback( () => {
-            setupLocalStorageValuesOnFocus()
-        }, [])
-      );
-
-    const setupLocalStorageValuesOnFocus = async ( ) => {
-        var tempData = await AsyncStorage.getItem("returndata")
-            tempData = JSON.parse(tempData)
-            await AsyncStorage.removeItem("returndata");
-            var cancelData = await AsyncStorage.getItem("cancelData")
-            cancelData = JSON.parse(cancelData)
-            setCancelData( cancelData )
-            setReturnData(tempData)
-    }
-
-    const setupGroupsArray = ( ) => {
-        const data = auditDetails.GroupsAndAttributes.Groups.map( item => {
+    const [groupsArray,setGroupsArray] = useState(()=>{
+        return auditDetails.GroupsAndAttributes.Groups.map( item => {
             const attributesArray = item.Attributes.map( val => {
                 const attribute = {
                     CustomFormResultID: val.CustomFormResultID,
@@ -257,7 +224,32 @@ export const EditAuditDetailsScreen = () => {
             }
             return finalGroupData
         })
-        setGroupsArray( data )
+    })
+    const [returnData,setReturnData] = useState( {} )
+    const [cancelData,setCancelData] = useState( {} )
+    const [primaryUser,setPrimaryUser] = useState(auditDetails?.AuditAndInspectionDetails.PrimaryUserID)
+    const STATUS_BAR_HEIGHT = getStatusBarHeight()
+    const keyboard = useKeyboard()
+    const navigation = useNavigation()
+
+    useEffect( ( ) => {
+        setDefaultSystemFieldsArray()
+    }, [] )
+
+    useFocusEffect(
+        React.useCallback( () => {
+            setupLocalStorageValuesOnFocus()
+        }, [])
+      );
+
+    const setupLocalStorageValuesOnFocus = async ( ) => {
+        var tempData = await AsyncStorage.getItem("returndata")
+            tempData = JSON.parse(tempData)
+            await AsyncStorage.removeItem("returndata");
+            var cancelData = await AsyncStorage.getItem("cancelData")
+            cancelData = JSON.parse(cancelData)
+            setCancelData( cancelData )
+            setReturnData(tempData)
     }
 
     const setDefaultSystemFieldsArray = ( ) => {
@@ -498,10 +490,6 @@ export const EditAuditDetailsScreen = () => {
     }
     
     const checkIsHazardsPresentAndRequired = ( selectedScoreValue, CorrectAnswerID, ScoreList ) => {
-        console.log( 'selected score value ',selectedScoreValue)
-        console.log( 'correct answer id ',CorrectAnswerID)
-        //console.log( 'check condition', checkIfTruthyValues ? Number(selectedScoreValue) === Number(CorrectAnswerID) : Number( selectedScoreValue ) >= Number( CorrectAnswerID )  )
-        console.log( 'score  list',JSON.stringify(ScoreList))
         const shouldCheckForNonApplicableValues = ScoreList.find( item => {
             if( item.Value === "Not Applicable" && item.ID === selectedScoreValue ) {
                 return true
@@ -516,25 +504,18 @@ export const EditAuditDetailsScreen = () => {
                 return false
             }
         })
-        console.log( 'truthy value is ',checkIfTruthyValues)
         if( checkIfTruthyValues ? Number(selectedScoreValue) === Number(CorrectAnswerID) : Number( selectedScoreValue ) >= Number( CorrectAnswerID ) ) {
-            console.log( 'Inside IF.. returning false')
             return false
         }else{
-            console.log( 'Inside ELSE.. returning true')
             return true
         }
     }
 
-    const currentSelectedScoreValue = ( value, id  ) => {
-        console.log( 'value is ',value, id )
-       
+    const currentSelectedScoreValue = async ( value, id  ) => {
         let clonedGroupsArray = [...groupsArray]
         clonedGroupsArray = clonedGroupsArray.map( groups => {
             groups = groups.Attributes.map( attribute => {
                 if( attribute.AttributeID === id ) {
-                    console.log( 'Inside first IF')
-                    console.log( 'after hazard requirement checked' ,attribute)
                     attribute.isHazardsRequired = checkIsHazardsPresentAndRequired( value, attribute.CorrectAnswerID, attribute.ScoreList )
                     if( attribute.isHazardsRequired == false ) {
                         attribute.HazardsID = "0"
@@ -542,13 +523,12 @@ export const EditAuditDetailsScreen = () => {
                     attribute.isRequired = checkIsCommentsMandatory( attribute.IsCommentsMandatory, value, attribute.CorrectAnswerID, attribute.ScoreList  )
                     if(value == null || value == undefined){
                         attribute.GivenAnswerID = 0
-
+                        
                     }else{
                         attribute.GivenAnswerID = value
                     }
                     return attribute     
                 }
-                console.log( 'outside first IF')
                 return attribute
             })
             return {
@@ -577,17 +557,14 @@ export const EditAuditDetailsScreen = () => {
         setGroupsArray( clonedGroupsArray )
     }
     const onHazardValueSelected = ( value, id  ) => {
-        console.log( 'new hazard value selected', value, id )
         if( value === null ) {
             return null
         }
         let clonedGroupsArray = [...groupsArray]
-        console.log( 'cloned groups array before ',JSON.stringify( clonedGroupsArray ) )
         clonedGroupsArray = clonedGroupsArray.map( groups => {
             groups = groups.Attributes.map( attribute => {
               
                 if( attribute.AttributeID === id ) {
-                    console.log( 'Inside first IF' )
                     attribute.HazardsID = value
                     return attribute
                 }
@@ -597,7 +574,6 @@ export const EditAuditDetailsScreen = () => {
                 Attributes: groups
             }
         })
-        console.log( 'cloned groups array after ',JSON.stringify( clonedGroupsArray ) )
         setGroupsArray( clonedGroupsArray )
     }
 
@@ -746,11 +722,9 @@ export const EditAuditDetailsScreen = () => {
     const checkForHazardsItem = ( ) => {
         let groupsArrayToCheck = []
         let clonedGroupsArray = [...groupsArray]
-        console.log( 'clonedGroupsArray',JSON.stringify(clonedGroupsArray))
         clonedGroupsArray = clonedGroupsArray.map( item => {
             let clonedGroupsAttributeArray = [...item.Attributes]
             clonedGroupsAttributeArray = clonedGroupsAttributeArray.map( val => {
-                console.log( 'Inside map called' )
                 if( val.isHazardsRequired === true && !['','0',0,null,undefined].includes(val.HazardsID) ) {
                     groupsArrayToCheck.push( true )
                     return true
@@ -764,7 +738,6 @@ export const EditAuditDetailsScreen = () => {
             })
             return item
         })
-        console.log( 'groupsArray to check',JSON.stringify(groupsArrayToCheck))
         const result = groupsArrayToCheck.every( item => item === true )
         return result
     }
@@ -1035,7 +1008,6 @@ export const EditAuditDetailsScreen = () => {
     }
     const renderLastDayOfScheduledPeriod = ( ) => {
         if( auditDetails?.AuditAndInspectionDetails?.IsSchedulerRequired === "True" && auditDetails.AuditAndInspectionDetails?.ReportingPeriodDueDates === null ) {
-            console.log("auditDetails?.AuditAndInspectionDetails?.IsSchedulerRequired",auditDetails.AuditAndInspectionDetails?.ReportingPeriodDueDates)
             return null
         }
         else if( auditDetails?.AuditAndInspectionDetails?.IsSchedulerRequired === "True" ) {
@@ -1067,6 +1039,7 @@ export const EditAuditDetailsScreen = () => {
     }
 
     return (
+        
         <View style={{ flex: 1, backgroundColor: 'white' }}>
         <View style={{ flex: 0.9 }}>
             <Header
