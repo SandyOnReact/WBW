@@ -862,7 +862,6 @@ export const EditAuditDetailsScreen = () => {
                 }
             }
             console.log( 'paload for submitting audit',JSON.stringify( payload ) )
-            return null
             const result = await api.post({
                 url: `api/AuditAndInspection/CompleteAudit`,
                 body: payload
