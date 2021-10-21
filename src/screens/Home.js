@@ -83,6 +83,36 @@ export const HomeScreen = ({ navigation }) => {
         )
     }
 
+    const onLogout = async ( ) => {
+        await AsyncStorage.clear()
+        navigation.dispatch(
+            CommonActions.reset({
+              index: 0,
+              routes: [
+                { name: 'Login' }
+              ],
+            })
+          );
+    }
+
+    const onRightIconPress = ( ) => {
+        Alert.alert(
+            "Logout?",
+            "Are you sure you want to logout?",
+            [
+              {
+                text: "No",
+                onPress: () => null
+              },
+              {
+                text: "Yes",
+                onPress: ( ) => onLogout()
+              }
+            ],
+          );
+          return true
+    }
+
     return (
         <Async promiseFn={fetchApi}>
             <Async.Pending>
@@ -106,6 +136,8 @@ export const HomeScreen = ({ navigation }) => {
                                 leftComponent={{ icon: 'menu', color: '#fff' }}
                                 containerStyle={{ backgroundColor: '#1e5873' }}
                                 centerComponent={{ text: userInfo.CompanyName, style: { color: '#fff',fontWeight:'bold', fontSize:16 } }}
+                                rightComponent={{ icon: 'logout', color: '#fff', type: 'material', onPress: onRightIconPress }}
+                                rightContainerStyle={{ marginHorizontal: '2%'}}
                             />
                             <View style={{margin:20}}>
                                 <FlatList
