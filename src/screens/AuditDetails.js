@@ -247,6 +247,7 @@ export const AuditDetailsScreen = () => {
                     CorrectAnswerID: val.CorrectAnswerID,
                     ScoreList: val.ScoreList,
                     isRequired: val.IsCommentsMandatory === "Mandatory" ? 'Comments *' : 'Comments',
+                    showHazard: val.DoNotShowHazard === "True" || val.AuditAndInspectionScore === "Do Not Show Score" ? false : true,
                     isHazardsRequired: val.DoNotShowHazard === "True" || val.AuditAndInspectionScore === "Do Not Show Score" ? false : true
                 }
                 return attribute
@@ -598,9 +599,12 @@ export const AuditDetailsScreen = () => {
         clonedGroupsArray = clonedGroupsArray.map( groups => {
             groups = groups.Attributes.map( attribute => {
                 if( attribute.AttributeID === id ) {
-                    attribute.isHazardsRequired = checkIsHazardsPresentAndRequired( value, attribute.CorrectAnswerID, attribute.ScoreList )
-                    if( attribute.isHazardsRequired == false ) {
-                        attribute.HazardsID = "0"
+                    if( attribute.showHazard == true ){
+                        attribute.isHazardsRequired = checkIsHazardsPresentAndRequired( value, attribute.CorrectAnswerID, attribute.ScoreList )
+                        console.log( 'isHazard required',attribute.isHazardsRequired )
+                        if( attribute.isHazardsRequired == false ) {
+                            attribute.HazardsID = "0"
+                        }
                     }
                     attribute.isRequired = checkIsCommentsMandatory( attribute.IsCommentsMandatory, value, attribute.CorrectAnswerID, attribute.ScoreList  )
                     if(value == null || value == undefined){
@@ -923,6 +927,7 @@ export const AuditDetailsScreen = () => {
                 }
             }
             console.log( 'paload for submitting audit',JSON.stringify( payload ) )
+            return null
             const result = await api.post({
                 url: `api/AuditAndInspection/CompleteAudit`,
                 body: payload

@@ -193,6 +193,7 @@ export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHaza
             return null
         }
         setHazardValue( value )
+        onHazardValueSelected( value )
         if( Platform.OS === "android" ) {
             navigateToCompleteOrAssignTask()
         }

@@ -4,7 +4,7 @@ import { getStatusBarHeight } from 'react-native-status-bar-height'
 import { Header, Input, Button, Icon } from "react-native-elements"
 import RadioForm from 'react-native-simple-radio-button';
 import { useNavigation, useRoute } from "@react-navigation/native"
-import { isEmpty } from "lodash"
+import { isEmpty, sortBy } from "lodash"
 import { CustomDropdown } from '../components/core/custom-dropdown'
 import { CustomDateTimePicker } from '../components/datetimepicker'
 import { AutoCompleteInput } from '../components/autocomplete-input/autocomplete.input'
@@ -480,10 +480,11 @@ export const AssignTask = ( props ) => {
             return probability
         })
 
-        const userList = result.UserList.map( item => {
+        let userList = result.UserList.map( item => {
             const user = { label: item.FullName, value: item.UserID }
             return user
         })
+        userList = sortBy( userList, ( item ) => item.label )
         setUserList( userList )
         setProbabilityRatingList( probabilityRating )
         setSeverityRatingList( severityRating )
@@ -931,6 +932,7 @@ export const CompleteOrAssignTask = ( props ) => {
                 CustomFormResultID:item.CustomFormResultID,
             }
             await AsyncStorage.setItem("cancelData", JSON.stringify(cancelData))
+            updateHazards( 0 )
             navigation.goBack()
         }   
     }
