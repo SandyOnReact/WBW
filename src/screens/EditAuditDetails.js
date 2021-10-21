@@ -214,6 +214,7 @@ export const EditAuditDetailsScreen = () => {
                     CorrectAnswerID: val.CorrectAnswerID,
                     ScoreList: val.ScoreList,
                     isRequired: val.IsCommentsMandatory === "Mandatory" ? 'Comments *' : 'Comments',
+                    showHazard: val.DoNotShowHazard === "True" || val.AuditAndInspectionScore === "Do Not Show Score" ? false : true,
                     isHazardsRequired: val.DoNotShowHazard === "True" || val.AuditAndInspectionScore === "Do Not Show Score" ? false : true
                 }
                 return attribute
@@ -233,6 +234,20 @@ export const EditAuditDetailsScreen = () => {
     const navigation = useNavigation()
 
     useEffect(()=>{
+        setReportingPeriodDueDate()
+    }, [] )
+
+    useEffect( ( ) => {
+        setDefaultSystemFieldsArray()
+    }, [] )
+
+    useFocusEffect(
+        React.useCallback( () => {
+            setupLocalStorageValuesOnFocus()
+        }, [])
+      );
+
+      const setReportingPeriodDueDate = ( ) => {
         if( isEmpty( auditDetails.AuditAndInspectionDetails?.ReportingPeriodDueDates ) ) {
             return null
         }else{
@@ -245,17 +260,7 @@ export const EditAuditDetailsScreen = () => {
             })
             setDropdownValue( correctId )
         }
-    }, [] )
-
-    useEffect( ( ) => {
-        setDefaultSystemFieldsArray()
-    }, [] )
-
-    useFocusEffect(
-        React.useCallback( () => {
-            setupLocalStorageValuesOnFocus()
-        }, [])
-      );
+      }
 
     const setupLocalStorageValuesOnFocus = async ( ) => {
         var tempData = await AsyncStorage.getItem("returndata")
@@ -505,6 +510,9 @@ export const EditAuditDetailsScreen = () => {
     }
     
     const checkIsHazardsPresentAndRequired = ( selectedScoreValue, CorrectAnswerID, ScoreList ) => {
+        console.log( 'selected score value',selectedScoreValue)
+        console.log( 'correctAnswerId',CorrectAnswerID)
+        console.log( 'scoreList',ScoreList)
         const shouldCheckForNonApplicableValues = ScoreList.find( item => {
             if( item.Value === "Not Applicable" && item.ID === selectedScoreValue ) {
                 return true
@@ -531,11 +539,13 @@ export const EditAuditDetailsScreen = () => {
         clonedGroupsArray = clonedGroupsArray.map( groups => {
             groups = groups.Attributes.map( attribute => {
                 if( attribute.AttributeID === id ) {
-                    attribute.isHazardsRequired = checkIsHazardsPresentAndRequired( value, attribute.CorrectAnswerID, attribute.ScoreList )
-                    console.log( 'isHazard required',attribute.isHazardsRequired )
-                    if( attribute.isHazardsRequired == false ) {
-                        attribute.HazardsID = "0"
-                    }
+                    if( attribute.showHazard == true ){
+                        attribute.isHazardsRequired = checkIsHazardsPresentAndRequired( value, attribute.CorrectAnswerID, attribute.ScoreList )
+                        console.log( 'isHazard required',attribute.isHazardsRequired )
+                        if( attribute.isHazardsRequired == false ) {
+                            attribute.HazardsID = "0"
+                        }
+                    } 
                     attribute.isRequired = checkIsCommentsMandatory( attribute.IsCommentsMandatory, value, attribute.CorrectAnswerID, attribute.ScoreList  )
                     if(value == null || value == undefined || value == 0 ){
                         attribute.GivenAnswerID = 0
@@ -833,7 +843,7 @@ export const EditAuditDetailsScreen = () => {
             })
             const groupsArrayWithOnlyRequiredFields = groupsArray.map( item => {
                 const attributes =  item.Attributes.map( val => {
-                    const attributeFields = omit( val, 'AttributeID', 'AuditAndInspectionScore', 'IsCommentsMandatory', 'CorrectAnswerID', 'ScoreList', 'isRequired', 'isHazardsRequired' )
+                    const attributeFields = omit( val, 'AttributeID', 'AuditAndInspectionScore', 'IsCommentsMandatory', 'CorrectAnswerID', 'ScoreList', 'isRequired', 'isHazardsRequired', 'showHazard' )
                     return attributeFields
                 })
                 return {
@@ -914,7 +924,7 @@ export const EditAuditDetailsScreen = () => {
             })
             const groupsArrayWithOnlyRequiredFields = groupsArray.map( item => {
                 const attributes =  item.Attributes.map( val => {
-                    const attributeFields = omit( val, 'AttributeID', 'AuditAndInspectionScore', 'IsCommentsMandatory', 'CorrectAnswerID', 'ScoreList', 'isRequired' )
+                    const attributeFields = omit( val, 'AttributeID', 'AuditAndInspectionScore', 'IsCommentsMandatory', 'CorrectAnswerID', 'ScoreList', 'isRequired','showHazard' )
                     return attributeFields
                 })
                 return {

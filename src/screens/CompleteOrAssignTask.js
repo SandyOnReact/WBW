@@ -742,7 +742,7 @@ export const AssignTask = ( props ) => {
             CustomFormResultID:item.CustomFormResultID,
         }
         await AsyncStorage.setItem("cancelData", JSON.stringify(cancelData))
-        clearHazards()
+        updateHazards( 0 )
         navigation.goBack()
     }
 
