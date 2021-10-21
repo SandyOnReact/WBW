@@ -281,7 +281,8 @@ export const EditAuditDetailsScreen = () => {
                 ControlID: item.ControlID,
                 SelectedValue: item.SelectedValue,
                 IsMandatory: item.IsMandatory,
-                DisplayOrder: item.DisplayOrder
+                DisplayOrder: item.DisplayOrder,
+                ControlLabel: item.ControlLabel
             }
             return systemFieldrow
         })
@@ -692,11 +693,6 @@ export const EditAuditDetailsScreen = () => {
                 return result
     }
 
-    
-    function replaceAll(string, search, replace) {
-        return string.split(search).join(replace);
-    }
-
 
     const checkForRequiredDynamicFields = ( ) => {
         var isFlagOn = true
@@ -707,8 +703,7 @@ export const EditAuditDetailsScreen = () => {
                 if(isFlagOn){
                     if(isEmpty(item.SelectedValue)){
                         if(item.IsMandatory){
-                            const controlIdWithoutUnderScore = replaceAll( item.ControlID, '_', ' ' )
-                            Toast.showWithGravity( `${controlIdWithoutUnderScore} is required`, Toast.LONG, Toast.CENTER);
+                            Toast.showWithGravity( `${item.ControlLabel} is required`, Toast.LONG, Toast.CENTER);
                             isFlagOn= false
                             return false
                         }
@@ -838,7 +833,7 @@ export const EditAuditDetailsScreen = () => {
             const reportingPeriodDueDate = !isEmpty( auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates ) ? auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates.find( item => item.ID === dropdownvalue) : ''
             const token = await AsyncStorage.getItem('Token')
             const systemsArrayWithoutMandatoryFields = systemFieldsArray.map( item => {
-                const arrayFields = omit( item, 'IsMandatory', 'DisplayOrder' )
+                const arrayFields = omit( item, 'IsMandatory', 'DisplayOrder', 'ControlLabel' )
                 return arrayFields
             })
             const groupsArrayWithOnlyRequiredFields = groupsArray.map( item => {
@@ -919,7 +914,7 @@ export const EditAuditDetailsScreen = () => {
             const reportingPeriodDueDate = !isEmpty( auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates ) ? auditDetails.AuditAndInspectionDetails.ReportingPeriodDueDates.find( item => item.ID === dropdownvalue) : ''
             const token = await AsyncStorage.getItem('Token')
             const systemsArrayWithoutMandatoryFields = systemFieldsArray.map( item => {
-                const arrayFields = omit( item, 'IsMandatory' )
+                const arrayFields = omit( item, 'IsMandatory', 'DisplayOrder', 'ControlLabel' )
                 return arrayFields
             })
             const groupsArrayWithOnlyRequiredFields = groupsArray.map( item => {
@@ -1116,7 +1111,7 @@ export const EditAuditDetailsScreen = () => {
                     onChangeText={(text) => setInputValue( text )}
                 />
             </View>
-            <View flex={0.5} style={{ marginHorizontal: '0.5%' }}>
+            <View flex={0.5} style={{ marginHorizontal: '2.3%', marginTop: -10 }}>
                 {
                     renderPrimaryUserList()
                 }

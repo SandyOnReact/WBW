@@ -270,7 +270,8 @@ export const AuditDetailsScreen = () => {
                 ControlID: item.ControlID,
                 SelectedValue: item.SelectedValue,
                 IsMandatory: item.IsMandatory,
-                DisplayOrder: item.DisplayOrder
+                DisplayOrder: item.DisplayOrder,
+                ControlLabel: item.ControlLabel
             }
             return systemFieldrow
         })
@@ -733,12 +734,6 @@ export const AuditDetailsScreen = () => {
                 return result
     }
 
-    
-    function replaceAll(string, search, replace) {
-        return string.split(search).join(replace);
-    }
-
-
     const checkForRequiredDynamicFields = ( ) => {
         var isFlagOn = true
         const SystemFieldsData = sortBy(systemFieldsArray, [function(o) { return o.DisplayOrder; }]);
@@ -748,8 +743,7 @@ export const AuditDetailsScreen = () => {
                 if(isFlagOn){
                     if(isEmpty(item.SelectedValue)){
                         if(item.IsMandatory){
-                            const controlIdWithoutUnderScore = replaceAll( item.ControlID, '_', ' ' )
-                            Toast.showWithGravity( `${controlIdWithoutUnderScore} is required`, Toast.LONG, Toast.CENTER);
+                            Toast.showWithGravity( `${item.ControlLabel} is required`, Toast.LONG, Toast.CENTER);
                             isFlagOn= false
                             return false
                         }
@@ -927,7 +921,6 @@ export const AuditDetailsScreen = () => {
                 }
             }
             console.log( 'paload for submitting audit',JSON.stringify( payload ) )
-            return null
             const result = await api.post({
                 url: `api/AuditAndInspection/CompleteAudit`,
                 body: payload
