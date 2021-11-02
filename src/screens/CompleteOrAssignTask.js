@@ -212,7 +212,7 @@ export const CompleteTask = ( props ) => {
            <ScrollView showsVerticalScrollIndicator={false}>
            <View style={{ flexDirection: 'row', marginHorizontal: '3%', alignItems: 'center' }}>
                 <Text style={{ fontSize: 16, fontWeight: 'bold'}}>Selected Hazard: </Text>
-                <Text style={{ marginHorizontal: '5%', fontSize: 16 }}>{selectedHazard?.label}</Text>
+                <Text style={{ marginHorizontal: '1%', fontSize: 16 }}>{selectedHazard?.label}</Text>
            </View>
            <View style={{ marginVertical: '5%'}}>
                <CustomTextAreaInput onChangeText={(text)=>setTaskTitle( text )} multiline={true} numberOfLines={0} value={taskTitle} label="Task Title *" />
@@ -275,7 +275,7 @@ export const CustomCalendar = ( { value, onDateChange } ) => {
         const currentDate = selectedDate || date;
         const pickedDate = moment(currentDate).format("MM/DD/YYYY")
         setDateValue(pickedDate)
-        onDateChange( datevalue )
+        onDateChange( pickedDate )
         date = currentDate
         hideDatePicker()
     };
@@ -399,13 +399,13 @@ export const ShowTaskDetails = ( props ) => {
                 <Text style={{ fontSize: 18, color: 'black' }}>Instructions</Text>
                 <Text style={{ fontSize: 16, fontWeight: '500'}}>{taskDetails?.Instructions}</Text>
            </View>
-           <View style={{ flexDirection: 'row', margin: '3%'}}>
+           <View style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: '3%', marginVertical: '1%'}}>
                <Text style={{ fontSize: 16, fontWeight: 'bold'}}>Previous Hazards: </Text>
                <Text>{taskDetails?.PreviousHazard}</Text>
            </View>
-           <View style={{ flexDirection: 'row', margin: '3%', alignItems: 'center' }}>
+           <View style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: '3%', marginVertical: '1%' }}>
                <Text style={{ fontSize: 16, fontWeight: 'bold'}}>New Hazards: </Text>
-               <Text style={{ fontSize: 14, marginLeft: '5%'}}>{newHazard?.label}</Text>
+               <Text>{newHazard?.label}</Text>
            </View>
            <View style={{ flex: 0.3 }}>
                 <View style={{ flex: 0.8, marginTop: '3%', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center'}}>
@@ -650,9 +650,6 @@ export const AssignTask = ( props ) => {
     }
 
     const checkShowRiskRating = ( severity, probability ) => {
-        console.log( 'severity rating ',severity)
-        console.log( 'probability rating ',probability)
-        console.log( 'isFetching ',isFetchingRatingData)
         if( !isEmpty( severity ) && !isEmpty( probability ) && isFetchingRatingData === false ) {
             fetchRiskRatingAndDueDate( severity, probability )
         }
@@ -667,7 +664,6 @@ export const AssignTask = ( props ) => {
     }
 
     const onProbabilityRatingChange = ( value ) => {
-        console.log( 'severity rating in prob',severityRating)
         setProbabilityRating( value )
         setShouldShowRiskRating( false )
         checkShowRiskRating( severityRating, value )
@@ -788,7 +784,7 @@ export const AssignTask = ( props ) => {
                     <ScrollView showsVerticalScrollIndicator={false} nestedScrollEnabled={true}  keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: 30 }}>
                         <View style={{ flexDirection: 'row', marginHorizontal: '3%', alignItems: 'center' }}>
                                 <Text style={{ fontSize: 16, fontWeight: 'bold'}}>Selected Hazard: </Text>
-                                <Text style={{ marginHorizontal: '5%', fontSize: 16 }}>{selectedHazard?.label}</Text>
+                                <Text style={{ marginHorizontal: '1%', fontSize: 16 }}>{selectedHazard?.label}</Text>
                         </View>
                         <View style={{ marginVertical: '5%'}}>
                             <CustomTextAreaInput 

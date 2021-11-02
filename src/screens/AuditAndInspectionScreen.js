@@ -103,7 +103,6 @@ export const AuditAndInspectionScreen = ({ route, navigation }) => {
             url: 'api/AuditAndInspection/GetAuditDetails',
             body: body
         })
-        console.log( 'response on edit inspection ',JSON.stringify( result ) )
         if( isEmpty( result ) ) {
             isLoading = false
             navigatetoBackScreen()

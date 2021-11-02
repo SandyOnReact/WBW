@@ -172,14 +172,12 @@ export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHaza
     }
 
     const onUpdateHazard = ( newHazard ) => {
-        console.log( 'Inside new hazard', JSON.stringify( newHazard ) )
         setShouldUpdate( !shouldUpdate )
         setHazardValue( newHazard )
         onHazardValueSelected( newHazard )
     }
 
     const navigateToCompleteOrAssignTask = async ( value ) => {
-        console.log( 'navigating -->', hazardValue )
         await AsyncStorage.setItem( 'AttributeID', item.AttributeID )
         navigation.navigate( 'CompleteOrAssignTask', {
             selectedHazardValue: value,
@@ -194,13 +192,11 @@ export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHaza
     }
 
     const onHazardValueChange = async ( value ) => {
-        console.log( 'value in hazard is  ',value)
         if( value === null || value == undefined ) {
             setHazardValue( value )
             onHazardValueSelected( "0" )
             return null
         }
-        console.log( 'hazard value',hazardValue, value )
         setHazardValue( value )
         onHazardValueSelected( value )
         if( hazardValue != value ) {
@@ -248,7 +244,6 @@ const RenderHazardDropdown = ( props ) => {
         return null
     }
     
-    console.log( 'in hazard score',Number(scoreValue))
     if( Number(scoreValue) == 0 ){
         return null
     }
@@ -306,7 +301,6 @@ export const GroupAttributes = ( props ) => {
     }
 
     const onScoreValueChange = ( value ) => {
-        console.log( 'score value is ',value)
         if( value == null ) {
             setScoreValue( value ),
             currentScoreValue( 0 )

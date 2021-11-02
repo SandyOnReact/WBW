@@ -22,9 +22,7 @@ export const HomeScreen = ({ navigation }) => {
 
         const user = await fetchUserInfoFromStorage()
         setUserInfo(user)
-        console.log( user )
         const token = await AsyncStorage.getItem('Token')
-        console.log( token )
         let result = await api.post({
             url: `api/Dashboard/getDashboardLink`,
             body: {
@@ -133,7 +131,7 @@ export const HomeScreen = ({ navigation }) => {
                         <View style={{ flex: 1 }}>
                             <Header
                                 statusBarProps={{ barStyle: "light-content", translucent: true, backgroundColor: "transparent" }}
-                                leftComponent={{ icon: 'menu', color: '#fff' }}
+                                // leftComponent={{ icon: 'menu', color: '#fff' }}
                                 containerStyle={{ backgroundColor: '#1e5873' }}
                                 centerComponent={{ text: userInfo.CompanyName, style: { color: '#fff',fontWeight:'bold', fontSize:16 } }}
                                 rightComponent={{ icon: 'logout', color: '#fff', type: 'material', onPress: onRightIconPress }}

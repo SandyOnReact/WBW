@@ -511,9 +511,11 @@ export const EditAuditDetailsScreen = () => {
     }
     
     const checkIsHazardsPresentAndRequired = ( selectedScoreValue, CorrectAnswerID, ScoreList ) => {
-        console.log( 'selected score value',selectedScoreValue)
-        console.log( 'correctAnswerId',CorrectAnswerID)
-        console.log( 'scoreList',ScoreList)
+        var shouldShowHazardDetails = auditDetails.AuditAndInspectionDetails?.IsDisplayHazardList
+
+        if( shouldShowHazardDetails == "False" ) {
+            return false
+        }
         const shouldCheckForNonApplicableValues = ScoreList.find( item => {
             if( item.Value === "Not Applicable" && item.ID === selectedScoreValue ) {
                 return true
@@ -528,6 +530,7 @@ export const EditAuditDetailsScreen = () => {
                 return false
             }
         })
+        
         if( checkIfTruthyValues ? Number(selectedScoreValue) === Number(CorrectAnswerID) : Number( selectedScoreValue ) >= Number( CorrectAnswerID ) ) {
             return false
         }else{
@@ -542,7 +545,6 @@ export const EditAuditDetailsScreen = () => {
                 if( attribute.AttributeID === id ) {
                     if( attribute.showHazard == true ){
                         attribute.isHazardsRequired = checkIsHazardsPresentAndRequired( value, attribute.CorrectAnswerID, attribute.ScoreList )
-                        console.log( 'isHazard required',attribute.isHazardsRequired )
                         if( attribute.isHazardsRequired == false ) {
                             attribute.HazardsID = "0"
                         }
@@ -786,7 +788,6 @@ export const EditAuditDetailsScreen = () => {
     const onSubmit = async ( ) =>  { 
         try {
             const isValid = checkForValidPayload()
-            console.log( 'isValid',isValid)
             if( !isValid ) {
                 Toast.showWithGravity('Last day of schedule period is required.', Toast.LONG, Toast.CENTER);
                 return null
@@ -799,14 +800,12 @@ export const EditAuditDetailsScreen = () => {
                 return null
             }
             const isreasonFilled = checkForSkippedReason()
-            console.log( 'isReason Filled',isreasonFilled)
             if(!isreasonFilled){
                 Toast.showWithGravity('Reason for skipping the last day of schedule period is required.', Toast.LONG, Toast.CENTER);
                 return null
             }
             
             const checkForValidFields = checkForRequiredDynamicFields()
-            console.log( 'checkForValidFields',checkForValidFields)
             if( !checkForValidFields ) {
                // Toast.showWithGravity('Please Enter Worksite mandatory data', Toast.LONG, Toast.CENTER);
                 return null 
@@ -866,12 +865,10 @@ export const EditAuditDetailsScreen = () => {
                     Groups: groupsArrayWithOnlyRequiredFields
                 }
             }
-            console.log( 'paload for submitting audit',JSON.stringify( payload ) )
             const result = await api.post({
                 url: `api/AuditAndInspection/CompleteAudit`,
                 body: payload
             })
-            console.log( 'result is', JSON.stringify( result ))
             if( isEmpty( result ) ) {
                 return null
             }else if( !isEmpty( result ) && isEmpty( imagesObject ) ) {
@@ -893,7 +890,6 @@ export const EditAuditDetailsScreen = () => {
               //  navigation.navigate( 'Home' )
             }
         } catch ( error ) {
-            console.log( 'error is ',JSON.stringify( error ))
             Toast.showWithGravity(error.message, Toast.LONG, Toast.CENTER);
         }
     }
@@ -947,12 +943,10 @@ export const EditAuditDetailsScreen = () => {
                     Groups: groupsArrayWithOnlyRequiredFields
                 }
             }
-            console.log( 'payload is ',JSON.stringify( payload ) )
             const result = await api.post({
                 url: `api/AuditAndInspection/SaveAudit`,
                 body: payload
             })
-            console.log( 'on save and come back',JSON.stringify( result ))
             if( isEmpty( result ) ) {
                 return null
             }else if( !isEmpty( result ) && isEmpty( imagesObject ) ) {

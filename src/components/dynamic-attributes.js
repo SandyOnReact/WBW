@@ -150,7 +150,6 @@ export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHaza
     }, [item.HazardsID] )
 
     const setHazardValueBasedonClearHazard = async ( ) => {
-        console.log( 'Inside clearing haazard', item.HazardsID)
         setHazardValue(null)
         await AsyncStorage.removeItem("cancelData")
     }
@@ -160,12 +159,10 @@ export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHaza
         return hazard
     })
     const onClear = ( ) => {
-        console.log( 'clearing hazard' )
         setHazardValue( '' )
     }
 
     const onUpdateHazard = ( newHazard ) => {
-        console.log( 'Inside new hazard', JSON.stringify( newHazard ) )
         setShouldUpdate( !shouldUpdate )
         setHazardValue( newHazard )
         onHazardValueSelected( newHazard )
@@ -186,7 +183,6 @@ export const HazardDropdown = ( { hazardList, item, auditAndInspectionId, onHaza
     }
 
     const onHazardValueChange = async ( value ) => {
-        console.log( 'value in hazard is  ',value)
         if( value === null ) {
             setHazardValue( value )
             onHazardValueSelected( "0" )
@@ -235,7 +231,9 @@ const RenderHazardDropdown = ( props ) => {
 
         return null
     }
-    
+    if( hazardList && hazardList.length == 0 ) {
+        return null
+    }
     if( shouldCheckForTruthyValues ? Number(scoreValue) === Number(item.CorrectAnswerID) : Number( scoreValue ) >= Number( item.CorrectAnswerID ) ) {
 
         return null
