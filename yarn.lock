@@ -5997,7 +5997,7 @@
   dependencies:
     "is-wsl" "^1.1.0"
 
-"opencollective-postinstall@^2.0.3":
+"opencollective-postinstall@^2.0.2", "opencollective-postinstall@^2.0.3":
   "integrity" "sha512-8AV/sCtuzUeTo8gQK5qDZzARrulB3egtLzFgteqB2tcT4Mw7B8Kt7JcDHmltjz6FOAHsvTevk70gZEbhM4ZS9Q=="
   "resolved" "https://registry.npmjs.org/opencollective-postinstall/-/opencollective-postinstall-2.0.3.tgz"
   "version" "2.0.3"
@@ -6575,6 +6575,14 @@
   "resolved" "https://registry.npmjs.org/react-native-image-picker/-/react-native-image-picker-3.2.1.tgz"
   "version" "3.2.1"
 
+"react-native-inappbrowser-reborn@^3.6.3":
+  "integrity" "sha512-fqF708GVZ/7zja0/GyJQfjDfKREOe1fxYq8RAKZo8/KK6SkFO9hBlYqC3PwLFPw29zzwBzR+6EpL3qo95igkLw=="
+  "resolved" "https://registry.npmjs.org/react-native-inappbrowser-reborn/-/react-native-inappbrowser-reborn-3.6.3.tgz"
+  "version" "3.6.3"
+  dependencies:
+    "invariant" "^2.2.4"
+    "opencollective-postinstall" "^2.0.2"
+
 "react-native-iphone-x-helper@^1.3.0":
   "integrity" "sha512-HOf0jzRnq2/aFUcdCJ9w9JGzN3gdEg0zFE4FyYlp4jtidqU03D5X7ZegGKfT1EWteR0gPBGp9ye5T5FvSWi9Yg=="
   "resolved" "https://registry.npmjs.org/react-native-iphone-x-helper/-/react-native-iphone-x-helper-1.3.1.tgz"
@@ -6659,7 +6667,7 @@
     "prop-types" "^15.7.2"
     "yargs" "^16.1.1"
 
-"react-native@*", "react-native@^0.51", "react-native@^0.60.6 || ^0.61.5 || ^0.62.2 || ^0.63.2 || ^0.64.0 || 1000.0.0", "react-native@>= 0.33", "react-native@>=0.42.0", "react-native@>=0.57", "react-native@>=0.59", "react-native@>=0.59.0-rc.0 <1.0.x", "react-native@>=0.60", "react-native@>=0.62.0-rc.0 <0.64.0", "react-native@>=0.63.3", "react-native@0.63.4":
+"react-native@*", "react-native@^0.51", "react-native@^0.60.6 || ^0.61.5 || ^0.62.2 || ^0.63.2 || ^0.64.0 || 1000.0.0", "react-native@>= 0.33", "react-native@>=0.42.0", "react-native@>=0.56", "react-native@>=0.57", "react-native@>=0.59", "react-native@>=0.59.0-rc.0 <1.0.x", "react-native@>=0.60", "react-native@>=0.62.0-rc.0 <0.64.0", "react-native@>=0.63.3", "react-native@0.63.4":
   "integrity" "sha512-I4kM8kYO2mWEYUFITMcpRulcy4/jd+j9T6PbIzR0FuMcz/xwd+JwHoLPa1HmCesvR1RDOw9o4D+OFLwuXXfmGw=="
   "resolved" "https://registry.npmjs.org/react-native/-/react-native-0.63.4.tgz"
   "version" "0.63.4"
